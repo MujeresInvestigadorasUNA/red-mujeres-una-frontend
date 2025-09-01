@@ -20,6 +20,7 @@ export default function Curso() {
                     </button>
                 </div>
             </section>
+            
             <div className="flex-grow px-20 py-10 h-[100%]">
                 <section>
                     <h2 className="text-3xl font-bold mb-5">Descripción del Curso</h2>
@@ -80,6 +81,7 @@ export default function Curso() {
                         </div>
                     </div>
                 </section>
+                <hr className="my-10" />
                 <section>
                     <h2 className="text-2xl font-bold mt-10 mb-5">Cursos Relacionados</h2>
                     <div className="flex gap-4 mt-5">
@@ -132,6 +134,7 @@ export default function Curso() {
                         </div>
                     </div>
                 </section>
+                <hr className="my-10" />
                 <section className="flex gap-20 justify-between mt-10">
                     <div>
                         <h1 className="text-2xl font-bold">Pilar López</h1>
