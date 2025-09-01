@@ -1,9 +1,12 @@
+import Image from "next/image";
 import Link from "next/link";
 
 export default function NavBar() {
     return (
-        <nav className="flex justify-between items-center px-5 py-3 shadow border-b border-[#ddd] sticky top-0 bg-white z-10">
-            <Link href="/" className="font-bold text-[#900]">Red De Mujeres Académicas UNA</Link>
+        <nav className="flex justify-between items-center px-5 py-2 sticky top-0 bg-[#3C0B12] text-white z-10">
+            <Link href="/" className="font-bold">
+                <Image src="/images/logo.png" alt="Logo" width={60} height={60} />
+            </Link>
             <ul className="flex gap-10">
                 <li>
                     <Link href="/Foros">Foros</Link>

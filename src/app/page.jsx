@@ -3,22 +3,43 @@ import Link from "next/link";
 
 export default function Home() {
   return (
-    <main className="flex-grow px-20 py-10 h-[100%]">
-      <h1 className="text-2xl font-bold mb-5">Red de Mujeres Académicas UNA</h1>
-      <p>
-        Únete a la Red de Mujeres Académicas, una plataforma para visibilizar logros,
-        compartir conocimientos y conectar con la comunidad. Publica cursos, participa
-        en foros y accede a información clave con tecnología avanzada e inteligencia artificial.
-      </p>
-      <Link href="/Registrarse" className="inline-block mt-5 bg-gray-800 text-white px-4 py-2 rounded">Unete Aquí</Link>
-      <Image
-        src="/images/portada.png"
-        alt="Portada de la Red de Mujeres Académicas UNA"
-        width={500}
-        height={300}
-        className="mt-5 w-full h-90 object-cover rounded"
-      />
-      <section>
+    <main className="flex-grow h-[100%]">
+      <section className="bg-[#3C0B12] px-20 py-10 text-white">
+        <h1 className="text-2xl font-bold">
+          Red de Mujeres Académicas UNA
+        </h1>
+        <p className="mt-3">
+          Únete a la Red de Mujeres Académicas, una plataforma para visibilizar logros,
+          compartir conocimientos y conectar con la comunidad. Publica cursos, participa
+          en foros y accede a información clave con tecnología avanzada e inteligencia artificial.
+        </p>
+        <div>
+          <h2 className="text-xl font-bold mt-10 mb-5">Foros Destacados</h2>
+          <div className="flex gap-5">
+            <div>
+              <Image src="/images/pilar.png" alt="Foro 1" width={200} height={100} className="object-cover rounded w-full max-h-70" />
+              <div className="mt-3">
+                <Link href="/Foros" className="font-bold">Pilar Aranda</Link>
+                <p className="text-gray-400">
+                  Pilar Aranda Ramírez es catedrática de Fisiología y doctora en Farmacia con una amplia
+                  trayectoria docente e investigadora.
+                </p>
+              </div>
+            </div>
+            <div>
+              <Image src="/images/tatiana.png" alt="Foro 1" width={200} height={100} className="object-cover rounded w-full max-h-70" />
+              <div className="mt-3">
+                <Link href="/Foros" className="font-bold">Tatiana López</Link>
+                <p className="text-gray-400">
+                  Aguiar es psicóloga graduada de la Universidad de Costa Rica, doctora por la
+                  Universidad Nacional Autónoma de México (UNAM).
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section className="px-20 py-10">
         <h2 className="text-xl font-bold mt-10">Herramientas de la Red</h2>
         <div className="mt-4 flex gap-10">
           <div className="w-full flex-grow">
@@ -68,32 +89,7 @@ export default function Home() {
           </div>
         </div>
       </section>
-      <section>
-        <h2 className="text-xl font-bold mt-10 mb-5">Foros Destacados</h2>
-        <div className="flex gap-5">
-          <div>
-            <Image src="/images/pilar.png" alt="Foro 1" width={200} height={100} className="object-cover rounded w-full max-h-70" />
-            <div className="mt-3">
-              <Link href="/Foros" className="font-bold">Pilar Aranda</Link>
-              <p className="text-gray-600">
-                Pilar Aranda Ramírez es catedrática de Fisiología y doctora en Farmacia con una amplia
-                trayectoria docente e investigadora.
-              </p>
-            </div>
-          </div>
-          <div>
-            <Image src="/images/tatiana.png" alt="Foro 1" width={200} height={100} className="object-cover rounded w-full max-h-70" />
-            <div className="mt-3">
-              <Link href="/Foros" className="font-bold">Tatiana López</Link>
-              <p className="text-gray-600">
-                Aguiar es psicóloga graduada de la Universidad de Costa Rica, doctora por la
-                Universidad Nacional Autónoma de México (UNAM).
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-      <section>
+      <section className="px-20 py-10">
         <h2 className="text-xl font-bold mt-10 mb-5">Cursos Populares</h2>
         <div className="flex gap-5">
           <div className="flex flex-col">
@@ -114,7 +110,7 @@ export default function Home() {
           <Image src="/images/cursos.png" alt="Curso 1" width={200} height={100} className="object-cover rounded w-full h-100" />
         </div>
       </section>
-      <section>
+      <section className="px-20 py-10">
         <h2 className="text-xl font-bold mt-10 mb-5">Investigaciones Recientes</h2>
         <div className="flex gap-5">
           <div>
