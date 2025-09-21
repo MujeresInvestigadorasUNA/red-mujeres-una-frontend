@@ -1,39 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import Card from "./components/Card";
+import Carousel from "./components/Carousel";
 
-const FORUMS_CARDS = [
-  {
-    id: 1,
-    image: "/images/pilar.png",
-    title: "Pilar Aranda",
-    description: "Pilar Aranda Ramírez es catedrática de Fisiología y doctora en Farmacia con una amplia trayectoria docente e investigadora."
-  },
-  {
-    id: 2,
-    image: "/images/tatiana.png",
-    title: "Tatiana López",
-    description: "Aguiar es psicóloga graduada de la Universidad de Costa Rica, doctora por la Universidad Nacional Autónoma de México (UNAM)."
-  },
-  {
-    id: 2,
-    image: "/images/tatiana.png",
-    title: "Tatiana López",
-    description: "Aguiar es psicóloga graduada de la Universidad de Costa Rica, doctora por la Universidad Nacional Autónoma de México (UNAM)."
-  },
-  {
-    id: 2,
-    image: "/images/tatiana.png",
-    title: "Tatiana López",
-    description: "Aguiar es psicóloga graduada de la Universidad de Costa Rica, doctora por la Universidad Nacional Autónoma de México (UNAM)."
-  },
-  {
-    id: 2,
-    image: "/images/tatiana.png",
-    title: "Tatiana López",
-    description: "Aguiar es psicóloga graduada de la Universidad de Costa Rica, doctora por la Universidad Nacional Autónoma de México (UNAM)."
-  }
-];
+
 
 export default function Home() {
   return (
@@ -49,17 +19,9 @@ export default function Home() {
         </p>
         <div>
           <h2 className="text-xl font-bold mt-10 mb-5">Foros Destacados</h2>
-          <div className="flex gap-5">
-            {FORUMS_CARDS.map((card) => (
-              <Card
-                key={card.id}
-                cardImage={card.image}
-                cardTitle={card.title}
-                cardDescription={card.description}
-                minCardWidth="40vw"
-              />
-            ))}
-          </div>
+          <Carousel>
+            
+          </Carousel>
         </div>
       </section>
       <section className="px-20 py-10 bg-[#F4C3CA]">

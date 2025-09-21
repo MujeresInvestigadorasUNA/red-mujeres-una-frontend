@@ -5,17 +5,17 @@ export default function Card({
     cardImage = "/images/pilar.png", 
     cardTitle = "Card Title", 
     cardDescription = "Card Description",
-    minCardWidth = "300px"
+    minCardWidth = "300px",
+    show = true
 }) {
     return (
-        <Link href="/Foros" className="font-bold flex gap-5 bg-[#E7473C] 
-            rounded w-full flex-grow max-w-[50%] outline-[#F0F0F0] outline-2 
-            shadow-md hover:outline-3 hover:shadow-lg hover:scale-101 
-            transition-shadow duration-300 ease-in-out cursor-pointer
-            transition-transform transform"
+        <Link 
+            href="/Foros" 
+            className={`rounded-t h-full
+                ${show ? "" : "hidden"}`}
             style={{ minWidth: minCardWidth }}
         >
-            <div className="bg-[#F0F0F0] text-[#E7473C]  rounded w-full">
+            <div className="bg-[#F0F0F0] text-[#E7473C] rounded w-full">
                 <Image
                     src={cardImage}
                     alt={cardTitle}
