@@ -3,11 +3,17 @@ import Link from "next/link";
 
 export default function NavBar() {
     return (
-        <nav className="flex justify-between items-center px-5 py-2 sticky top-0 bg-[#3C0B12] text-white z-10">
+        <nav className="flex justify-between items-center px-5 py-2 sticky top-0 bg-[#E7473C] text-white z-10">
             <Link href="/" className="font-bold">
-                <Image src="/images/logo.png" alt="Logo" width={60} height={60} />
+                <Image 
+                    src="/images/logo.png" 
+                    alt="Logo" 
+                    width={60} 
+                    height={60} 
+                    className="border-[#8A192A] border-3 rounded-full shadow"
+                />
             </Link>
-            <ul className="flex gap-10">
+            <ul className="flex gap-10 text-[#F0F0F0]">
                 <li>
                     <Link href="/Foros">Foros</Link>
                 </li>
@@ -18,7 +24,7 @@ export default function NavBar() {
                     <Link href="/Investigaciones">Investigaciones</Link>
                 </li>
             </ul>
-            <Link href="/IniciarSesion" className="bg-gray-800 text-white px-3 py-1 rounded">Iniciar Sesión</Link>
+            <Link href="/IniciarSesion" className="bg-[#b62116] text-white px-3 py-1 rounded shadow">Iniciar Sesión</Link>
         </nav>
     )
 }

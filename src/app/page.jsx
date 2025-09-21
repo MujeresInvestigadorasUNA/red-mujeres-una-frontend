@@ -1,10 +1,44 @@
 import Image from "next/image";
 import Link from "next/link";
+import Card from "./components/Card";
+
+const FORUMS_CARDS = [
+  {
+    id: 1,
+    image: "/images/pilar.png",
+    title: "Pilar Aranda",
+    description: "Pilar Aranda Ramírez es catedrática de Fisiología y doctora en Farmacia con una amplia trayectoria docente e investigadora."
+  },
+  {
+    id: 2,
+    image: "/images/tatiana.png",
+    title: "Tatiana López",
+    description: "Aguiar es psicóloga graduada de la Universidad de Costa Rica, doctora por la Universidad Nacional Autónoma de México (UNAM)."
+  },
+  {
+    id: 2,
+    image: "/images/tatiana.png",
+    title: "Tatiana López",
+    description: "Aguiar es psicóloga graduada de la Universidad de Costa Rica, doctora por la Universidad Nacional Autónoma de México (UNAM)."
+  },
+  {
+    id: 2,
+    image: "/images/tatiana.png",
+    title: "Tatiana López",
+    description: "Aguiar es psicóloga graduada de la Universidad de Costa Rica, doctora por la Universidad Nacional Autónoma de México (UNAM)."
+  },
+  {
+    id: 2,
+    image: "/images/tatiana.png",
+    title: "Tatiana López",
+    description: "Aguiar es psicóloga graduada de la Universidad de Costa Rica, doctora por la Universidad Nacional Autónoma de México (UNAM)."
+  }
+];
 
 export default function Home() {
   return (
     <main className="flex-grow h-[100%]">
-      <section className="bg-[#3C0B12] px-20 py-10 text-white">
+      <section className="bg-[#E7473C] px-20 py-10 text-[#F0F0F0] min-h-[calc(100vh-80px)]">
         <h1 className="text-2xl font-bold">
           Red de Mujeres Académicas UNA
         </h1>
@@ -16,30 +50,19 @@ export default function Home() {
         <div>
           <h2 className="text-xl font-bold mt-10 mb-5">Foros Destacados</h2>
           <div className="flex gap-5">
-            <div>
-              <Image src="/images/pilar.png" alt="Foro 1" width={200} height={100} className="object-cover rounded w-full max-h-70" />
-              <div className="mt-3">
-                <Link href="/Foros" className="font-bold">Pilar Aranda</Link>
-                <p className="text-gray-400">
-                  Pilar Aranda Ramírez es catedrática de Fisiología y doctora en Farmacia con una amplia
-                  trayectoria docente e investigadora.
-                </p>
-              </div>
-            </div>
-            <div>
-              <Image src="/images/tatiana.png" alt="Foro 1" width={200} height={100} className="object-cover rounded w-full max-h-70" />
-              <div className="mt-3">
-                <Link href="/Foros" className="font-bold">Tatiana López</Link>
-                <p className="text-gray-400">
-                  Aguiar es psicóloga graduada de la Universidad de Costa Rica, doctora por la
-                  Universidad Nacional Autónoma de México (UNAM).
-                </p>
-              </div>
-            </div>
+            {FORUMS_CARDS.map((card) => (
+              <Card
+                key={card.id}
+                cardImage={card.image}
+                cardTitle={card.title}
+                cardDescription={card.description}
+                minCardWidth="40vw"
+              />
+            ))}
           </div>
         </div>
       </section>
-      <section className="px-20 py-10">
+      <section className="px-20 py-10 bg-[#F4C3CA]">
         <h2 className="text-xl font-bold mt-10">Herramientas de la Red</h2>
         <div className="mt-4 flex gap-10">
           <div className="w-full flex-grow">
@@ -89,7 +112,7 @@ export default function Home() {
           </div>
         </div>
       </section>
-      <section className="px-20 py-10">
+      <section className="px-20 py-10 bg-[#DF4E64]">
         <h2 className="text-xl font-bold mt-10 mb-5">Cursos Populares</h2>
         <div className="flex gap-5">
           <div className="flex flex-col">
@@ -110,7 +133,7 @@ export default function Home() {
           <Image src="/images/cursos.png" alt="Curso 1" width={200} height={100} className="object-cover rounded w-full h-100" />
         </div>
       </section>
-      <section className="px-20 py-10">
+      <section className="px-20 py-10 bg-[#FBE9EC]">
         <h2 className="text-xl font-bold mt-10 mb-5">Investigaciones Recientes</h2>
         <div className="flex gap-5">
           <div>
