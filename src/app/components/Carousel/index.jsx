@@ -69,7 +69,10 @@ export default function Carousel() {
       {/* Left button */}
       <button
         onClick={() => scroll("left")}
-        className="h-30 p-2 bg-gray-200 rounded-full shadow hover:bg-gray-300 text-[#E7473C]"
+        className="h-30 p-2 bg-gray-200 rounded-full shadow hover:bg-gray-300 text-[#E7473C]
+        shadow-md hover:outline-3 hover:shadow-lg hover:scale-101 
+        transition-shadow duration-300 ease-in-out cursor-pointer
+        transition-transform transform"
       >
         {"<"}
       </button>
@@ -77,7 +80,7 @@ export default function Carousel() {
       {/* Scroll container */}
       <div
         ref={scrollRef}
-        className="flex gap-2 overflow-hidden scroll-smooth w-full px-2 hide-scrollbar"
+        className="flex gap-2 overflow-hidden scroll-smooth w-full px-2 hide-scrollbar rounded"
       >
         {FORUMS_CARDS.map((card) => (
           <div key={card.id} className="min-w-[60%] sm:min-w-[50%]">
@@ -93,7 +96,10 @@ export default function Carousel() {
       {/* Right button */}
       <button
         onClick={() => scroll("right")}
-        className="h-30 p-2 bg-gray-200 rounded-full shadow hover:bg-gray-300 text-[#E7473C]"
+        className="h-30 p-2 bg-gray-200 rounded-full shadow hover:bg-gray-300 text-[#E7473C]
+        shadow-md hover:outline-3 hover:shadow-lg hover:scale-101 
+        transition-shadow duration-300 ease-in-out cursor-pointer
+        transition-transform transform"
       >
         {">"}
       </button>
