@@ -6,7 +6,7 @@ import Card from "./components/Card";
 export default function Home() {
   return (
     <main className="flex-grow h-[100%]">
-      <section className="bg-[#E7473C] px-20 py-10 text-[#F0F0F0] min-h-[calc(100vh-80px)]">
+      <section className="bg-[#E7473C] px-20 py-10 text-[#F0F0F0] min-h-[calc(100vh-80px)] mainSection">
         <h1 className="text-2xl font-bold">
           Red de Mujeres Académicas UNA
         </h1>
@@ -21,7 +21,7 @@ export default function Home() {
         </div>
       </section>
       <section className="px-20 py-10 toolsSection">
-        <h2 className="text-xl font-bold mt-10">Herramientas de la Red</h2>
+        <h2 className="text-[#E7473C] text-xl font-bold">Herramientas de la Red</h2>
         <div className="mt-4 flex gap-5">
           <Card 
             cardImage="/images/tool1.png"
@@ -55,29 +55,53 @@ export default function Home() {
           />
         </div>
       </section>
-      <section className="px-20 py-10 bg-[#b62116]">
-        <h2 className="text-xl font-bold mt-10 mb-5">Cursos Populares</h2>
-        <div className="flex gap-5">
-          <div className="flex flex-col">
-            <Link href="/Cursos" className="font-bold">Introducción a la Investigación Académica</Link>
-            <p className="text-gray-600">
-              Un curso básico para entender los fundamentos de la investigación académica.
-            </p>
-            <Link href="/Cursos" className="font-bold mt-10">Introducción a la Investigación Académica</Link>
-            <p className="text-gray-600">
-              Un curso básico para entender los fundamentos de la investigación académica.
-            </p>
-            <Link href="/Cursos" className="font-bold mt-10">Introducción a la Investigación Académica</Link>
-            <p className="text-gray-600">
-              Un curso básico para entender los fundamentos de la investigación académica.
-            </p>
-            <Link href="/Cursos" className="mt-7 bg-gray-800 text-white text-center px-4 py-2 rounded">Ver Todos</Link>
-          </div>
-          <Image src="/images/cursos.png" alt="Curso 1" width={200} height={100} className="object-cover rounded w-full h-100" />
+      <section className="flex gap-10 px-20 py-10 bg-[#b62116] text-[#F0F0F0] cursesSection">
+        <div className="flex flex-col gap-2 w-1/3">
+          <h2 className="text-xl font-bold mb-2">Cursos Populares</h2>
+          <Card 
+            cardWithImage={false}
+            cardTitle="Introducción a la Investigación Académica"
+            cardDescription="Un curso básico para entender los fundamentos de la investigación académica."
+            cardURL="/Cursos"
+            cardBgColor="#F0F0F0"
+            cardTitleTextColor="#831d16"
+          />
+          <Card 
+            cardWithImage={false}
+            cardTitle="Gestión del Tiempo para Académicas"
+            cardDescription="Aprende técnicas efectivas de gestión del tiempo para equilibrar tus responsabilidades académicas y personales."
+            cardURL="/Cursos"
+            cardBgColor="#F0F0F0"
+            cardTitleTextColor="#831d16"
+          />
+          <Card 
+            cardWithImage={false}
+            cardTitle="Redacción Académica Avanzada"
+            cardDescription="Mejora tus habilidades de redacción académica con este curso avanzado."
+            cardURL="/Cursos"
+            cardBgColor="#F0F0F0"
+            cardTitleTextColor="#831d16"
+          />
+          <Link 
+            href="/Cursos" 
+            className="bg-[#E7473C] text-white text-center px-4 py-2 rounded
+            shadow"
+          >
+            Ver Todos
+          </Link>
+        </div>
+        <div className="w-2/3 h-full bg-white rounded shadow-md p-3">
+          <Image 
+            src="/images/cursos.png" 
+            alt="Curso 1" 
+            width={200} 
+            height={200} 
+            className="object-cover rounded w-full h-100 bg-[#fff] " 
+          />
         </div>
       </section>
-      <section className="px-20 py-10 bg-[#FBE9EC]">
-        <h2 className="text-xl font-bold mt-10 mb-5">Investigaciones Recientes</h2>
+      <section className="px-20 py-10 toolsSection">
+        <h2 className="text-xl font-bold mb-5">Investigaciones Recientes</h2>
         <div className="flex gap-5">
           <div>
             <Image

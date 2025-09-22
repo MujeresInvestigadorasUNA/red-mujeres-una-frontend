@@ -2,7 +2,9 @@ import Link from "next/link";
 
 export default function Footer() {
     return (
-        <footer className="flex justify-between pl-10 pr-20 py-10 border-t border-gray-200 shadow bg-[#D72842] text-white">
+        <footer className="flex justify-between pl-10 pr-20 py-10 border-t 
+            border-gray-200 shadow toolsSection"
+        >
             <div>
                 Red de Mujeres Académicas UNA
                 <div className="flex gap-3 mt-3">

@@ -90,7 +90,7 @@ export default function Carousel() {
         className="flex gap-2 overflow-hidden scroll-smooth w-full px-2 hide-scrollbar rounded"
       >
         {FORUMS_CARDS.map((card) => (
-          <div key={card.id} className="min-w-[60%] sm:min-w-[50%]">
+          <div key={card.id} className="min-w-[60%] sm:min-w-[49.9%]">
             <Card
               cardImage={card.image}
               cardTitle={card.title}
