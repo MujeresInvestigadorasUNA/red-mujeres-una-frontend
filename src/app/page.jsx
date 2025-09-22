@@ -1,9 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
-import Card from "./components/Card";
 import Carousel from "./components/Carousel";
-
-
+import Card from "./components/Card";
 
 export default function Home() {
   return (
@@ -19,62 +17,45 @@ export default function Home() {
         </p>
         <div>
           <h2 className="text-xl font-bold mt-10 mb-5">Foros Destacados</h2>
-          <Carousel>
-            
-          </Carousel>
+          <Carousel />
         </div>
       </section>
-      <section className="px-20 py-10 bg-[#F4C3CA]">
+      <section className="px-20 py-10 toolsSection">
         <h2 className="text-xl font-bold mt-10">Herramientas de la Red</h2>
-        <div className="mt-4 flex gap-10">
-          <div className="w-full flex-grow">
-            <Image
-              src="/images/tool1.png"
-              alt="Portada de la Red de Mujeres Académicas UNA"
-              width={200}
-              height={75}
-              className="object-cover rounded w-full max-h-60"
-            />
-            <div className="mt-3">
-              <Link href="/Foros" className="font-bold">Foros de discusión</Link>
-              <p className="text-gray-600">
-                Revisa los foros con toda la información de cada una de las mujeres de la Red.
-              </p>
-            </div>
-          </div>
-          <div className="w-full flex-grow">
-            <Image
-              src="/images/tool2.png"
-              alt="Portada de la Red de Mujeres Académicas UNA"
-              width={200}
-              height={75}
-              className="object-cover rounded w-full max-h-60"
-            />
-            <div className="mt-3">
-              <Link href="/Cursos" className="font-bold">Cursos en línea</Link>
-              <p className="text-gray-600">
-                Accede a una variedad de cursos en línea diseñados para empoderar a las mujeres académicas.
-              </p>
-            </div>
-          </div>
-          <div className="w-full flex-grow">
-            <Image
-              src="/images/tool3.png"
-              alt="Portada de la Red de Mujeres Académicas UNA"
-              width={200}
-              height={75}
-              className="object-cover rounded w-full max-h-60"
-            />
-            <div className="mt-3">
-              <Link href="/Investigaciones" className="font-bold">Recursos de investigación</Link>
-              <p className="text-gray-600">
-                Explora una colección de recursos de investigación para apoyar tu trabajo académico.
-              </p>
-            </div>
-          </div>
+        <div className="mt-4 flex gap-5">
+          <Card 
+            cardImage="/images/tool1.png"
+            cardTitle="Foros de discusión"
+            cardDescription="Revisa los foros con toda la información de 
+            cada una de las mujeres de la Red."
+            cardURL="/Foros"
+            cardBgColor="#E7473C"
+            cardTitleTextColor="#F0F0F0"
+            cardTextColor="#F0F0F0"
+          />
+          <Card 
+            cardImage="/images/tool2.png"
+            cardTitle="Cursos en línea"
+            cardDescription="Accede a una variedad de cursos en línea diseñados 
+            para empoderar a las mujeres académicas."
+            cardURL="/Cursos"
+            cardBgColor="#E7473C"
+            cardTitleTextColor="#F0F0F0"
+            cardTextColor="#F0F0F0"
+          />
+          <Card
+            cardImage="/images/tool3.png"
+            cardTitle="Recursos de investigación"
+            cardDescription="Explora una colección de recursos de investigación 
+            para apoyar tu trabajo académico."
+            cardURL="/Investigaciones"
+            cardBgColor="#E7473C"
+            cardTitleTextColor="#F0F0F0"
+            cardTextColor="#F0F0F0"
+          />
         </div>
       </section>
-      <section className="px-20 py-10 bg-[#DF4E64]">
+      <section className="px-20 py-10 bg-[#b62116]">
         <h2 className="text-xl font-bold mt-10 mb-5">Cursos Populares</h2>
         <div className="flex gap-5">
           <div className="flex flex-col">

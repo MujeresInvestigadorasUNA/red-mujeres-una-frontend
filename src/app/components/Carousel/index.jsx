@@ -9,6 +9,7 @@ const FORUMS_CARDS = [
     title: "Pilar Aranda",
     description:
       "Pilar Aranda Ramírez es catedrática de Fisiología y doctora en Farmacia con una amplia trayectoria docente e investigadora.",
+    url: "/Foros"
   },
   {
     id: 2,
@@ -16,6 +17,8 @@ const FORUMS_CARDS = [
     title: "Tatiana López",
     description:
       "Aguiar es psicóloga graduada de la Universidad de Costa Rica, doctora por la Universidad Nacional Autónoma de México (UNAM).",
+  
+    url: "/Foros"
   },
   {
     id: 3,
@@ -23,6 +26,7 @@ const FORUMS_CARDS = [
     title: "Tatiana López",
     description:
       "Aguiar es psicóloga graduada de la Universidad de Costa Rica, doctora por la Universidad Nacional Autónoma de México (UNAM).",
+    url: "/Foros"
   },
   {
     id: 4,
@@ -30,6 +34,7 @@ const FORUMS_CARDS = [
     title: "Tatiana López",
     description:
       "Aguiar es psicóloga graduada de la Universidad de Costa Rica, doctora por la Universidad Nacional Autónoma de México (UNAM).",
+    url: "/Foros"
   },{
     id: 5,
     image: "/images/tatiana.png",
@@ -42,12 +47,14 @@ const FORUMS_CARDS = [
     title: "Tatiana López",
     description:
       "Aguiar es psicóloga graduada de la Universidad de Costa Rica, doctora por la Universidad Nacional Autónoma de México (UNAM).",
+    url: "/Foros"
   },{
     id: 7,
     image: "/images/tatiana.png",
     title: "Tatiana López",
     description:
       "Aguiar es psicóloga graduada de la Universidad de Costa Rica, doctora por la Universidad Nacional Autónoma de México (UNAM).",
+    url: "/Foros"
   },
 ];
 
@@ -88,6 +95,7 @@ export default function Carousel() {
               cardImage={card.image}
               cardTitle={card.title}
               cardDescription={card.description}
+              cardURL={card.url}
             />
           </div>
         ))}
