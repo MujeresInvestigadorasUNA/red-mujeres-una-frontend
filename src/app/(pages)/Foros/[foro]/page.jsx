@@ -9,17 +9,17 @@ export default function Foro() {
                     <h1 className="text-2xl font-bold">Pilar López</h1>
                     <p className="text-gray-600">Catedrática de Fisiología.</p>
                     <p className="mt-3">
-                        Pilar Aranda Ramírez es catedrática de Fisiología y doctora en
-                        Farmacia con una amplia trayectoria docente e investigadora. <br /> <br />
+                        Pilar Aranda Ramírez es catedrática de Fisiología y doctora en
+                        Farmacia con una amplia trayectoria docente e investigadora. <br /> <br />
 
-                        Lleva a cabo su labor de investigadora en el Grupo de Investigación
+                        Lleva a cabo su labor de investigadora en el Grupo de Investigación
                         «Fisiología digestiva y nutrición» y el «Instituto Universitario de
                         Nutrición y Tecnología de los Alimentos» de la Universidad de Granada
-                        y sus líneas de investigación se centran en las interacciones
+                        y sus líneas de investigación se centran en las interacciones
                         fármacos-nutrientes, en la valoración del estado nutricional en
                         poblaciones en situaciones patológicas y en la educación en hábitos
-                        de vida saludable. Desde el año 2002 hasta la actualidad ha participado
-                        como Investigadora Principal en ocho proyectos y contratos de investigación.
+                        de vida saludable. Desde el año 2002 hasta la actualidad ha participado
+                        como Investigadora Principal en ocho proyectos y contratos de investigación.
                     </p>
                 </div>
                 <Image

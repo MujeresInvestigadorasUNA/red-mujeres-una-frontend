@@ -3,6 +3,101 @@ import Link from "next/link";
 import Carousel from "./components/Carousel";
 import Card from "./components/Card";
 
+const FORUMS_CARDS = [
+  {
+    id: 1,
+    image: "/images/pilar.png",
+    title: "Pilar Aranda",
+    description:
+      "Pilar Aranda Ramírez es catedrática de Fisiología y doctora en Farmacia con una amplia trayectoria docente e investigadora.",
+    url: "/Foros"
+  },
+  {
+    id: 2,
+    image: "/images/tatiana.png",
+    title: "Tatiana López",
+    description:
+      "Aguiar es psicóloga graduada de la Universidad de Costa Rica, doctora por la Universidad Nacional Autónoma de México (UNAM).",
+  
+    url: "/Foros"
+  },
+  {
+    id: 3,
+    image: "/images/tatiana.png",
+    title: "Tatiana López",
+    description:
+      "Aguiar es psicóloga graduada de la Universidad de Costa Rica, doctora por la Universidad Nacional Autónoma de México (UNAM).",
+    url: "/Foros"
+  },
+  {
+    id: 4,
+    image: "/images/tatiana.png",
+    title: "Tatiana López",
+    description:
+      "Aguiar es psicóloga graduada de la Universidad de Costa Rica, doctora por la Universidad Nacional Autónoma de México (UNAM).",
+    url: "/Foros"
+  },{
+    id: 5,
+    image: "/images/tatiana.png",
+    title: "Tatiana López",
+    description:
+      "Aguiar es psicóloga graduada de la Universidad de Costa Rica, doctora por la Universidad Nacional Autónoma de México (UNAM).",
+  },{
+    id: 6,
+    image: "/images/tatiana.png",
+    title: "Tatiana López",
+    description:
+      "Aguiar es psicóloga graduada de la Universidad de Costa Rica, doctora por la Universidad Nacional Autónoma de México (UNAM).",
+    url: "/Foros"
+  },{
+    id: 7,
+    image: "/images/tatiana.png",
+    title: "Tatiana López",
+    description:
+      "Aguiar es psicóloga graduada de la Universidad de Costa Rica, doctora por la Universidad Nacional Autónoma de México (UNAM).",
+    url: "/Foros"
+  },
+];
+
+const RESEARCH_CARDS = [
+  {
+    id: 1,
+    image: "/images/curso1.png",
+    title: "Introducción a la Investigación Académica",
+    description:
+      "Un curso básico para entender los fundamentos de la investigación académica.",
+    url: "/Cursos",
+    bgColor: "#E7473C",
+    titleTextColor: "#F0F0F0",
+    textColor: "#F0F0F0",
+    withImage: true
+  },
+  {
+    id: 2,
+    image: "/images/curso2.png",
+    title: "Gestión del Tiempo para Académicas",
+    description:
+      "Aprende técnicas efectivas de gestión del tiempo para equilibrar tus responsabilidades académicas y personales.",
+    url: "/Cursos",
+    bgColor: "#E7473C",
+    titleTextColor: "#F0F0F0",
+    textColor: "#F0F0F0",
+    withImage: true
+  },
+  {
+    id: 3,
+    image: "/images/curso3.png",
+    title: "Redacción Académica",
+    description:
+      "Mejora tus habilidades de redacción académica y aprende a comunicar tus ideas de manera efectiva.",
+    url: "/Cursos",
+    bgColor: "#E7473C",
+    titleTextColor: "#F0F0F0",
+    textColor: "#F0F0F0",
+    withImage: true
+  },
+];
+
 export default function Home() {
   return (
     <main className="flex-grow h-[100%]">
@@ -17,7 +112,7 @@ export default function Home() {
         </p>
         <div>
           <h2 className="text-xl font-bold mt-10 mb-5">Foros Destacados</h2>
-          <Carousel />
+          <Carousel cards={FORUMS_CARDS} />
         </div>
       </section>
       <section className="px-20 py-10 toolsSection">
@@ -100,42 +195,13 @@ export default function Home() {
           />
         </div>
       </section>
-      <section className="px-20 py-10 toolsSection">
-        <h2 className="text-xl font-bold mb-5">Investigaciones Recientes</h2>
-        <div className="flex gap-5">
-          <div>
-            <Image
-              src="/images/investigacion1.png"
-              alt="Foro 1"
-              width={200}
-              height={100}
-              className="object-cover rounded w-full h-100 max-h-60"
-            />
-            <div className="mt-3">
-              <Link href="/Investigaciones" className="font-bold">Qué es la Fisiología Digestiva</Link>
-              <p className="text-gray-600">
-                Pilar Aranda Ramírez es catedrática de Fisiología y doctora en Farmacia con una amplia
-                trayectoria docente e investigadora.
-              </p>
-            </div>
-          </div>
-          <div>
-            <Image
-              src="/images/investigacion2.png"
-              alt="Foro 1"
-              width={200}
-              height={100}
-              className="object-cover rounded w-full h-100 max-h-60"
-            />
-            <div className="mt-3">
-              <Link href="/Investigaciones" className="font-bold">Aprende de Nutrición y Tecnología</Link>
-              <p className="text-gray-600">
-                Aguiar es psicóloga graduada de la Universidad de Costa Rica, doctora por la Universidad
-                Nacional Autónoma de México (UNAM).
-              </p>
-            </div>
-          </div>
-        </div>
+      <section className="px-10 py-10 toolsSection">
+        <h2 className="text-xl font-bold mb-5 px-10">Investigaciones Recientes</h2>
+        <Carousel 
+          cards={RESEARCH_CARDS} 
+          scrollButtonsColor="#F0F0F0"
+          scrollButtonsBgColor="#E7473C"
+        />
       </section>
     </main>
   );

@@ -17,6 +17,7 @@ export default function Card({
                 className={`bg-[${cardBgColor}] text-[${cardTextColor}] rounded 
                 hover:brightness-80 duration-400 ease-in-out cursor-pointer
                 shadow-md h-full`}
+                style={{ backgroundColor: cardBgColor, color: cardTextColor }}
             >
                 {cardWithImage && (
                     <Image

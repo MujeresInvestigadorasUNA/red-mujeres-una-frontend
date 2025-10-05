@@ -68,64 +68,68 @@ export default function IniciarSesion() {
   };
 
   return (
-    <main className="flex gap-13 flex-grow px-20 py-10 h-[100%]">
-      <Image
-        src="/images/tool3.png"
-        alt="Portada de la Red de Mujeres Académicas UNA"
-        width={500}
-        height={300}
-        className="mt-5 h-90 object-cover rounded min-w-[40vw]"
-        priority
-      />
+    // <main className="flex gap-13 flex-grow px-20 py-10 h-[100%]">
+    //   <Image
+    //     src="/images/tool3.png"
+    //     alt="Portada de la Red de Mujeres Académicas UNA"
+    //     width={500}
+    //     height={300}
+    //     className="mt-5 h-90 object-cover rounded min-w-[40vw]"
+    //     priority
+    //   />
 
-      <form className="flex flex-col gap-3 w-full" onSubmit={handleSubmit}>
-        <h1 className="text-2xl font-bold">Iniciar Sesión</h1>
+    //   <form className="flex flex-col gap-3 w-full" onSubmit={handleSubmit}>
+    //     <h1 className="text-2xl font-bold">Iniciar Sesión</h1>
 
-        {err && <p className="text-red-600 text-sm">{err}</p>}
-        {okMsg && <p className="text-green-600 text-sm">{okMsg}</p>}
+    //     {err && <p className="text-red-600 text-sm">{err}</p>}
+    //     {okMsg && <p className="text-green-600 text-sm">{okMsg}</p>}
 
-        <div>
-          <label htmlFor="email" className="font-semibold">
-            Correo Electrónico
-          </label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            placeholder="Correo Electrónico"
-            className="rounded border border-gray-300 px-3 py-2 w-full mt-2"
-            value={form.email}
-            onChange={onChange}
-          />
-        </div>
+    //     <div>
+    //       <label htmlFor="email" className="font-semibold">
+    //         Correo Electrónico
+    //       </label>
+    //       <input
+    //         type="email"
+    //         id="email"
+    //         name="email"
+    //         placeholder="Correo Electrónico"
+    //         className="rounded border border-gray-300 px-3 py-2 w-full mt-2"
+    //         value={form.email}
+    //         onChange={onChange}
+    //       />
+    //     </div>
 
-        <div>
-          <label htmlFor="password" className="font-semibold mb-1">
-            Contraseña
-          </label>
-          <input
-            type="password"
-            id="password"
-            name="password"
-            placeholder="Contraseña"
-            className="rounded border border-gray-300 px-3 py-2 w-full mt-2"
-            value={form.password}
-            onChange={onChange}
-          />
-        </div>
+    //     <div>
+    //       <label htmlFor="password" className="font-semibold mb-1">
+    //         Contraseña
+    //       </label>
+    //       <input
+    //         type="password"
+    //         id="password"
+    //         name="password"
+    //         placeholder="Contraseña"
+    //         className="rounded border border-gray-300 px-3 py-2 w-full mt-2"
+    //         value={form.password}
+    //         onChange={onChange}
+    //       />
+    //     </div>
 
-        <button
-          type="submit"
-          className="rounded bg-gray-800 text-white px-4 py-2 disabled:opacity-60"
-          disabled={loading}
-        >
-          {loading ? "Ingresando..." : "Iniciar Sesión"}
-        </button>
+    //     <button
+    //       type="submit"
+    //       className="rounded bg-gray-800 text-white px-4 py-2 disabled:opacity-60"
+    //       disabled={loading}
+    //     >
+    //       {loading ? "Ingresando..." : "Iniciar Sesión"}
+    //     </button>
 
-        <Link href="/Registrarse" className="text-gray-400 hover:underline text-center">
-          ¿No tienes una cuenta? <br /> Regístrate aquí
-        </Link>
-      </form>
+    //     <Link href="/Registrarse" className="text-gray-400 hover:underline text-center">
+    //       ¿No tienes una cuenta? <br /> Regístrate aquí
+    //     </Link>
+    //   </form>
+    // </main>
+    <main className="flex">
+      <section className="w-1/2 mainSection h-screen"> Login </section>
+      <section className="w-1/2 bg-[#F0F0F0] h-screen"> Presentation </section>
     </main>
   );
 }
