@@ -1,3 +1,5 @@
+
+
 // "use client";
 
 // import { useState } from "react";
@@ -206,10 +208,17 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { iconEye, iconEyeSlash, iconInstagram, iconFacebook, iconWhatsApp } from "../../assets/icons";
 import Image from "next/image";
 import Link from "next/link";
 
 export default function Registrarse() {
+  const [showPassword, setShowPassword] = useState(false);
+  const togglePassword = () => setShowPassword(!showPassword);
+
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const toggleConfirmPassword = () => setShowConfirmPassword(!showConfirmPassword);
+
   const router = useRouter();
 
   const [form, setForm] = useState({ email: "", password: "" });
@@ -272,8 +281,8 @@ export default function Registrarse() {
   };
 
   return (
-    <main className="flex">
-      <section className="w-1/2 bg-[#F0F0F0] h-screen toolsSection"> 
+    <main className="flex h-[100vh]">
+      <section className="w-1/2 bg-[#F0F0F0] h-full toolsSection">
         <Image
           src="/images/logo.png"
           alt="Portada de la Red de Mujeres Académicas UNA"
@@ -286,16 +295,46 @@ export default function Registrarse() {
           Red de Mujeres Académicas UNA
         </h1>
         <p className="text-center mt-5 px-10 text-gray-600 text-lg">
-          Plataforma para la visibilización, colaboración y apoyo entre 
+          Plataforma para la visibilización, colaboración y apoyo entre
           mujeres académicas de la Universidad Nacional de Asunción.
         </p>
+        <div className="flex justify-center mt-5 gap-5">
+          {iconInstagram({ size: 24, color: "#8A192A" })}
+          {iconFacebook({ size: 24, color: "#8A192A" })}
+          {iconWhatsApp({ size: 24, color: "#8A192A" })}
+        </div>
       </section>
-      <section className="w-1/2 mainSection h-screen p-5 flex items-center justify-center"> 
-        <form className="flex flex-col gap-3 bg-[#E7473C] border-2 border-[#B62116] rounded p-4 px-5 shadow-md w-full">
+      <section className="w-1/2 mainSection h-full p-5 flex">
+        <form className="flex flex-col gap-3 rounded p-4 px-5 w-full">
           <h2 className="text-2xl font-bold text-center text-white ">
-            Iniciar Sesión
+            Registrarse
           </h2>
-          <hr className="border-white my-3" />
+          <div>
+            <label htmlFor="name" className="font-semibold text-white">
+              Nombre
+            </label>
+            <input
+              id="name"
+              name="name"
+              type="text"
+              placeholder="Nombre"
+              className="rounded border border-gray-300 px-3 py-2 w-full mt-2 bg-white customOutline"
+              onChange={onChange}
+            />
+          </div>
+          <div>
+            <label htmlFor="lastName" className="font-semibold text-white">
+              Apellidos
+            </label>
+            <input
+              id="lastName"
+              name="lastName"
+              type="text"
+              placeholder="Apellidos"
+              className="rounded border border-gray-300 px-3 py-2 w-full mt-2 bg-white customOutline"
+              onChange={onChange}
+            />
+          </div>
           <div>
             <label htmlFor="email" className="font-semibold text-white">
               Correo Electrónico
@@ -305,30 +344,66 @@ export default function Registrarse() {
               name="email"
               type="email"
               placeholder="Correo Electrónico"
-              className="rounded border border-gray-300 px-3 py-2 w-full mt-2 bg-white"
-              value={form.email}
+              className="rounded border border-gray-300 px-3 py-2 w-full mt-2 bg-white customOutline"
               onChange={onChange}
             />
           </div>
           <div>
-            <label htmlFor="password" className="font-semibold mt-3 text-white">
+            <label htmlFor="password" className="font-semibold text-white">
               Contraseña
             </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              placeholder="Contraseña"
-              className="rounded border border-gray-300 px-3 py-2 w-full mt-2 bg-white"
-              value={form.password}
-              onChange={onChange}
-            />
+            <span className="mt-2 flex border border-gray-300 rounded bg-white customOutline">
+              <input
+                id="password"
+                name="password"
+                type={showPassword ? "text" : "password"}
+                placeholder="Contraseña"
+                className="rounded border border-gray-300 px-3 py-2 w-full bg-white
+                        hover:outline-none focus:outline-none border-none"
+                onChange={onChange}
+              />
+              <button
+                onClick={togglePassword}
+                type="button"
+                className="mr-3 hover:cursor-pointer self-center"
+              >
+                {showPassword
+                  ? iconEyeSlash({ size: 16, color: "#8A192A" })
+                  : iconEye({ size: 16, color: "#8A192A" })}
+              </button>
+            </span>
+          </div>
+          <div>
+            <label htmlFor="confirmPassword" className="font-semibold text-white">
+              Confirmar Contraseña
+            </label>
+            <span className="mt-2 flex border border-gray-300 rounded bg-white customOutline">
+              <input
+                id="confirmPassword"
+                name="confirmPassword"
+                type={showConfirmPassword ? "text" : "password"}
+                placeholder="Confirmar Contraseña"
+                className="rounded border border-gray-300 px-3 py-2 w-full bg-white
+                        hover:outline-none focus:outline-none border-none"
+                onChange={onChange}
+              />
+              <button
+                onClick={toggleConfirmPassword}
+                type="button"
+                className="mr-3 hover:cursor-pointer self-center"
+              >
+                {showConfirmPassword
+                  ? iconEyeSlash({ size: 16, color: "#8A192A" })
+                  : iconEye({ size: 16, color: "#8A192A" })}
+              </button>
+            </span>
           </div>
           <button className="rounded bg-[#B62116] text-white px-4 py-2">
-            Iniciar Sesión
+            Registrarse
           </button>
-          <Link href="/Registrarse" className="text-gray-200 hover:underline text-center">
-            ¿No tienes una cuenta? <br /> Regístrate aquí
+          <hr className="border-white" />
+          <Link href="/IniciarSesion" className="text-gray-200 hover:underline text-center">
+            ¿Ya tienes una cuenta? <br /> Inicia sesión aquí
           </Link>
         </form>
       </section>
