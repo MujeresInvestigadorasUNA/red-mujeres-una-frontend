@@ -14,9 +14,9 @@ export default function Card({
     return (
         <Link href={cardURL}>
             <div 
-                className={`bg-[${cardBgColor}] text-[${cardTextColor}] rounded 
+                className={`bg-[${cardBgColor}] text-[${cardTextColor}] rounded-lg 
                 hover:brightness-80 duration-400 ease-in-out cursor-pointer
-                shadow-md h-full`}
+                shadow-md h-full overflow-hidden`}
                 style={{ backgroundColor: cardBgColor, color: cardTextColor }}
             >
                 {cardWithImage && (
@@ -25,7 +25,7 @@ export default function Card({
                         alt={cardTitle}
                         width={1920}
                         height={1316}
-                        className="h-70 object-cover rounded-t object-top"
+                        className="h-70 object-cover object-top"
                     />
                 )}
                 <div className={`${cardWithImage ? 'mt-3 px-5 pb-5' : 'p-5 shadow-md'}`}>

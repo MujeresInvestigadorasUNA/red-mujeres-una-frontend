@@ -3,61 +3,49 @@ import Link from "next/link";
 import Carousel from "./components/Carousel";
 import Card from "./components/Card";
 
-const FORUMS_CARDS = [
-  {
+const FORUMS_CARDS = [{
     id: 1,
     image: "/images/pilar.png",
     title: "Pilar Aranda",
     description:
       "Pilar Aranda Ramírez es catedrática de Fisiología y doctora en Farmacia con una amplia trayectoria docente e investigadora.",
-    url: "/Foros"
-  },
-  {
+    url: "/Foros/pilar-lopez"
+}, {
     id: 2,
     image: "/images/tatiana.png",
     title: "Tatiana López",
     description:
       "Aguiar es psicóloga graduada de la Universidad de Costa Rica, doctora por la Universidad Nacional Autónoma de México (UNAM).",
-  
-    url: "/Foros"
-  },
-  {
+    url: "/Foros/tatiana-agular"
+}, {
     id: 3,
-    image: "/images/tatiana.png",
-    title: "Tatiana López",
+    image: "/images/mariaA.png",
+    title: "Maria Arguedas",
     description:
-      "Aguiar es psicóloga graduada de la Universidad de Costa Rica, doctora por la Universidad Nacional Autónoma de México (UNAM).",
-    url: "/Foros"
-  },
-  {
+      "Bioeticista con amplia experiencia en ética de la investigación y la atención en salud.",
+    url: "/Foros/maria-arguedas"
+}, {
     id: 4,
-    image: "/images/tatiana.png",
-    title: "Tatiana López",
+    image: "/images/mariaJ.png",
+    title: "Maria Jose Chaves",
     description:
-      "Aguiar es psicóloga graduada de la Universidad de Costa Rica, doctora por la Universidad Nacional Autónoma de México (UNAM).",
-    url: "/Foros"
-  },{
+      "Investigadora del CIEM con un enfoque en estudios de género y políticas públicas.",
+    url: "/Foros/maria-jose-chaves"
+}, {
     id: 5,
-    image: "/images/tatiana.png",
-    title: "Tatiana López",
+    image: "/images/amanda.png",
+    title: "Amanda Mesén",
     description:
-      "Aguiar es psicóloga graduada de la Universidad de Costa Rica, doctora por la Universidad Nacional Autónoma de México (UNAM).",
-  },{
+      "Investigadora con experiencia en ciencias sociales y desarrollo comunitario.",
+    url: "/Foros/amanda-mesen"
+}, {
     id: 6,
-    image: "/images/tatiana.png",
-    title: "Tatiana López",
+    image: "/images/carolina.png",
+    title: "Carolina Rojas",
     description:
-      "Aguiar es psicóloga graduada de la Universidad de Costa Rica, doctora por la Universidad Nacional Autónoma de México (UNAM).",
-    url: "/Foros"
-  },{
-    id: 7,
-    image: "/images/tatiana.png",
-    title: "Tatiana López",
-    description:
-      "Aguiar es psicóloga graduada de la Universidad de Costa Rica, doctora por la Universidad Nacional Autónoma de México (UNAM).",
-    url: "/Foros"
-  },
-];
+      "Directora e investigadora con un enfoque en estudios de género y derechos humanos.",
+    url: "/Foros/carolina-rojas"
+}];
 
 const RESEARCH_CARDS = [
   {
@@ -101,17 +89,17 @@ const RESEARCH_CARDS = [
 export default function Home() {
   return (
     <main className="flex-grow h-[100%]">
-      <section className="bg-[#E7473C] px-20 py-10 text-[#F0F0F0] min-h-[calc(100vh-80px)] mainSection">
-        <h1 className="text-2xl font-bold">
+      <section className="bg-[#E7473C] px-10 py-10 text-[#F0F0F0] min-h-[calc(100vh-80px)] mainSection">
+        <h1 className="text-2xl font-bold px-10">
           Red de Mujeres Académicas UNA
         </h1>
-        <p className="mt-3">
+        <p className="mt-3 px-10">
           Únete a la Red de Mujeres Académicas, una plataforma para visibilizar logros,
           compartir conocimientos y conectar con la comunidad. Publica cursos, participa
           en foros y accede a información clave con tecnología avanzada e inteligencia artificial.
         </p>
         <div>
-          <h2 className="text-xl font-bold mt-10 mb-5">Foros Destacados</h2>
+          <h2 className="text-xl font-bold mt-10 mb-5 px-10">Foros Destacados</h2>
           <Carousel cards={FORUMS_CARDS} />
         </div>
       </section>

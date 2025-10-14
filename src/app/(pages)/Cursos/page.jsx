@@ -1,9 +1,48 @@
+import Card from "@/app/components/Card";
 import Image from "next/image";
 import Link from "next/link";
 
+const COURSES_CARDS = [{
+    id: 1,
+    image: "/images/curso1.png",
+    title: "Qué es la Fisiología Digestiva",
+    description: "Descripción del curso de Fisiología Digestiva.",
+    url: "/Cursos/pilar-lopez"
+}, {
+    id: 2,
+    image: "/images/curso2.png",
+    title: "Aprende de Nutrición y Tecnología",
+    description: "Psicóloga.",
+    url: "/Cursos/tatiana-agular"
+}, {
+    id: 3,
+    image: "/images/curso3.png",
+    title: "Mejora Tus Hábitos de Vida",
+    description: "Bioeticista.",
+    url: "/Cursos/maria-arguedas"
+}, {
+    id: 4,
+    image: "/images/curso4.png",
+    title: "Nutrición y Tecnología",
+    description: "Investigadora del CIEM.",
+    url: "/Cursos/maria-jose-chaves"
+}, {
+    id: 5,
+    image: "/images/curso5.png",
+    title: "Hábitos de Vida Saludables",
+    description: "Investigadora.",
+    url: "/Cursos/amanda-mesen"
+}, {
+    id: 6,
+    image: "/images/curso6.png",
+    title: "Fisiología Digestiva y Nutrición",
+    description: "Directora, Investigadora.",
+    url: "/Cursos/carolina-rojas"
+}];
+
 export default function Cursos() {
     return (
-        <main className="flex-grow px-20 py-10 h-[100%]">
+        <main className="flex-grow px-20 py-10 h-[100%] toolsSection">
             <h1 className="text-2xl font-bold">Cursos</h1>
             <p className="mt-3">
                 Encuentra aquí los cursos que imparten cada una de las integrantes de la 
@@ -23,73 +62,20 @@ export default function Cursos() {
                     </select>
                 </div>
             </div>
-            <div className="flex gap-5 flex-wrap">
-                <div className="flex-grow">
-                    <Image 
-                        src="/images/curso1.png" 
-                        alt="Foro 1"
-                        width={200} 
-                        height={100} 
-                        className="object-cover rounded w-full h-100 mt-5 max-h-[200px] min-h-[200px] mb-3" 
-                    />
-                    <Link href="/Cursos/pilar-lopez" className="text-md font-bold">Qué es la Fisiología Digestiva</Link>
-                    <p className="text-gray-600">Descripción del foro de Pilar López.</p>
-                </div>
-                <div className="flex-grow">
-                    <Image 
-                        src="/images/curso2.png" 
-                        alt="Foro 1"
-                        width={200} 
-                        height={100} 
-                        className="object-cover rounded w-full h-100 mt-5 max-h-[200px] min-h-[200px] mb-3" 
-                    />
-                    <Link href="/Cursos/tatiana-agular" className="text-md font-bold">Aprende de Nutrición y Tecnología</Link>
-                    <p className="text-gray-600">Psicóloga.</p>
-                </div>
-                <div className="flex-grow">
-                    <Image 
-                        src="/images/curso3.png" 
-                        alt="Foro 1"
-                        width={200} 
-                        height={100} 
-                        className="object-cover rounded w-full h-100 mt-5 max-h-[200px] min-h-[200px] mb-3" 
-                    />
-                    <Link href="/Cursos/maria-arguedas" className="text-md font-bold">Mejora Tus Hábitos de Vida</Link>
-                    <p className="text-gray-600">Bioeticista.</p>
-                </div>
-                <div className="flex-grow">
-                    <Image 
-                        src="/images/curso4.png" 
-                        alt="Foro 1"
-                        width={200} 
-                        height={100} 
-                        className="object-cover rounded w-full h-100 mt-5 max-h-[200px] min-h-[200px] mb-3" 
-                    />
-                    <Link href="/Cursos/maria-jose-chaves" className="text-md font-bold">Nutrición y Tecnología</Link>
-                    <p className="text-gray-600">Investigadora del CIEM.</p>
-                </div>
-                <div className="flex-grow">
-                    <Image 
-                        src="/images/curso5.png" 
-                        alt="Foro 1"
-                        width={200} 
-                        height={100} 
-                        className="object-cover rounded w-full h-100 mt-5 max-h-[200px] min-h-[200px] mb-3" 
-                    />
-                    <Link href="/Cursos/amanda-mesen" className="text-md font-bold">Hábitos de Vida Saludables</Link>
-                    <p className="text-gray-600">Investigadora.</p>
-                </div>
-                <div className="flex-grow">
-                    <Image 
-                        src="/images/curso6.png" 
-                        alt="Foro 1"
-                        width={200} 
-                        height={100} 
-                        className="object-cover rounded w-full h-100 mt-5 max-h-[200px] min-h-[200px] mb-3" 
-                    />
-                    <Link href="/Cursos/carolina-rojas" className="text-md font-bold">Fisiología Digestiva y Nutrición</Link>
-                    <p className="text-gray-600">Directora, Investigadora.</p>
-                </div>
+            <div className="flex gap-5 flex-wrap mt-5">
+                {COURSES_CARDS.map((card) => (
+                    <div key={card.id} className="flex-fill flex-grow flex-shrink basis-[30%] min-w-[250px]">
+                        <Card
+                            cardImage={card.image}
+                            cardTitle={card.title}
+                            cardDescription={card.description}
+                            cardURL={card.url}
+                            cardBgColor="#E7473C"
+                            cardTitleTextColor="#F0F0F0"
+                            cardTextColor="#F0F0F0"
+                        />
+                    </div>
+                ))}
             </div>
         </main>
     );

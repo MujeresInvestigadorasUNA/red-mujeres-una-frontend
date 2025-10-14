@@ -1,9 +1,46 @@
-import Image from "next/image";
-import Link from "next/link";
+import Card from "@/app/components/Card";
+
+const RESEARCHES_CARDS = [{
+    id: 1,
+    image: "/images/curso6.png",
+    title: "Investigación 1",
+    description: "Descripción de la investigación 1.",
+    url: "/Investigaciones/investigacion-1"
+}, {
+    id: 2,
+    image: "/images/investigacion2.png",
+    title: "Investigación 2",
+    description: "Descripción de la investigación 2.",
+    url: "/Investigaciones/investigacion-2"
+}, {
+    id: 3,
+    image: "/images/curso1.png",
+    title: "Investigación 3",
+    description: "Descripción de la investigación 3.",
+    url: "/Investigaciones/investigacion-3"
+}, {
+    id: 4,
+    image: "/images/curso5.png",
+    title: "Investigación 4",
+    description: "Descripción de la investigación 4.",
+    url: "/Investigaciones/investigacion-4"
+}, {
+    id: 5,
+    image: "/images/curso2.png",
+    title: "Investigación 5",
+    description: "Descripción de la investigación 5.",
+    url: "/Investigaciones/investigacion-5"
+}, {
+    id: 6,
+    image: "/images/curso4.png",
+    title: "Investigación 6",
+    description: "Descripción de la investigación 6.",
+    url: "/Investigaciones/investigacion-6"
+}];
 
 export default function Investigaciones() {
     return (
-        <main className="flex-grow px-20 py-10 h-[100%]">
+        <main className="flex-grow px-20 py-10 h-[100%] toolsSection">
             <h1 className="text-2xl font-bold">Investigaciones</h1>
             <p className="mt-3">
                 Encuentra aquí todas las investigaciones realizadas por cada una de las 
@@ -23,73 +60,20 @@ export default function Investigaciones() {
                     </select>
                 </div>
             </div>
-            <div className="flex gap-5 flex-wrap">
-                <div className="flex-grow">
-                    <Image 
-                        src="/images/curso6.png" 
-                        alt="Foro 1"
-                        width={200} 
-                        height={100} 
-                        className="object-cover rounded w-full h-100 mt-5 max-h-[200px] min-h-[200px] mb-3" 
-                    />
-                    <Link href="/Investigaciones/carolina-rojas" className="text-md font-bold">Fisiología Digestiva y Nutrición</Link>
-                    <p className="text-gray-600">Directora, Investigadora.</p>
-                </div>
-                <div className="flex-grow">
-                    <Image 
-                        src="/images/curso1.png" 
-                        alt="Foro 1"
-                        width={200} 
-                        height={100} 
-                        className="object-cover rounded w-full h-100 mt-5 max-h-[200px] min-h-[200px] mb-3" 
-                    />
-                    <Link href="/Investigaciones/pilar-lopez" className="text-md font-bold">Qué es la Fisiología Digestiva</Link>
-                    <p className="text-gray-600">Descripción del foro de Pilar López.</p>
-                </div>
-                <div className="flex-grow">
-                    <Image 
-                        src="/images/curso3.png" 
-                        alt="Foro 1"
-                        width={200} 
-                        height={100} 
-                        className="object-cover rounded w-full h-100 mt-5 max-h-[200px] min-h-[200px] mb-3" 
-                    />
-                    <Link href="/Investigaciones/maria-arguedas" className="text-md font-bold">Mejora Tus Hábitos de Vida</Link>
-                    <p className="text-gray-600">Bioeticista.</p>
-                </div>
-                <div className="flex-grow">
-                    <Image 
-                        src="/images/curso4.png" 
-                        alt="Foro 1"
-                        width={200} 
-                        height={100} 
-                        className="object-cover rounded w-full h-100 mt-5 max-h-[200px] min-h-[200px] mb-3" 
-                    />
-                    <Link href="/Investigaciones/maria-jose-chaves" className="text-md font-bold">Nutrición y Tecnología</Link>
-                    <p className="text-gray-600">Investigadora del CIEM.</p>
-                </div>
-                <div className="flex-grow">
-                    <Image 
-                        src="/images/curso5.png" 
-                        alt="Foro 1"
-                        width={200} 
-                        height={100} 
-                        className="object-cover rounded w-full h-100 mt-5 max-h-[200px] min-h-[200px] mb-3" 
-                    />
-                    <Link href="/Investigaciones/amanda-mesen" className="text-md font-bold">Hábitos de Vida Saludables</Link>
-                    <p className="text-gray-600">Investigadora.</p>
-                </div>
-                <div className="flex-grow">
-                    <Image 
-                        src="/images/curso2.png" 
-                        alt="Foro 1"
-                        width={200} 
-                        height={100} 
-                        className="object-cover rounded w-full h-100 mt-5 max-h-[200px] min-h-[200px] mb-3" 
-                    />
-                    <Link href="/Investigaciones/tatiana-agular" className="text-md font-bold">Aprende de Nutrición y Tecnología</Link>
-                    <p className="text-gray-600">Psicóloga.</p>
-                </div>
+            <div className="flex gap-5 flex-wrap mt-5">
+                {RESEARCHES_CARDS.map((card) => (
+                    <div key={card.id} className="flex-fill flex-grow flex-shrink basis-[30%] min-w-[250px]">
+                        <Card
+                            cardImage={card.image}
+                            cardTitle={card.title}
+                            cardDescription={card.description}
+                            cardURL={card.url}
+                            cardBgColor="#E7473C"
+                            cardTitleTextColor="#F0F0F0"
+                            cardTextColor="#F0F0F0"
+                        />
+                    </div>
+                ))}
             </div>
         </main>
     );
