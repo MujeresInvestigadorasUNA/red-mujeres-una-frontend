@@ -1,7 +1,9 @@
 "use client";
+import { iconClockwise, iconSearch } from "@/app/assets/icons";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+
 
 export default function MiForo() {
     const [forumName, setForumName] = useState("");
@@ -13,14 +15,14 @@ export default function MiForo() {
                 <div>
                     <input
                         type="text"
-                        className="text-2xl font-bold w-full"
+                        className="text-2xl font-bold w-full rounded"
                         placeholder="Nombre del Foro"
                         value={forumName}
                         onChange={(e) => setForumName(e.target.value)}
                     />
                     <input
                         type="text"
-                        className="text-gray-600"
+                        className="text-gray-600 rounded"
                         placeholder="Nombre del Subforo"
                         value={subForumName}
                         onChange={(e) => setSubForumName(e.target.value)}
@@ -35,45 +37,43 @@ export default function MiForo() {
                     alt="Pilar López"
                     width={300}
                     height={300}
-                    className="object-cover rounded w-full h-100 mt-5 max-w-100 max-h-[300px] min-h-[300px] mb-3"
+                    className="object-cover rounded w-full h-100 mt-5 max-w-100 
+                    max-h-[300px] min-h-[300px] mb-3"
                 />
             </section>
             <section>
                 <h2 className="text-2xl font-bold mt-10 mb-5"> Mis Investigaciones </h2>
-                <div className="flex gap-4 mt-5 bg-[#000] items-end">
-                    <button className="bg-[#E7473C]">
-                        Nueva Investigación
+                <div className="flex items-stretch gap-3 mb-3">
+                    <button className="bg-[#E7473C] text-white p-2 rounded text-nowrap px-4
+                    hover:cursor-pointer hover:bg-[#b0352c] font-semibold">
+                        Añadir Investigación
                     </button>
-                    <div className="bg-[#fd0]">
-                        <label
-                            className="font-semibold text-nowrap"
+                    <span>
+                        <select
+                            defaultValue=""
+                            className="bg-[#ffffff] py-2 px-3 rounded h-full border border-gray-300"
                         >
-                            Filtrar Por:
-                        </label>
-                        <select 
-                            id="filtro-investigaciones" 
-                            className="rounded border border-gray-300 w-full h-full"
-                        >
-                            <option value="todos">Todos</option>
+                            <option value=""disabled>Filtrar Por</option>
                             <option value="temas">Temas</option>
-                            <option value="autoras">Autoras</option>
                         </select>
-                    </div>
-                    <div className="w-full">
-                        <label className="font-semibold">Filtrar Investigaciones:</label>
-                        <span className="flex">
-                            <input 
-                                type="text" 
-                                id="filtro-investigaciones" 
-                                placeholder="Buscar..." 
-                                className="" 
-                            />
-                            <button className="bg-[#000]">
-                                Buscar
-                            </button>
-                        </span>
-                    </div>
+                    </span>
+                    <span className="flex w-full">
+                        <input
+                            type="search"
+                            placeholder="Buscar..."
+                            className="bg-[#ffffff] py-2 px-3 rounded-l w-full border border-gray-300"
+                        />
+                        <button className="bg-[#E7473C] text-white py-2 px-3 rounded-r text-sm 
+                        hover:cursor-pointer hover:bg-[#b0352c] font-semibold">
+                            {iconSearch({})}
+                        </button>
+                    </span>
+                    <button className="bg-[#E7473C] text-white py-2 px-3 rounded
+                    hover:cursor-pointer hover:bg-[#b0352c] font-semibold">
+                        {iconClockwise({})}
+                    </button>
                 </div>
+
                 <div className="flex gap-5 flex-wrap mt-5">
                     <div className="flex-grow">
                         <Image
@@ -81,7 +81,8 @@ export default function MiForo() {
                             alt="Investigación 1"
                             width={300}
                             height={200}
-                            className="object-cover rounded w-full h-100 mt-5 min-w-100 max-h-[200px] min-h-[200px] mb-3"
+                            className="object-cover rounded w-full h-100 min-w-100 
+                            max-h-[200px] min-h-[200px] mb-3"
                         />
                         <Link href="/investigaciones/investigacion-1" className="text-md font-bold">Impacto de la nutrición en la salud digestiva</Link>
                         <p className="text-gray-600">Resumen de la investigación 1.</p>
@@ -92,7 +93,7 @@ export default function MiForo() {
                             alt="Investigación 1"
                             width={300}
                             height={200}
-                            className="object-cover rounded w-full h-100 mt-5 min-w-100 max-h-[200px] min-h-[200px] mb-3"
+                            className="object-cover rounded w-full h-100 min-w-100 max-h-[200px] min-h-[200px] mb-3"
                         />
                         <Link href="/investigaciones/investigacion-1" className="text-md font-bold">Impacto de la nutrición en la salud digestiva</Link>
                         <p className="text-gray-600">Resumen de la investigación 1.</p>
@@ -103,7 +104,7 @@ export default function MiForo() {
                             alt="Investigación 1"
                             width={300}
                             height={200}
-                            className="object-cover rounded w-full h-100 mt-5 min-w-100 max-h-[200px] min-h-[200px] mb-3"
+                            className="object-cover rounded w-full h-100 min-w-100 max-h-[200px] min-h-[200px] mb-3"
                         />
                         <Link href="/investigaciones/investigacion-1" className="text-md font-bold">Impacto de la nutrición en la salud digestiva</Link>
                         <p className="text-gray-600">Resumen de la investigación 1.</p>
