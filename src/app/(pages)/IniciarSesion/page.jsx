@@ -168,7 +168,8 @@ export default function IniciarSesion() {
               type={showPassword ? "text" : "password"}
               placeholder="Contraseña"
               className="rounded border border-gray-300 px-3 py-2 w-full bg-white
-              hover:outline-none focus:outline-none border-none"
+              hover:outline-none focus:outline-none border-none hover:border-none
+              inputHideOutline"
               onChange={onChange}
             />
             <button

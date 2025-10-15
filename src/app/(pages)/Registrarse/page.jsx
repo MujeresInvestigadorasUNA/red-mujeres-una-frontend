@@ -359,7 +359,7 @@ export default function Registrarse() {
                 type={showPassword ? "text" : "password"}
                 placeholder="Contraseña"
                 className="rounded border border-gray-300 px-3 py-2 w-full bg-white
-                        hover:outline-none focus:outline-none border-none"
+                hover:outline-none focus:outline-none border-none inputHideOutline"
                 onChange={onChange}
               />
               <button
@@ -384,7 +384,7 @@ export default function Registrarse() {
                 type={showConfirmPassword ? "text" : "password"}
                 placeholder="Confirmar Contraseña"
                 className="rounded border border-gray-300 px-3 py-2 w-full bg-white
-                        hover:outline-none focus:outline-none border-none"
+                hover:outline-none focus:outline-none border-none inputHideOutline"
                 onChange={onChange}
               />
               <button

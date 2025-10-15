@@ -4,47 +4,47 @@ import Carousel from "./components/Carousel";
 import Card from "./components/Card";
 
 const FORUMS_CARDS = [{
-    id: 1,
-    image: "/images/pilar.png",
-    title: "Pilar Aranda",
-    description:
-      "Pilar Aranda Ramírez es catedrática de Fisiología y doctora en Farmacia con una amplia trayectoria docente e investigadora.",
-    url: "/Foros/pilar-lopez"
+  id: 1,
+  image: "/images/pilar.png",
+  title: "Pilar Aranda",
+  description:
+    "Pilar Aranda Ramírez es catedrática de Fisiología y doctora en Farmacia con una amplia trayectoria docente e investigadora.",
+  url: "/Foros/pilar-lopez"
 }, {
-    id: 2,
-    image: "/images/tatiana.png",
-    title: "Tatiana López",
-    description:
-      "Aguiar es psicóloga graduada de la Universidad de Costa Rica, doctora por la Universidad Nacional Autónoma de México (UNAM).",
-    url: "/Foros/tatiana-agular"
+  id: 2,
+  image: "/images/tatiana.png",
+  title: "Tatiana López",
+  description:
+    "Aguiar es psicóloga graduada de la Universidad de Costa Rica, doctora por la Universidad Nacional Autónoma de México (UNAM).",
+  url: "/Foros/tatiana-agular"
 }, {
-    id: 3,
-    image: "/images/mariaA.png",
-    title: "Maria Arguedas",
-    description:
-      "Bioeticista con amplia experiencia en ética de la investigación y la atención en salud.",
-    url: "/Foros/maria-arguedas"
+  id: 3,
+  image: "/images/mariaA.png",
+  title: "Maria Arguedas",
+  description:
+    "Bioeticista con amplia experiencia en ética de la investigación y la atención en salud.",
+  url: "/Foros/maria-arguedas"
 }, {
-    id: 4,
-    image: "/images/mariaJ.png",
-    title: "Maria Jose Chaves",
-    description:
-      "Investigadora del CIEM con un enfoque en estudios de género y políticas públicas.",
-    url: "/Foros/maria-jose-chaves"
+  id: 4,
+  image: "/images/mariaJ.png",
+  title: "Maria Jose Chaves",
+  description:
+    "Investigadora del CIEM con un enfoque en estudios de género y políticas públicas.",
+  url: "/Foros/maria-jose-chaves"
 }, {
-    id: 5,
-    image: "/images/amanda.png",
-    title: "Amanda Mesén",
-    description:
-      "Investigadora con experiencia en ciencias sociales y desarrollo comunitario.",
-    url: "/Foros/amanda-mesen"
+  id: 5,
+  image: "/images/amanda.png",
+  title: "Amanda Mesén",
+  description:
+    "Investigadora con experiencia en ciencias sociales y desarrollo comunitario.",
+  url: "/Foros/amanda-mesen"
 }, {
-    id: 6,
-    image: "/images/carolina.png",
-    title: "Carolina Rojas",
-    description:
-      "Directora e investigadora con un enfoque en estudios de género y derechos humanos.",
-    url: "/Foros/carolina-rojas"
+  id: 6,
+  image: "/images/carolina.png",
+  title: "Carolina Rojas",
+  description:
+    "Directora e investigadora con un enfoque en estudios de género y derechos humanos.",
+  url: "/Foros/carolina-rojas"
 }];
 
 const RESEARCH_CARDS = [
