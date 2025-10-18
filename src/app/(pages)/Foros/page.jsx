@@ -1,4 +1,5 @@
 import Card from "@/app/components/Card";
+import { iconClockwise, iconSearch } from "@/app/assets/icons";
 
 const FORUMS_CARDS = [{
     id: 1,
@@ -48,24 +49,40 @@ export default function Foros() {
     return (
         <main className="flex-grow px-20 py-10 h-[100%] toolsSection">
             <h1 className="text-2xl font-bold">Foros</h1>
-            <p className="mt-3">
+            <p className="mt-3 mb-5">
                 Encuentra aquí los foros de cada una de las integrantes de la 
                 Red de Mujeres Académicas, con su información más relevante, sus logros 
                 y sus investigaciones.
             </p>
-            <div className="flex gap-4 mt-5">
-                <div className="w-full">
-                    <label htmlFor="filtro-foros" className="font-semibold">Filtrar Foros:</label>
-                    <input type="text" id="filtro-foros" placeholder="Buscar..." className="rounded border border-gray-300 px-3 py-2 w-full mt-2" />
-                </div>
-                <div className="w-70">
-                    <label htmlFor="filtro-foros" className="font-semibold">Filtrar Por:</label>
-                    <select id="filtro-foros" className="rounded border border-gray-300 px-3 py-2 w-full mt-2">
-                        <option value="todos">Todos</option>
+            <div className="flex items-stretch gap-3 mb-3">
+                <button className="bg-[#E7473C] text-white p-2 rounded text-nowrap px-4
+                hover:cursor-pointer hover:bg-[#b0352c] font-semibold">
+                    Mi Foro
+                </button>
+                <span>
+                    <select
+                        defaultValue=""
+                        className="bg-[#ffffff] py-2 px-2 rounded h-full border border-gray-300"
+                    >
+                        <option value="" disabled>Filtrar Por</option>
                         <option value="temas">Temas</option>
-                        <option value="autoras">Autoras</option>
                     </select>
-                </div>
+                </span>
+                <span className="flex w-full">
+                    <input
+                        type="search"
+                        placeholder="Buscar..."
+                        className="bg-[#ffffff] py-2 px-3 rounded-l w-full border border-gray-300"
+                    />
+                    <button className="bg-[#E7473C] text-white py-2 px-3 rounded-r text-sm 
+                    hover:cursor-pointer hover:bg-[#b0352c] font-semibold">
+                        {iconSearch({})}
+                    </button>
+                </span>
+                <button className="bg-[#E7473C] text-white py-2 px-3 rounded
+                hover:cursor-pointer hover:bg-[#b0352c] font-semibold">
+                    {iconClockwise({})}
+                </button>
             </div>
             <div className="flex gap-5 flex-wrap mt-5">
                 {FORUMS_CARDS.map((card) => (

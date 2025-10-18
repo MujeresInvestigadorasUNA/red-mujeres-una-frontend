@@ -1,6 +1,7 @@
 import Card from "@/app/components/Card";
 import Image from "next/image";
 import Link from "next/link";
+import { iconClockwise, iconSearch } from "@/app/assets/icons";
 
 const COURSES_CARDS = [{
     id: 1,
@@ -44,23 +45,39 @@ export default function Cursos() {
     return (
         <main className="flex-grow px-20 py-10 h-[100%] toolsSection">
             <h1 className="text-2xl font-bold">Cursos</h1>
-            <p className="mt-3">
+            <p className="mt-3 mb-5">
                 Encuentra aquí los cursos que imparten cada una de las integrantes de la 
                 Red de Mujeres Académicas, con su información relevante.
             </p>
-            <div className="flex gap-4 mt-5">
-                <div className="w-full">
-                    <label htmlFor="filtro-cursos" className="font-semibold">Filtrar Cursos:</label>
-                    <input type="text" id="filtro-cursos" placeholder="Buscar..." className="rounded border border-gray-300 px-3 py-2 w-full mt-2" />
-                </div>
-                <div className="w-70">
-                    <label htmlFor="filtro-cursos" className="font-semibold">Filtrar Por:</label>
-                    <select id="filtro-cursos" className="rounded border border-gray-300 px-3 py-2 w-full mt-2">
-                        <option value="todos">Todos</option>
+            <div className="flex items-stretch gap-3 mb-3">
+                <button className="bg-[#E7473C] text-white p-2 rounded text-nowrap px-4
+                hover:cursor-pointer hover:bg-[#b0352c] font-semibold">
+                    Añadir Curso
+                </button>
+                <span>
+                    <select
+                        defaultValue=""
+                        className="bg-[#ffffff] py-2 px-2 rounded h-full border border-gray-300"
+                    >
+                        <option value="" disabled>Filtrar Por</option>
                         <option value="temas">Temas</option>
-                        <option value="autoras">Autoras</option>
                     </select>
-                </div>
+                </span>
+                <span className="flex w-full">
+                    <input
+                        type="search"
+                        placeholder="Buscar..."
+                        className="bg-[#ffffff] py-2 px-3 rounded-l w-full border border-gray-300"
+                    />
+                    <button className="bg-[#E7473C] text-white py-2 px-3 rounded-r text-sm 
+                    hover:cursor-pointer hover:bg-[#b0352c] font-semibold">
+                        {iconSearch({})}
+                    </button>
+                </span>
+                <button className="bg-[#E7473C] text-white py-2 px-3 rounded
+                hover:cursor-pointer hover:bg-[#b0352c] font-semibold">
+                    {iconClockwise({})}
+                </button>
             </div>
             <div className="flex gap-5 flex-wrap mt-5">
                 {COURSES_CARDS.map((card) => (

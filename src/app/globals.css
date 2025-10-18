@@ -26,5 +26,5 @@
 
 .customOutline:hover, .customOutline:focus, input:hover, input:focus, 
 textarea:hover, textarea:focus, select:hover, select:focus {
-    outline: 2px solid #8A192A;
+    outline: 2px solid #b8adaf;
 }

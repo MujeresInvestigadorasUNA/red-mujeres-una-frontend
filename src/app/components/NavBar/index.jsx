@@ -159,12 +159,20 @@ export default function NavBar() {
             {initial}
           </button>
         ) : (
-          <Link
-            href="/IniciarSesion"
-            className="bg-[#b62116] text-white px-3 py-1 rounded shadow"
-          >
-            Iniciar Sesión
-          </Link>
+          <>
+            <Link
+              href="/MiForo"
+              className="bg-[#b62116] text-white px-3 py-1 rounded shadow"
+            >
+              Mi Foro
+            </Link>
+            <Link
+              href="/IniciarSesion"
+              className="bg-[#b62116] text-white px-3 py-1 rounded shadow"
+            >
+              Iniciar Sesión
+            </Link>
+          </>
         )}
       </div>
     </nav>
