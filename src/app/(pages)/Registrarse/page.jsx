@@ -208,7 +208,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { iconEye, iconEyeSlash, iconInstagram, iconFacebook, iconWhatsApp } from "../../assets/icons";
+import { iconEye, iconEyeSlash, iconInstagram, iconFacebook, iconWhatsApp, iconReturn } from "../../assets/icons";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -282,6 +282,9 @@ export default function Registrarse() {
 
   return (
     <main className="flex h-[100vh]">
+      <Link href="/" className="position absolute top-5 left-5 hover:cursor-pointer">
+        {iconReturn({ size: 30 })}
+      </Link>
       <section className="w-1/2 bg-[#F0F0F0] h-full toolsSection">
         <Image
           src="/images/logo.png"

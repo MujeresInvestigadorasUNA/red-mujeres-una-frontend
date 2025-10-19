@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { iconEye, iconEyeSlash } from "../../assets/icons";
+import { iconEye, iconEyeSlash, iconReturn } from "../../assets/icons";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -132,6 +132,9 @@ export default function IniciarSesion() {
     // </main>
     <main className="flex flex-col justify-center items-center bg-[#E7473C] 
     h-screen overflow-auto gap-5">
+      <Link href="/" className="position absolute top-5 left-5 hover:cursor-pointer">
+        {iconReturn({ size: 30, color: "white" })}
+      </Link>
       <Image
         src="/images/logo.png"
         alt="Portada de la Red de Mujeres Académicas UNA"
