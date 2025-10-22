@@ -67,6 +67,15 @@ export default function Registrarse() {
         const data = await response.json();
         alert("Registration successful!");
         // Redirect to login page or home
+        localStorage.setItem("access_token", data.access_token);
+        localStorage.setItem("user", JSON.stringify({
+          id: data.id,
+          email: data.email,
+          name: data.name,
+          last_name: data.last_name,
+          user_type_id: data.user_type_id,
+        }));
+
         window.location.href = "/";
       } else {
         const data = await response.json();

@@ -1,5 +1,5 @@
 "use client";
-
+import { UserProvider } from './contexts/UserContext';
 import { usePathname } from "next/navigation";
 import NavBar from "./components/NavBar";
 import Footer from "./components/Footer";
@@ -12,9 +12,11 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
-        {!hideLayout && <NavBar />}
-        {children}
-        {!hideLayout && <Footer />}
+        <UserProvider>
+          {!hideLayout && <NavBar />}
+          {children}
+          {!hideLayout && <Footer />}
+        </UserProvider>
       </body>
     </html>
   );
