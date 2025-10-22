@@ -6,15 +6,9 @@ import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuPortal,
   DropdownMenuSeparator,
-  DropdownMenuShortcut,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
@@ -55,7 +49,7 @@ export default function NavBar() {
                 {user.email}
               </DropdownMenuLabel>
               <DropdownMenuItem>
-                <Link href="/MiForo">Mi perfil</Link>
+                <Link href="/MiPerfil">Mi perfil</Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem>

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useState } from "react";
 
 
-export default function MiForo() {
+export default function MiPerfil() {
     const [forumName, setForumName] = useState("");
     const [subForumName, setSubForumName] = useState("");
 
