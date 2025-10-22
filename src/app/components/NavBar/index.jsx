@@ -2,6 +2,21 @@
 import { useUser } from '../../contexts/UserContext';
 import Image from "next/image";
 import Link from "next/link";
+import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuPortal,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 export default function NavBar() {
   const { user, logout } = useUser();
@@ -28,21 +43,26 @@ export default function NavBar() {
       <div className="flex items-center gap-3 min-w-[160px] justify-end">
 
         {user ? (
-          <>
-            <Link
-              href="/MiForo"
-              className="bg-[#b62116] text-white px-3 py-1 rounded shadow"
-            >
-              Mi Foro
-            </Link>
-            <button
-              onClick={logout}
-              className="bg-[#b62116] text-white px-3 py-1 rounded shadow
-              hover:bg-red-700 transition hover:cursor-pointer"
-            >
-              Cerrar Sesión
-            </button>
-          </>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button className="bg-[#b62116] text-white hover:bg-red-700
+              transition hover:cursor-pointer rounded-full w-10 h-10 p-0">
+                {user.name[0].toUpperCase()}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-40 mr-5" align="start" variant="dark">
+              <DropdownMenuLabel className="font-normal text-sm text-gray-500 text-center">
+                {user.email}
+              </DropdownMenuLabel>
+              <DropdownMenuItem>
+                <Link href="/MiForo">Mi perfil</Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem>
+                <button onClick={logout}>Cerrar sesión</button>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         ) : (
           <Link
             href="/IniciarSesion"
