@@ -6,10 +6,10 @@ export default function Foro() {
         <main className="flex-grow px-20 py-10 h-[100%]">
             <section className="flex gap-20 justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold">Pilar López</h1>
+                    <h1 className="text-2xl font-bold">jinette López</h1>
                     <p className="text-gray-600">Catedrática de Fisiología.</p>
                     <p className="mt-3">
-                        Pilar Aranda Ramírez es catedrática de Fisiología y doctora en
+                        jinette Aranda Ramírez es catedrática de Fisiología y doctora en
                         Farmacia con una amplia trayectoria docente e investigadora. <br /> <br />
 
                         Lleva a cabo su labor de investigadora en el Grupo de Investigación
@@ -23,8 +23,8 @@ export default function Foro() {
                     </p>
                 </div>
                 <Image
-                    src="/images/pilar.png"
-                    alt="Pilar López"
+                    src="/images/jinette.png"
+                    alt="jinette López"
                     width={300}
                     height={300}
                     className="object-cover rounded w-full h-100 mt-5 max-w-100 max-h-[300px] min-h-[300px] mb-3"

@@ -8,13 +8,13 @@ const COURSES_CARDS = [{
     image: "/images/curso1.png",
     title: "Qué es la Fisiología Digestiva",
     description: "Descripción del curso de Fisiología Digestiva.",
-    url: "/Cursos/pilar-lopez"
+    url: "/Cursos/jinette-lopez"
 }, {
     id: 2,
     image: "/images/curso2.png",
     title: "Aprende de Nutrición y Tecnología",
     description: "Psicóloga.",
-    url: "/Cursos/tatiana-agular"
+    url: "/Cursos/kattia-agular"
 }, {
     id: 3,
     image: "/images/curso3.png",
@@ -32,7 +32,7 @@ const COURSES_CARDS = [{
     image: "/images/curso5.png",
     title: "Hábitos de Vida Saludables",
     description: "Investigadora.",
-    url: "/Cursos/amanda-mesen"
+    url: "/Cursos/brenda-mesen"
 }, {
     id: 6,
     image: "/images/curso6.png",

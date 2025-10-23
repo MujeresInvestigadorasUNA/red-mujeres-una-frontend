@@ -3,46 +3,39 @@ import { iconClockwise, iconSearch } from "@/app/assets/icons";
 
 const FORUMS_CARDS = [{
     id: 1,
-    image: "/images/pilar.png",
-    title: "Pilar Aranda",
+    image: "/images/jinette.png",
+    title: "Jinette Naranjo",
     description:
-      "Pilar Aranda Ramírez es catedrática de Fisiología y doctora en Farmacia con una amplia trayectoria docente e investigadora.",
-    url: "/Foros/pilar-lopez"
+      "Jinette Naranjo es catedrática de Fisiología y doctora en Farmacia con una amplia trayectoria docente e investigadora.",
+    url: "/Foros/jinette-naranjo"
 }, {
     id: 2,
-    image: "/images/tatiana.png",
-    title: "Tatiana López",
+    image: "/images/kattia.png",
+    title: "Kattia Vasconcelos ",
     description:
-      "Aguiar es psicóloga graduada de la Universidad de Costa Rica, doctora por la Universidad Nacional Autónoma de México (UNAM).",
-    url: "/Foros/tatiana-agular"
+      "Kattia Vasconcelos es psicóloga graduada de la Universidad de Costa Rica, doctora por la Universidad Nacional Autónoma de México (UNAM).",
+    url: "/Foros/kattia-vasconcelos"
 }, {
     id: 3,
-    image: "/images/mariaA.png",
-    title: "Maria Arguedas",
+    image: "/images/mildred.png",
+    title: "Mildred Arguedas",
     description:
       "Bioeticista con amplia experiencia en ética de la investigación y la atención en salud.",
-    url: "/Foros/maria-arguedas"
+    url: "/Foros/mildred-arguedas"
 }, {
     id: 4,
-    image: "/images/mariaJ.png",
-    title: "Maria Jose Chaves",
+    image: "/images/anayudel.png",
+    title: "Anayudel Gutierrez",
     description:
       "Investigadora del CIEM con un enfoque en estudios de género y políticas públicas.",
-    url: "/Foros/maria-jose-chaves"
+    url: "/Foros/anayudel-gutierrez"
 }, {
     id: 5,
-    image: "/images/amanda.png",
-    title: "Amanda Mesén",
+    image: "/images/brenda.png",
+    title: "Brenda Jiménez",
     description:
       "Investigadora con experiencia en ciencias sociales y desarrollo comunitario.",
-    url: "/Foros/amanda-mesen"
-}, {
-    id: 6,
-    image: "/images/carolina.png",
-    title: "Carolina Rojas",
-    description:
-      "Directora e investigadora con un enfoque en estudios de género y derechos humanos.",
-    url: "/Foros/carolina-rojas"
+    url: "/Foros/brenda-jimenez"
 }];
 
 export default function Foros() {

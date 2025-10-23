@@ -32,8 +32,8 @@ export default function MiPerfil() {
                     ></textarea>
                 </div>
                 <Image
-                    src="/images/pilar.png"
-                    alt="Pilar López"
+                    src="/images/jinette.png"
+                    alt="jinette López"
                     width={300}
                     height={300}
                     className="object-cover rounded w-full h-100 mt-5 max-w-100 

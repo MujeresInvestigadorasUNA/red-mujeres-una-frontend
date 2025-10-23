@@ -52,7 +52,7 @@ export default function Curso() {
                                 través de la plataforma Teams de Microsoft. <br />
                                 Hora: de 6:00 p.m. a 9:00 p.m.<br />
                                 Días: L [ ] M [ ] MI [ ] J [ ] V [ ] S [ ] D [ ]<br />
-                                Impartido por: Pilar Aranda.<br />
+                                Impartido por: jinette Aranda.<br />
                             </p>
                         </div>
                         <div className="max-w-[40vw] flex-grow w-full">
@@ -137,10 +137,10 @@ export default function Curso() {
                 <hr className="my-10" />
                 <section className="flex gap-20 justify-between mt-10">
                     <div>
-                        <h1 className="text-2xl font-bold">Pilar López</h1>
+                        <h1 className="text-2xl font-bold">jinette López</h1>
                         <p className="text-gray-600">Catedrática de Fisiología.</p>
                         <p className="mt-3">
-                            Pilar Aranda Ramírez es catedrática de Fisiología y doctora en
+                            jinette Aranda Ramírez es catedrática de Fisiología y doctora en
                             Farmacia con una amplia trayectoria docente e investigadora. <br /> <br />
 
                             Lleva a cabo su labor de investigadora en el Grupo de Investigación
@@ -157,8 +157,8 @@ export default function Curso() {
                         </button>
                     </div>
                     <Image
-                        src="/images/pilar.png"
-                        alt="Pilar López"
+                        src="/images/jinette.png"
+                        alt="jinette López"
                         width={300}
                         height={300}
                         className="object-cover rounded w-full h-100 mt-5 max-w-100 max-h-[300px] min-h-[300px] mb-3"

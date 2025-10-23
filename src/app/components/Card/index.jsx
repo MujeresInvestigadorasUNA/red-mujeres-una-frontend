@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 export default function Card({ 
-    cardImage = "/images/pilar.png", 
+    cardImage = "/images/jinette.png", 
     cardTitle = "Card Title", 
     cardDescription = "Card Description",
     cardURL = "/",
@@ -23,9 +23,9 @@ export default function Card({
                     <Image
                         src={cardImage}
                         alt={cardTitle}
-                        width={1920}
-                        height={1316}
-                        className="h-70 object-cover object-top"
+                        width={1000}
+                        height={1000}
+                        className="h-70 object-cover w-full"
                     />
                 )}
                 <div className={`${cardWithImage ? 'mt-3 px-5 pb-5' : 'p-5 shadow-md'}`}>
