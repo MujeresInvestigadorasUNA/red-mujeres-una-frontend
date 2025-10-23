@@ -1,4 +1,5 @@
 "use client";
+import { Toaster } from "@/components/ui/sonner"
 import { UserProvider } from './contexts/UserContext';
 import { usePathname } from "next/navigation";
 import NavBar from "./components/NavBar";
@@ -17,6 +18,7 @@ export default function RootLayout({ children }) {
           {children}
           {!hideLayout && <Footer />}
         </UserProvider>
+        <Toaster position="top-center" richColors  />
       </body>
     </html>
   );

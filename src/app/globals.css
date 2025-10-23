@@ -22,16 +22,6 @@
     background-image: linear-gradient(90deg, #E7473C, #FF6B55);
 }
 
-.inputHideOutline:focus, .inputHideOutline:hover {
-    outline: none ;
-    box-shadow: none;
-}
-
-.customOutline:hover, .customOutline:focus, input:hover, input:focus, 
-textarea:hover, textarea:focus, select:hover, select:focus {
-    outline: 2px solid #b8adaf;
-}
-
 @theme inline {
     --radius-sm: calc(var(--radius) - 4px);
     --radius-md: calc(var(--radius) - 2px);
