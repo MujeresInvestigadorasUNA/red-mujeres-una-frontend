@@ -52,7 +52,7 @@ export default function Cursos() {
                 Red de Mujeres Académicas, con su información relevante.
             </p>
             <div className="flex items-stretch gap-3 mb-3">
-                {user && (
+                {user && user.user_type_id != 1 && (
                     <button className="bg-[#E7473C] text-white p-2 rounded text-nowrap px-4
                     hover:cursor-pointer hover:bg-[#b0352c] font-semibold">
                         Añadir Curso
