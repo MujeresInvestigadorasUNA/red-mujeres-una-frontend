@@ -1,5 +1,7 @@
+"use client";
 import { iconClockwise, iconSearch } from "@/app/assets/icons";
 import CustomCard from "@/app/components/CustomCard";
+import { useUser } from "@/app/contexts/UserContext";
 
 const RESEARCHES_CARDS = [{
     id: 1,
@@ -40,6 +42,8 @@ const RESEARCHES_CARDS = [{
 }];
 
 export default function Investigaciones() {
+    const { user } = useUser();
+
     return (
         <main className="flex-grow px-20 py-10 h-[100%] toolsSection">
             <h1 className="text-2xl font-bold">Investigaciones</h1>
@@ -48,10 +52,12 @@ export default function Investigaciones() {
                 integrantes de la Red de Mujeres Académicas, con su información más relevante.
             </p>
             <div className="flex items-stretch gap-3 mb-3">
-                <button className="bg-[#E7473C] text-white p-2 rounded text-nowrap px-4
-                hover:cursor-pointer hover:bg-[#b0352c] font-semibold">
-                    Añadir Investigación
-                </button>
+                {user && (
+                    <button className="bg-[#E7473C] text-white p-2 rounded text-nowrap px-4
+                    hover:cursor-pointer hover:bg-[#b0352c] font-semibold">
+                        Añadir Investigación
+                    </button>
+                )}
                 <span>
                     <select
                         defaultValue=""
