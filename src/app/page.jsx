@@ -1,7 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
-import Carousel from "./components/Carousel";
-import Card from "./components/Card";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
+import CustomCard from "./components/CustomCard";
 
 const FORUMS_CARDS = [{
   id: 1,
@@ -91,38 +97,58 @@ export default function Home() {
           compartir conocimientos y conectar con la comunidad. Publica cursos, participa
           en foros y accede a información clave con tecnología avanzada e inteligencia artificial.
         </p>
-        <div>
-          <h2 className="text-xl font-bold mt-10 mb-5 px-10">Foros Destacados</h2>
-          <Carousel cards={FORUMS_CARDS} />
+        <div className="mt-10 px-10">
+          <h2 className="text-xl font-bold mt-10 mb-5">Foros Destacados</h2>
+          <Carousel
+            opts={{
+              align: "start",
+            }}
+            className="w-full"
+          >
+            <CarouselContent>
+              {FORUMS_CARDS.map((forum, index) => (
+                <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/4">
+                  <CustomCard
+                    cardImage={forum.image}
+                    cardTitle={forum.title}
+                    cardDescription={forum.description}
+                    cardURL={forum.url}
+                  />
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselPrevious className="hover:cursor-pointer"/>
+            <CarouselNext className="hover:cursor-pointer"/>
+          </Carousel>
         </div>
       </section>
       <section className="px-20 py-10 toolsSection">
         <h2 className="text-[#E7473C] text-xl font-bold">Herramientas de la Red</h2>
         <div className="mt-4 flex gap-5">
-          <Card 
+          <CustomCard
             cardImage="/images/tool1.png"
             cardTitle="Foros de discusión"
-            cardDescription="Revisa los foros con toda la información de 
+            cardDescription="Revisa los foros con toda la información de
             cada una de las mujeres de la Red."
             cardURL="/Foros"
             cardBgColor="#E7473C"
             cardTitleTextColor="#F0F0F0"
             cardTextColor="#F0F0F0"
           />
-          <Card 
+          <CustomCard
             cardImage="/images/tool2.png"
             cardTitle="Cursos en línea"
-            cardDescription="Accede a una variedad de cursos en línea diseñados 
+            cardDescription="Accede a una variedad de cursos en línea diseñados
             para empoderar a las mujeres académicas."
             cardURL="/Cursos"
             cardBgColor="#E7473C"
             cardTitleTextColor="#F0F0F0"
             cardTextColor="#F0F0F0"
           />
-          <Card
+          <CustomCard
             cardImage="/images/tool3.png"
             cardTitle="Recursos de investigación"
-            cardDescription="Explora una colección de recursos de investigación 
+            cardDescription="Explora una colección de recursos de investigación
             para apoyar tu trabajo académico."
             cardURL="/Investigaciones"
             cardBgColor="#E7473C"
@@ -134,32 +160,35 @@ export default function Home() {
       <section className="flex gap-10 px-20 py-10 bg-[#b62116] text-[#F0F0F0] cursesSection">
         <div className="flex flex-col gap-2 w-1/3">
           <h2 className="text-xl font-bold mb-2">Cursos Populares</h2>
-          <Card 
-            cardWithImage={false}
+          <CustomCard
             cardTitle="Introducción a la Investigación Académica"
             cardDescription="Un curso básico para entender los fundamentos de la investigación académica."
             cardURL="/Cursos"
             cardBgColor="#F0F0F0"
             cardTitleTextColor="#831d16"
-          />
-          <Card 
+            cardTextColor="#E7473C"
             cardWithImage={false}
+          />
+          <CustomCard
             cardTitle="Gestión del Tiempo para Académicas"
             cardDescription="Aprende técnicas efectivas de gestión del tiempo para equilibrar tus responsabilidades académicas y personales."
             cardURL="/Cursos"
             cardBgColor="#F0F0F0"
             cardTitleTextColor="#831d16"
-          />
-          <Card 
+            cardTextColor="#E7473C"
             cardWithImage={false}
-            cardTitle="Redacción Académica Avanzada"
+          />
+          <CustomCard
+            cardTitle="Redacción Académica"
             cardDescription="Mejora tus habilidades de redacción académica con este curso avanzado."
             cardURL="/Cursos"
             cardBgColor="#F0F0F0"
             cardTitleTextColor="#831d16"
+            cardTextColor="#E7473C"
+            cardWithImage={false}
           />
-          <Link 
-            href="/Cursos" 
+          <Link
+            href="/Cursos"
             className="bg-[#E7473C] text-white text-center px-4 py-2 rounded
             shadow"
           >
@@ -167,22 +196,41 @@ export default function Home() {
           </Link>
         </div>
         <div className="w-2/3 h-full bg-white rounded shadow-md p-3">
-          <Image 
-            src="/images/cursos.png" 
-            alt="Curso 1" 
-            width={200} 
-            height={200} 
-            className="object-cover rounded w-full h-100 bg-[#fff] " 
+          <Image
+            src="/images/cursos.png"
+            alt="Curso 1"
+            width={200}
+            height={200}
+            className="object-cover rounded w-full h-100 bg-[#fff] "
           />
         </div>
       </section>
-      <section className="px-10 py-10 toolsSection">
-        <h2 className="text-xl font-bold mb-5 px-10">Investigaciones Recientes</h2>
-        <Carousel 
-          cards={RESEARCH_CARDS} 
-          scrollButtonsColor="#F0F0F0"
-          scrollButtonsBgColor="#E7473C"
-        />
+      <section className="px-20 py-10 toolsSection">
+        <h2 className="text-xl font-bold mb-5">Investigaciones Recientes</h2>
+        <Carousel
+            opts={{
+              align: "start",
+            }}
+            className="w-full"
+          >
+          <CarouselContent>
+            {RESEARCH_CARDS.map((research, index) => (
+              <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/2">
+                <CustomCard
+                  cardImage={research.image}
+                  cardTitle={research.title}
+                  cardDescription={research.description}
+                  cardURL={research.url}
+                  cardBgColor={research.bgColor}
+                  cardTitleTextColor={research.titleTextColor}
+                  cardTextColor={research.textColor}
+                />
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          <CarouselPrevious className="hover:cursor-pointer"/>
+          <CarouselNext className="hover:cursor-pointer"/>
+        </Carousel>
       </section>
     </main>
   );

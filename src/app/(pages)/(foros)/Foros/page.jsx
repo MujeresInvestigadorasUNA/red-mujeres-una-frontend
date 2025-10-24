@@ -1,5 +1,5 @@
-import Card from "@/app/components/Card";
 import { iconClockwise, iconSearch } from "@/app/assets/icons";
+import CustomCard from "@/app/components/CustomCard";
 
 const FORUMS_CARDS = [{
     id: 1,
@@ -80,7 +80,7 @@ export default function Foros() {
             <div className="flex gap-5 flex-wrap mt-5">
                 {FORUMS_CARDS.map((card) => (
                     <div key={card.id} className="flex-fill flex-grow flex-shrink basis-[30%] min-w-[250px]">
-                        <Card
+                        <CustomCard
                             cardImage={card.image}
                             cardTitle={card.title}
                             cardDescription={card.description}
