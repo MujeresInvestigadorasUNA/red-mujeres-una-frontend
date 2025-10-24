@@ -1,45 +1,112 @@
 "use client";
-import { iconClockwise, iconSearch } from "@/app/assets/icons";
-import { useState } from "react";
+import { iconClockwise, iconSearch, iconCamara } from "@/app/assets/icons";
+import { useState, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+    Empty,
+    EmptyDescription,
+    EmptyHeader,
+    EmptyMedia,
+    EmptyTitle,
+} from "@/components/ui/empty";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 export default function MiPerfil() {
+    const photoInputRef = useRef(null);
     const [forumName, setForumName] = useState("");
     const [subForumName, setSubForumName] = useState("");
 
+    const [form, setForm] = useState({
+        name: "",
+        last_name: "",
+        profession: "",
+        description: "",
+        photo: null
+    });
+
+    const onChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+
+    const handlePhotoClick = () => {
+        photoInputRef.current.click(); // trigger hidden input
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        if (!form.name || !form.last_name || !form.profession || !form.description) {
+            return toast.error("Por favor, complete todos los campos");
+        }
+    };
+
     return (
         <main className="flex-grow px-20 py-10 h-[100%]">
-            <section className="flex gap-20 justify-between">
-                <div>
-                    <input
-                        type="text"
-                        className="text-2xl font-bold w-full rounded"
-                        placeholder="Nombre del Foro"
-                        value={forumName}
-                        onChange={(e) => setForumName(e.target.value)}
-                    />
-                    <input
-                        type="text"
-                        className="text-gray-600 rounded"
-                        placeholder="Nombre del Subforo"
-                        value={subForumName}
-                        onChange={(e) => setSubForumName(e.target.value)}
-                    />
-                    <textarea 
-                        className="text-gray-600 mt-3 w-full h-80 border rounded border-gray-300" 
-                        placeholder="Descripción del Subforo"
-                    ></textarea>
+            <form onSubmit={handleSubmit} className="flex flex-col gap-5 justify-between">
+                <div className="flex gap-10">
+                    <div className="w-full">
+                        <Input
+                            type="text"
+                            className="border-0 shadow-none p-0 font-bold w-full"
+                            placeholder="Nombre"
+                            value={forumName}
+                            onChange={(e) => setForumName(e.target.value)}
+                            style={{ fontSize: '2rem' }}
+                        />
+                        <Input
+                            type="text"
+                            className="text-gray-600 rounded border-0 shadow-none p-0 
+                            w-full"
+                            placeholder="Profesión o Especialidad"
+                            value={subForumName}
+                            onChange={(e) => setSubForumName(e.target.value)}
+                            style={{ fontSize: '1rem' }}
+                        />
+                        <Textarea
+                            className="text-gray-600 mt-3 w-full h-80 border 
+                            rounded border-0 p-0 shadow-none resize-none"
+                            placeholder="Descripción o Biografía"
+                        ></Textarea>
+                    </div>
+                    <div>
+                        <Input 
+                            id="photo"
+                            name="photo" 
+                            type="file" 
+                            accept="image/*"
+                            ref={photoInputRef}
+                            className="hidden"
+                        />
+                        <Empty className="border border-dashed border-[#999] bg-[#f9f9f9]
+                        h-100 w-100 hover:cursor-pointer hover:border-[#666]
+                        hover:brightness-95 transition-all duration-200"
+                        onClick={handlePhotoClick}>
+                            <EmptyHeader>
+                                <EmptyMedia variant="icon">
+                                    {iconCamara({ size: 48, color: "#999" })}
+                                </EmptyMedia>
+                                <EmptyTitle>Una Foto Profesional</EmptyTitle>
+                                <EmptyDescription>
+                                    Sube una foto profesional para que otros sepan quién eres.
+                                </EmptyDescription>
+                            </EmptyHeader>
+                        </Empty>
+                        {/* <Image
+                            src="/images/jinette.png"
+                            alt="jinette López"
+                            width={1000}
+                            height={1000}
+                            className="object-cover rounded w-full h-100 w-100"
+                        /> */}
+                    </div>
                 </div>
-                <Image
-                    src="/images/jinette.png"
-                    alt="jinette López"
-                    width={300}
-                    height={300}
-                    className="object-cover rounded w-full h-100 mt-5 max-w-100 
-                    max-h-[300px] min-h-[300px] mb-3"
-                />
-            </section>
+                <Button type="submit" className="bg-[#E7473C] text-white
+                hover:bg-[#b0352c] hover:cursor-pointer">
+                    Guardar Cambios
+                </Button>
+            </form>
             <section>
                 <h2 className="text-2xl font-bold mt-10 mb-5"> Mis Investigaciones </h2>
                 <div className="flex items-stretch gap-3 mb-3">
