@@ -48,10 +48,10 @@ export default function NavBar() {
               <DropdownMenuLabel className="font-normal text-sm text-gray-500 text-center">
                 {user.email}
               </DropdownMenuLabel>
+              <DropdownMenuSeparator />
               <DropdownMenuItem>
                 <Link href="/MiPerfil">Mi perfil</Link>
               </DropdownMenuItem>
-              <DropdownMenuSeparator />
               <DropdownMenuItem>
                 <button onClick={logout}>Cerrar sesión</button>
               </DropdownMenuItem>

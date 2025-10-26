@@ -1,6 +1,6 @@
 "use client";
 import { iconClockwise, iconSearch, iconCamara } from "@/app/assets/icons";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
@@ -14,18 +14,17 @@ import {
 } from "@/components/ui/empty";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { createForumn, getUserForum } from "@/lib/api/forums";
+import { useUser } from "@/app/contexts/UserContext";
 
 export default function MiPerfil() {
+    const { user } = useUser();
     const photoInputRef = useRef(null);
-    const [forumName, setForumName] = useState("");
-    const [subForumName, setSubForumName] = useState("");
 
     const [form, setForm] = useState({
         name: "",
-        last_name: "",
         profession: "",
-        description: "",
-        photo: null
+        description: ""
     });
 
     const onChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
@@ -37,10 +36,49 @@ export default function MiPerfil() {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!form.name || !form.last_name || !form.profession || !form.description) {
+        if (!form.name || !form.profession || !form.description) {
             return toast.error("Por favor, complete todos los campos");
         }
+
+        try {
+            const response = await createForumn({ 
+                user_id: user.id, 
+                user_proffesion: form.profession, 
+                user_description: form.description 
+            });
+
+            const data = await response.json();
+            if (!response.ok) {
+                return toast.warning(data.detail?.[0]?.msg || "Error al iniciar sesión");
+            }
+            toast.success("Perfil actualizado correctamente");
+        } catch (err) {
+            toast.warning("Error de conexión");
+        }
     };
+
+    const fetchUserForum = async () => {
+        try {
+            const response = await getUserForum({ user_id: user.id });
+            const data = await response.json();
+            if (!response.ok) {
+                return toast.warning(data.detail?.[0]?.msg || "Error al obtener el foro");
+            }
+            setForm({
+                name: data.user.name + " " + data.user.last_name || "",
+                profession: data.user_proffesion || "",
+                description: data.user_description || "",
+            });
+        } catch (err) {
+            toast.warning("Error de conexión");
+        }
+    };
+
+    useEffect(() => {
+        if (user?.id) {
+            fetchUserForum();
+        }
+    }, [user]);
 
     return (
         <main className="flex-grow px-20 py-10 h-[100%]">
@@ -48,33 +86,41 @@ export default function MiPerfil() {
                 <div className="flex gap-10">
                     <div className="w-full">
                         <Input
+                            id="name"
+                            name="name"
                             type="text"
                             className="border-0 shadow-none p-0 font-bold w-full"
                             placeholder="Nombre"
-                            value={forumName}
-                            onChange={(e) => setForumName(e.target.value)}
+                            value={form.name}
+                            onChange={onChange}
                             style={{ fontSize: '2rem' }}
                         />
                         <Input
+                            id="profession"
+                            name="profession"
                             type="text"
                             className="text-gray-600 rounded border-0 shadow-none p-0 
                             w-full"
                             placeholder="Profesión o Especialidad"
-                            value={subForumName}
-                            onChange={(e) => setSubForumName(e.target.value)}
+                            value={form.profession}
+                            onChange={onChange}
                             style={{ fontSize: '1rem' }}
                         />
                         <Textarea
+                            id="description"
+                            name="description"
                             className="text-gray-600 mt-3 w-full h-80 border 
                             rounded border-0 p-0 shadow-none resize-none"
                             placeholder="Descripción o Biografía"
+                            value={form.description}
+                            onChange={onChange}
                         ></Textarea>
                     </div>
                     <div>
-                        <Input 
+                        <Input
                             id="photo"
-                            name="photo" 
-                            type="file" 
+                            name="photo"
+                            type="file"
                             accept="image/*"
                             ref={photoInputRef}
                             className="hidden"
@@ -82,7 +128,7 @@ export default function MiPerfil() {
                         <Empty className="border border-dashed border-[#999] bg-[#f9f9f9]
                         h-100 w-100 hover:cursor-pointer hover:border-[#666]
                         hover:brightness-95 transition-all duration-200"
-                        onClick={handlePhotoClick}>
+                            onClick={handlePhotoClick}>
                             <EmptyHeader>
                                 <EmptyMedia variant="icon">
                                     {iconCamara({ size: 48, color: "#999" })}
