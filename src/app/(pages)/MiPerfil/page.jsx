@@ -1,93 +1,96 @@
 "use client";
-import { iconClockwise, iconSearch, iconCamara } from "@/app/assets/icons";
-import { useState, useRef, useEffect } from "react";
-import Image from "next/image";
-import Link from "next/link";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import {
-    Empty,
-    EmptyDescription,
-    EmptyHeader,
-    EmptyMedia,
-    EmptyTitle,
-} from "@/components/ui/empty";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
-import { updateForum, getUserForum } from "@/lib/api/forums";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useEffect, useState } from "react";
+import { iconEye, iconEyeSlash } from "@/app/assets/icons";
+import { getUserInfo, updateUser } from "@/lib/api/auth";
 import { useUser } from "@/app/contexts/UserContext";
-import { capitalizeWords } from "@/app/assets/utils";
+import { toast } from "sonner";
+import {
+    InputGroup,
+    InputGroupAddon,
+    InputGroupButton,
+    InputGroupInput
+} from "@/components/ui/input-group";
 
 export default function MiPerfil() {
     const { user } = useUser();
-    const photoInputRef = useRef(null);
 
     const [form, setForm] = useState({
-        name: "",
+        firstName: "",
+        lastName: "",
         profession: "",
-        description: "",
-        photo: null,
+        email: "",
+        password: "",
+        confirmPassword: "",
     });
 
-    const onChange = (e) => {
-        if (e.target.name === "photo") {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onloadend = () => {
-                    console.log(reader.result);
-                    setForm({ ...form, photo: reader.result }); // reader.result is base64
-                };
+    const [showPassword, setShowPassword] = useState(false);
+    const togglePassword = () => setShowPassword(!showPassword);
 
-                reader.readAsDataURL(file); // converts to base64
-            }
-        } else {
-            setForm({ ...form, [e.target.name]: e.target.value });
-        }
-    };
-
-    const handlePhotoClick = () => {
-        photoInputRef.current.click(); // trigger hidden input
-    };
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const toggleConfirmPassword = () => setShowConfirmPassword(!showConfirmPassword);
+    const onChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!form.name || !form.profession || !form.description) {
-            return toast.error("Por favor, complete todos los campos");
+        // Basic form validation
+        if (!form.firstName || !form.lastName || !form.email || !form.profession || !form.password || !form.confirmPassword) {
+            toast.error("Please fill in all required fields");
+            return;
+        }
+        if (form.password !== form.confirmPassword) {
+            toast.error("Passwords do not match");
+            return;
         }
 
         try {
-            const response = await updateForum({
-                user_id: user.id,
-                user_proffesion: form.profession,
-                user_description: form.description,
-                photo: form.photo
+            const response = await updateUser({
+                id: user.id,
+                first_name: form.firstName,
+                last_name: form.lastName,
+                profession: form.profession,
+                email: form.email,
+                password: form.password
             });
 
-            const data = await response.json();
             if (!response.ok) {
-                return toast.warning(data.detail?.[0]?.msg || "Error al actualizar el perfil");
+                const data = await response.json();
+                return toast.warning(data.detail?.[0]?.msg || "Error al iniciar sesión");
             }
-            toast.success("Foro actualizado correctamente");
+
+            const data = await response.json();
+            localStorage.setItem("user", JSON.stringify({
+                id: data.id,
+                first_name: form.firstName,
+                last_name: form.lastName,
+                profession: form.profession,
+                email: form.email
+            }));
+            toast.success("Perfil actualizado correctamente");
         } catch (err) {
             console.error(err);
             toast.warning("Error de conexión");
         }
     };
 
-    const fetchUserForum = async () => {
+    const fetchUserInfo = async () => {
         try {
-            const response = await getUserForum({ user_id: user.id });
+            const response = await getUserInfo({ user_id: user.id });
             const data = await response.json();
             if (!response.ok) {
-                return toast.warning(data.detail?.[0]?.msg || "Error al obtener el foro");
+                toast.warning(data.detail?.[0]?.msg || "Error al obtener la información del usuario");
+                return;
             }
             setForm({
-                name: data.user.name + " " + data.user.last_name || "",
-                profession: data.user_proffesion || "",
-                description: data.user_description || "",
-                photo: data.user.photo || null,
+                firstName: data.first_name || "",
+                lastName: data.last_name || "",
+                profession: data.profession || "",
+                email: data.email || "",
+                password: data.password || "",
+                confirmPassword: data.password || ""
             });
         } catch (err) {
             toast.warning("Error de conexión");
@@ -96,277 +99,139 @@ export default function MiPerfil() {
 
     useEffect(() => {
         if (user?.id) {
-            fetchUserForum();
+            fetchUserInfo();
         }
     }, [user]);
 
     return (
-        <main className="flex-grow px-20 py-10 h-[100%]">
-            <form onSubmit={handleSubmit} className="flex flex-col gap-5 justify-between">
-                <div className="flex gap-10">
-                    <div className="w-full">
-                        <h2 className="text-2xl font-bold mb-3" style={{ fontSize: '2rem' }}>
-                            {capitalizeWords(form.name) || "Nombre Completo"}
-                        </h2>
-                        <h2 className="text-gray-600 font-semibold mb-1" style={{ fontSize: '1rem' }}>
-                            {capitalizeWords(form.profession) || "Profesión u Ocupación"}
-                        </h2>
-                        <Textarea
-                            id="description"
-                            name="description"
-                            className="text-gray-600 mt-3 w-full h-80 border 
-                            rounded border-0 p-0 shadow-none resize-none pr-3"
-                            value={form.description}
-                            placeholder="Escribe una breve descripción sobre ti..."
-                            onChange={onChange}
-                        ></Textarea>
-                    </div>
-                    <div>
+        <main className="flex mainSection pb-20 pt-10">
+            <form className="flex flex-col gap-4 w-1/2 m-auto" onSubmit={handleSubmit}>
+                <div className="flex gap-4">
+                    <div className="grid w-full gap-3">
+                        <Label htmlFor="firstName" className="font-semibold text-white text-md">
+                            Nombre
+                        </Label>
                         <Input
-                            id="photo"
-                            name="photo"
-                            type="file"
-                            accept="image/*"
-                            ref={photoInputRef}
+                            id="firstName"
+                            name="firstName"
+                            placeholder="Nombre"
+                            type="text"
+                            value={form.firstName}
                             onChange={onChange}
-                            className="hidden"
+                            required
+                            className="bg-white h-12 rounded"
+                            style={{ fontSize: "1rem" }}
                         />
-                        {form.photo ? null : (
-                            <Empty className="border border-dashed border-[#999] bg-[#f9f9f9]
-                            h-100 w-100 hover:cursor-pointer hover:border-[#666]
-                            hover:brightness-95 transition-all duration-200"
-                                onClick={handlePhotoClick}>
-                                <EmptyHeader>
-                                    <EmptyMedia variant="icon">
-                                        {iconCamara({ size: 48, color: "#999" })}
-                                    </EmptyMedia>
-                                    <EmptyTitle>Una Foto Profesional</EmptyTitle>
-                                    <EmptyDescription>
-                                        Sube una foto profesional para que otros sepan quién eres.
-                                    </EmptyDescription>
-                                </EmptyHeader>
-                            </Empty>
-                        )}
-                        {form.photo && (
-                            <Image
-                                onClick={handlePhotoClick}
-                                src={form.photo}
-                                alt="Foto de perfil"
-                                width={3000}
-                                height={3000}
-                                className="w-100 h-100 rounded object-cover
-                                min-w-100 min-h-100 hover:cursor-pointer
-                                hover:brightness-95 transition-all duration-200"
-                            />
-                        )}
+                    </div>
+                    <div className="grid w-full items-center gap-3">
+                        <Label htmlFor="firstName" className="font-semibold text-white text-md">
+                            Apellidos
+                        </Label>
+                        <Input
+                            id="lastName"
+                            name="lastName"
+                            placeholder="Apellidos"
+                            type="text"
+                            value={form.lastName}
+                            onChange={onChange}
+                            required
+                            className="bg-white h-12 rounded"
+                            style={{ fontSize: "1rem" }}
+                        />
                     </div>
                 </div>
-                <Button type="submit" className="bg-[#E7473C] text-white
-                hover:bg-[#b0352c] hover:cursor-pointer">
+                <div className="grid w-full items-center gap-3">
+                    <Label htmlFor="firstName" className="font-semibold text-white text-md">
+                        Profesión
+                    </Label>
+                    <Input
+                        id="profession"
+                        name="profession"
+                        placeholder="Profesión"
+                        type="text"
+                        value={form.profession}
+                        onChange={onChange}
+                        required
+                        className="bg-white h-12 rounded"
+                        style={{ fontSize: "1rem" }}
+                    />
+                </div>
+                <div className="grid w-full items-center gap-3">
+                    <Label htmlFor="email" className="font-semibold text-white text-md">
+                        Correo Electrónico
+                    </Label>
+                    <Input
+                        id="email"
+                        name="email"
+                        placeholder="Correo Electrónico"
+                        type="email"
+                        value={form.email}
+                        onChange={onChange}
+                        required
+                        className="bg-white h-12 rounded"
+                        style={{ fontSize: "1rem" }}
+                    />
+                </div>
+                <div className="flex gap-4">
+                    <div className="grid w-full items-center gap-3">
+                        <Label htmlFor="email" className="font-semibold text-white text-md">
+                            Contraseña
+                        </Label>
+                        <InputGroup className="bg-white h-12 rounded">
+                            <InputGroupInput
+                                id="password"
+                                name="password"
+                                type={showPassword ? "text" : "password"}
+                                placeholder="Contraseña"
+                                value={form.password}
+                                onChange={onChange}
+                                style={{ fontSize: "1rem" }}
+                            />
+                            <InputGroupAddon align="inline-end">
+                                <InputGroupButton
+                                    type="button"
+                                    onClick={togglePassword}
+                                >
+                                    {showPassword ?
+                                        iconEyeSlash({ size: 16, color: "#8A192A" }) :
+                                        iconEye({ size: 16, color: "#8A192A" })
+                                    }
+                                </InputGroupButton>
+                            </InputGroupAddon>
+                        </InputGroup>
+                    </div>
+                    <div className="grid w-full items-center gap-3">
+                        <Label htmlFor="email" className="font-semibold text-white text-md">
+                            Confirmar Contraseña
+                        </Label>
+                        <InputGroup className="bg-white h-12 rounded">
+                            <InputGroupInput
+                                id="confirmPassword"
+                                name="confirmPassword"
+                                type={showConfirmPassword ? "text" : "password"}
+                                placeholder="Confirmar Contraseña"
+                                value={form.confirmPassword}
+                                onChange={onChange}
+                                style={{ fontSize: "1rem" }}
+                            />
+                            <InputGroupAddon align="inline-end">
+                                <InputGroupButton
+                                    type="button"
+                                    onClick={toggleConfirmPassword}
+                                >
+                                    {showConfirmPassword
+                                        ? iconEyeSlash({ size: 16, color: "#8A192A" })
+                                        : iconEye({ size: 16, color: "#8A192A" })}
+                                </InputGroupButton>
+                            </InputGroupAddon>
+                        </InputGroup>
+                    </div>
+                </div>
+                <Button type="submit" className="bg-[#b62116] text-white hover:bg-red-700
+                transition hover:cursor-pointer">
                     Guardar Cambios
                 </Button>
             </form>
-            <section>
-                <h2 className="text-2xl font-bold mt-10 mb-5"> Mis Investigaciones </h2>
-                <div className="flex items-stretch gap-3 mb-3">
-                    <button className="bg-[#E7473C] text-white p-2 rounded text-nowrap px-4
-                    hover:cursor-pointer hover:bg-[#b0352c] font-semibold">
-                        Añadir Investigación
-                    </button>
-                    <span>
-                        <select
-                            defaultValue=""
-                            className="bg-[#ffffff] py-2 px-2 rounded h-full border border-gray-300"
-                        >
-                            <option value="" disabled>Filtrar Por</option>
-                            <option value="temas">Temas</option>
-                        </select>
-                    </span>
-                    <span className="flex w-full">
-                        <input
-                            type="search"
-                            placeholder="Buscar..."
-                            className="bg-[#ffffff] py-2 px-3 rounded-l w-full border border-gray-300"
-                        />
-                        <button className="bg-[#E7473C] text-white py-2 px-3 rounded-r text-sm 
-                        hover:cursor-pointer hover:bg-[#b0352c] font-semibold">
-                            {iconSearch({})}
-                        </button>
-                    </span>
-                    <button className="bg-[#E7473C] text-white py-2 px-3 rounded
-                    hover:cursor-pointer hover:bg-[#b0352c] font-semibold">
-                        {iconClockwise({})}
-                    </button>
-                </div>
-                <div className="flex gap-5 flex-wrap mt-3">
-                    <div className="flex-grow">
-                        <Image
-                            src="/images/investigacion1.png"
-                            alt="Investigación 1"
-                            width={300}
-                            height={200}
-                            className="object-cover rounded w-full h-100 min-w-100 
-                            max-h-[200px] min-h-[200px] mb-3"
-                        />
-                        <Link href="/investigaciones/investigacion-1" className="text-md font-bold">Impacto de la nutrición en la salud digestiva</Link>
-                        <p className="text-gray-600">Resumen de la investigación 1.</p>
-                    </div>
-                    <div className="flex-grow">
-                        <Image
-                            src="/images/investigacion1.png"
-                            alt="Investigación 1"
-                            width={300}
-                            height={200}
-                            className="object-cover rounded w-full h-100 min-w-100 max-h-[200px] min-h-[200px] mb-3"
-                        />
-                        <Link href="/investigaciones/investigacion-1" className="text-md font-bold">Impacto de la nutrición en la salud digestiva</Link>
-                        <p className="text-gray-600">Resumen de la investigación 1.</p>
-                    </div>
-                    <div className="flex-grow">
-                        <Image
-                            src="/images/investigacion1.png"
-                            alt="Investigación 1"
-                            width={300}
-                            height={200}
-                            className="object-cover rounded w-full h-100 min-w-100 max-h-[200px] min-h-[200px] mb-3"
-                        />
-                        <Link href="/investigaciones/investigacion-1" className="text-md font-bold">Impacto de la nutrición en la salud digestiva</Link>
-                        <p className="text-gray-600">Resumen de la investigación 1.</p>
-                    </div>
-                </div>
-            </section>
-            <section>
-                <h2 className="text-2xl font-bold mt-10 mb-5">Cursos Relacionados</h2>
-                <div className="flex items-stretch gap-3 mb-3">
-                    <button className="bg-[#E7473C] text-white p-2 rounded text-nowrap px-4
-                    hover:cursor-pointer hover:bg-[#b0352c] font-semibold">
-                        Añadir Curso
-                    </button>
-                    <span>
-                        <select
-                            defaultValue=""
-                            className="bg-[#ffffff] py-2 px-2 rounded h-full border border-gray-300"
-                        >
-                            <option value="" disabled>Filtrar Por</option>
-                            <option value="temas">Temas</option>
-                        </select>
-                    </span>
-                    <span className="flex w-full">
-                        <input
-                            type="search"
-                            placeholder="Buscar..."
-                            className="bg-[#ffffff] py-2 px-3 rounded-l w-full border border-gray-300"
-                        />
-                        <button className="bg-[#E7473C] text-white py-2 px-3 rounded-r text-sm 
-                        hover:cursor-pointer hover:bg-[#b0352c] font-semibold">
-                            {iconSearch({})}
-                        </button>
-                    </span>
-                    <button className="bg-[#E7473C] text-white py-2 px-3 rounded
-                    hover:cursor-pointer hover:bg-[#b0352c] font-semibold">
-                        {iconClockwise({})}
-                    </button>
-                </div>
-                <div className="flex gap-5 flex-wrap mt-3">
-                    <div className="flex-grow">
-                        <Image
-                            src="/images/investigacion1.png"
-                            alt="Investigación 1"
-                            width={300}
-                            height={200}
-                            className="object-cover rounded w-full h-100 min-w-100 max-h-[200px] min-h-[200px] mb-3"
-                        />
-                        <Link href="/investigaciones/investigacion-1" className="text-md font-bold">Impacto de la nutrición en la salud digestiva</Link>
-                        <p className="text-gray-600">Resumen de la investigación 1.</p>
-                    </div>
-                    <div className="flex-grow">
-                        <Image
-                            src="/images/investigacion1.png"
-                            alt="Investigación 1"
-                            width={300}
-                            height={200}
-                            className="object-cover rounded w-full h-100 min-w-100 max-h-[200px] min-h-[200px] mb-3"
-                        />
-                        <Link href="/investigaciones/investigacion-1" className="text-md font-bold">Impacto de la nutrición en la salud digestiva</Link>
-                        <p className="text-gray-600">Resumen de la investigación 1.</p>
-                    </div>
-                    <div className="flex-grow">
-                        <Image
-                            src="/images/investigacion1.png"
-                            alt="Investigación 1"
-                            width={300}
-                            height={200}
-                            className="object-cover rounded w-full h-100 min-w-100 max-h-[200px] min-h-[200px] mb-3"
-                        />
-                        <Link href="/investigaciones/investigacion-1" className="text-md font-bold">Impacto de la nutrición en la salud digestiva</Link>
-                        <p className="text-gray-600">Resumen de la investigación 1.</p>
-                    </div>
-                </div>
-            </section>
-            <section>
-                <h2 className="text-2xl font-bold mt-10 mb-5">Menciones</h2>
-                <div className="flex items-stretch gap-3 mb-3">
-                    <span>
-                        <select
-                            defaultValue=""
-                            className="bg-[#ffffff] py-2 px-2 rounded h-full border border-gray-300"
-                        >
-                            <option value="" disabled>Filtrar Por</option>
-                            <option value="temas">Temas</option>
-                        </select>
-                    </span>
-                    <span className="flex w-full">
-                        <input
-                            type="search"
-                            placeholder="Buscar..."
-                            className="bg-[#ffffff] py-2 px-3 rounded-l w-full border border-gray-300"
-                        />
-                        <button className="bg-[#E7473C] text-white py-2 px-3 rounded-r text-sm 
-                        hover:cursor-pointer hover:bg-[#b0352c] font-semibold">
-                            {iconSearch({})}
-                        </button>
-                    </span>
-                    <button className="bg-[#E7473C] text-white py-2 px-3 rounded
-                    hover:cursor-pointer hover:bg-[#b0352c] font-semibold">
-                        {iconClockwise({})}
-                    </button>
-                </div>
-                <div className="flex gap-5 flex-wrap mt-3">
-                    <div className="flex-grow">
-                        <Image
-                            src="/images/investigacion1.png"
-                            alt="Investigación 1"
-                            width={300}
-                            height={200}
-                            className="object-cover rounded w-full h-100 min-w-100 max-h-[200px] min-h-[200px] mb-3"
-                        />
-                        <Link href="/investigaciones/investigacion-1" className="text-md font-bold">Impacto de la nutrición en la salud digestiva</Link>
-                        <p className="text-gray-600">Resumen de la investigación 1.</p>
-                    </div>
-                    <div className="flex-grow">
-                        <Image
-                            src="/images/investigacion1.png"
-                            alt="Investigación 1"
-                            width={300}
-                            height={200}
-                            className="object-cover rounded w-full h-100 min-w-100 max-h-[200px] min-h-[200px] mb-3"
-                        />
-                        <Link href="/investigaciones/investigacion-1" className="text-md font-bold">Impacto de la nutrición en la salud digestiva</Link>
-                        <p className="text-gray-600">Resumen de la investigación 1.</p>
-                    </div>
-                    <div className="flex-grow">
-                        <Image
-                            src="/images/investigacion1.png"
-                            alt="Investigación 1"
-                            width={300}
-                            height={200}
-                            className="object-cover rounded w-full h-100 min-w-100 max-h-[200px] min-h-[200px] mb-3"
-                        />
-                        <Link href="/investigaciones/investigacion-1" className="text-md font-bold">Impacto de la nutrición en la salud digestiva</Link>
-                        <p className="text-gray-600">Resumen de la investigación 1.</p>
-                    </div>
-                </div>
-            </section>
         </main>
     );
 }

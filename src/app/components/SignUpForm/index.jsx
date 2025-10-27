@@ -8,11 +8,11 @@ import {
   iconWhatsApp,
   iconReturn
 } from "../../assets/icons";
-import { 
-  InputGroup, 
-  InputGroupAddon, 
-  InputGroupButton, 
-  InputGroupInput 
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput
 } from "@/components/ui/input-group";
 import Image from "next/image";
 import Link from "next/link";
@@ -30,7 +30,7 @@ export default function SignUpForm() {
   const toggleConfirmPassword = () => setShowConfirmPassword(!showConfirmPassword);
 
   const [formData, setFormData] = useState({
-    name: "",
+    firstName: "",
     lastName: "",
     email: "",
     password: "",
@@ -61,7 +61,7 @@ export default function SignUpForm() {
 
     try {
       const response = await registerUser({
-        name: formData.name,
+        first_name: formData.firstName,
         last_name: formData.lastName,
         email: formData.email,
         password: formData.password,
@@ -76,7 +76,7 @@ export default function SignUpForm() {
         localStorage.setItem("user", JSON.stringify({
           id: data.id,
           email: formData.email,
-          name: formData.name,
+          first_name: formData.firstName,
           last_name: formData.lastName,
           user_type_id: 1,
         }));
@@ -129,17 +129,17 @@ export default function SignUpForm() {
           {error && <p className="text-red-500">{error}</p>} {/* Display error message */}
 
           <div className="grid w-full items-center gap-3">
-            <Label htmlFor="name" className="font-semibold text-white">
+            <Label htmlFor="firstName" className="font-semibold text-white">
               Nombre
             </Label>
             <Input
-              id="name"
-              name="name"
+              id="firstName"
+              name="firstName"
               type="text"
               placeholder="Nombre"
               className="rounded border border-gray-300 px-3 py-2 w-full
               bg-white h-12"
-              value={formData.name}
+              value={formData.firstName}
               onChange={handleChange}
               style={{ fontSize: "1rem" }}
             />

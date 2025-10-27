@@ -50,7 +50,10 @@ export default function NavBar() {
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem>
-                <Link href="/MiPerfil">Mi perfil</Link>
+                <Link href="/MiPerfil">Mi Perfil</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <Link href="/MiForo">Mi Foro</Link>
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <button onClick={logout}>Cerrar sesión</button>
