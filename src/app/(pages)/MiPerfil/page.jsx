@@ -53,21 +53,23 @@ export default function MiPerfil() {
                 last_name: form.lastName,
                 profession: form.profession,
                 email: form.email,
-                password: form.password
+                password: form.password,
+                user_type_id: user.user_type_id
             });
 
+            console.log(user.user_type_id)
             if (!response.ok) {
                 const data = await response.json();
-                return toast.warning(data.detail?.[0]?.msg || "Error al iniciar sesión");
+                return toast.warning(data.detail?.[0]?.msg || "Error al guardar los cambios");
             }
 
-            const data = await response.json();
             localStorage.setItem("user", JSON.stringify({
-                id: data.id,
+                id: user.id,
                 first_name: form.firstName,
                 last_name: form.lastName,
                 profession: form.profession,
-                email: form.email
+                email: form.email,
+                user_type_id: user.user_type_id
             }));
             toast.success("Perfil actualizado correctamente");
         } catch (err) {
@@ -98,9 +100,9 @@ export default function MiPerfil() {
     };
 
     useEffect(() => {
-        if (user?.id) {
-            fetchUserInfo();
-        }
+        console.log(user);
+        if (!user?.id) return;
+        fetchUserInfo();
     }, [user]);
 
     return (

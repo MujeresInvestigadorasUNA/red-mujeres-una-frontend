@@ -10,6 +10,7 @@ export async function loginUser({ email, password }) {
 export async function getUserInfo({ user_id }) {
   const response = await fetch(`http://127.0.0.1:8000/users/${user_id}/`, {
     method: "GET",
+    cache: "no-store",
     headers: { "Content-Type": "application/json" },
   });
   return response;
@@ -32,7 +33,7 @@ export async function registerUser({ first_name, last_name, email, password, use
   return response;
 }
 
-export async function updateUser({ id, first_name, last_name, profession, email, password}) {
+export async function updateUser({ id, first_name, last_name, profession, email, password, user_type_id}) {
   const response = await fetch(`http://127.0.0.1:8000/users/${id}/`, {
     method: "PUT",
     headers: {
@@ -43,7 +44,8 @@ export async function updateUser({ id, first_name, last_name, profession, email,
       last_name, 
       profession, 
       email, 
-      password 
+      password,
+      user_type_id
     }),
   });
   return response;

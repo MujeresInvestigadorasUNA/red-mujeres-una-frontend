@@ -41,7 +41,7 @@ export default function LoginForm() {
             const data = await response.json();
             localStorage.setItem("access_token", data.access_token);
             localStorage.setItem("user", JSON.stringify(data));
-            window.location.href = "/";
+            console.log(data);
         } catch (err) {
             toast.warning("Error de conexión");
         } finally {

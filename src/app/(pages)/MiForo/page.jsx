@@ -60,7 +60,7 @@ export default function MiForo() {
         try {
             const response = await updateForum({
                 user_id: user.id,
-                user_proffesion: form.profession,
+                user_profession: form.profession,
                 user_description: form.description,
                 photo: form.photo
             });
@@ -75,7 +75,7 @@ export default function MiForo() {
             toast.warning("Error de conexión");
         }
     };
-
+    
     const fetchUserForum = async () => {
         try {
             const response = await getUserForum({ user_id: user.id });
@@ -84,8 +84,8 @@ export default function MiForo() {
                 return toast.warning(data.detail?.[0]?.msg || "Error al obtener el foro");
             }
             setForm({
-                name: data.user.name + " " + data.user.last_name || "",
-                profession: data.user_proffesion || "",
+                name: data.user.first_name + " " + data.user.last_name || "",
+                profession: data.user_profession || "",
                 description: data.user_description || "",
                 photo: data.user.photo || null,
             });
