@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { updateForum, getUserForum } from "@/lib/api/forums";
 import { useUser } from "@/app/contexts/UserContext";
+import { capitalizeWords } from "@/app/assets/utils";
 
 export default function MiPerfil() {
     const { user } = useUser();
@@ -24,10 +25,26 @@ export default function MiPerfil() {
     const [form, setForm] = useState({
         name: "",
         profession: "",
-        description: ""
+        description: "",
+        photo: null,
     });
 
-    const onChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+    const onChange = (e) => {
+        if (e.target.name === "photo") {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    console.log(reader.result);
+                    setForm({ ...form, photo: reader.result }); // reader.result is base64
+                };
+
+                reader.readAsDataURL(file); // converts to base64
+            }
+        } else {
+            setForm({ ...form, [e.target.name]: e.target.value });
+        }
+    };
 
     const handlePhotoClick = () => {
         photoInputRef.current.click(); // trigger hidden input
@@ -41,17 +58,18 @@ export default function MiPerfil() {
         }
 
         try {
-            const response = await updateForum({ 
+            const response = await updateForum({
                 user_id: user.id,
-                user_proffesion: form.profession, 
-                user_description: form.description 
+                user_proffesion: form.profession,
+                user_description: form.description,
+                photo: form.photo
             });
 
             const data = await response.json();
             if (!response.ok) {
                 return toast.warning(data.detail?.[0]?.msg || "Error al actualizar el perfil");
             }
-            toast.success("Perfil actualizado correctamente");
+            toast.success("Foro actualizado correctamente");
         } catch (err) {
             console.error(err);
             toast.warning("Error de conexión");
@@ -69,6 +87,7 @@ export default function MiPerfil() {
                 name: data.user.name + " " + data.user.last_name || "",
                 profession: data.user_proffesion || "",
                 description: data.user_description || "",
+                photo: data.user.photo || null,
             });
         } catch (err) {
             toast.warning("Error de conexión");
@@ -86,34 +105,19 @@ export default function MiPerfil() {
             <form onSubmit={handleSubmit} className="flex flex-col gap-5 justify-between">
                 <div className="flex gap-10">
                     <div className="w-full">
-                        <Input
-                            id="name"
-                            name="name"
-                            type="text"
-                            className="border-0 shadow-none p-0 font-bold w-full"
-                            placeholder="Nombre"
-                            value={form.name}
-                            onChange={onChange}
-                            style={{ fontSize: '2rem' }}
-                        />
-                        <Input
-                            id="profession"
-                            name="profession"
-                            type="text"
-                            className="text-gray-600 rounded border-0 shadow-none p-0 
-                            w-full"
-                            placeholder="Profesión o Especialidad"
-                            value={form.profession}
-                            onChange={onChange}
-                            style={{ fontSize: '1rem' }}
-                        />
+                        <h2 className="text-2xl font-bold mb-3" style={{ fontSize: '2rem' }}>
+                            {capitalizeWords(form.name) || "Nombre Completo"}
+                        </h2>
+                        <h2 className="text-gray-600 font-semibold mb-1" style={{ fontSize: '1rem' }}>
+                            {capitalizeWords(form.profession) || "Profesión u Ocupación"}
+                        </h2>
                         <Textarea
                             id="description"
                             name="description"
                             className="text-gray-600 mt-3 w-full h-80 border 
-                            rounded border-0 p-0 shadow-none resize-none"
-                            placeholder="Descripción o Biografía"
+                            rounded border-0 p-0 shadow-none resize-none pr-3"
                             value={form.description}
+                            placeholder="Escribe una breve descripción sobre ti..."
                             onChange={onChange}
                         ></Textarea>
                     </div>
@@ -124,29 +128,37 @@ export default function MiPerfil() {
                             type="file"
                             accept="image/*"
                             ref={photoInputRef}
+                            onChange={onChange}
                             className="hidden"
                         />
-                        <Empty className="border border-dashed border-[#999] bg-[#f9f9f9]
-                        h-100 w-100 hover:cursor-pointer hover:border-[#666]
-                        hover:brightness-95 transition-all duration-200"
-                            onClick={handlePhotoClick}>
-                            <EmptyHeader>
-                                <EmptyMedia variant="icon">
-                                    {iconCamara({ size: 48, color: "#999" })}
-                                </EmptyMedia>
-                                <EmptyTitle>Una Foto Profesional</EmptyTitle>
-                                <EmptyDescription>
-                                    Sube una foto profesional para que otros sepan quién eres.
-                                </EmptyDescription>
-                            </EmptyHeader>
-                        </Empty>
-                        {/* <Image
-                            src="/images/jinette.png"
-                            alt="jinette López"
-                            width={1000}
-                            height={1000}
-                            className="object-cover rounded w-full h-100 w-100"
-                        /> */}
+                        {form.photo ? null : (
+                            <Empty className="border border-dashed border-[#999] bg-[#f9f9f9]
+                            h-100 w-100 hover:cursor-pointer hover:border-[#666]
+                            hover:brightness-95 transition-all duration-200"
+                                onClick={handlePhotoClick}>
+                                <EmptyHeader>
+                                    <EmptyMedia variant="icon">
+                                        {iconCamara({ size: 48, color: "#999" })}
+                                    </EmptyMedia>
+                                    <EmptyTitle>Una Foto Profesional</EmptyTitle>
+                                    <EmptyDescription>
+                                        Sube una foto profesional para que otros sepan quién eres.
+                                    </EmptyDescription>
+                                </EmptyHeader>
+                            </Empty>
+                        )}
+                        {form.photo && (
+                            <Image
+                                onClick={handlePhotoClick}
+                                src={form.photo}
+                                alt="Foto de perfil"
+                                width={3000}
+                                height={3000}
+                                className="w-100 h-100 rounded object-cover
+                                min-w-100 min-h-100 hover:cursor-pointer
+                                hover:brightness-95 transition-all duration-200"
+                            />
+                        )}
                     </div>
                 </div>
                 <Button type="submit" className="bg-[#E7473C] text-white
