@@ -41,7 +41,7 @@ export default function NavBar() {
             <DropdownMenuTrigger asChild>
               <Button className="bg-[#b62116] text-white hover:bg-red-700
               transition hover:cursor-pointer rounded-full w-10 h-10 p-0">
-                {user.name[0].toUpperCase()}
+                {user.name ? user.name[0].toUpperCase() : "U"}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-40 mr-5" align="start" variant="dark">

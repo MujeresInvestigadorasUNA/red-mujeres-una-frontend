@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/empty";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { createForumn, getUserForum } from "@/lib/api/forums";
+import { updateForum, getUserForum } from "@/lib/api/forums";
 import { useUser } from "@/app/contexts/UserContext";
 
 export default function MiPerfil() {
@@ -41,18 +41,19 @@ export default function MiPerfil() {
         }
 
         try {
-            const response = await createForumn({ 
-                user_id: user.id, 
+            const response = await updateForum({ 
+                user_id: user.id,
                 user_proffesion: form.profession, 
                 user_description: form.description 
             });
 
             const data = await response.json();
             if (!response.ok) {
-                return toast.warning(data.detail?.[0]?.msg || "Error al iniciar sesión");
+                return toast.warning(data.detail?.[0]?.msg || "Error al actualizar el perfil");
             }
             toast.success("Perfil actualizado correctamente");
         } catch (err) {
+            console.error(err);
             toast.warning("Error de conexión");
         }
     };
