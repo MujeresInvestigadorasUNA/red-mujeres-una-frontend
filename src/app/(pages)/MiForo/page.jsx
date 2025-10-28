@@ -1,5 +1,5 @@
 "use client";
-import { iconClockwise, iconSearch, iconCamara, iconEye, iconEyeSlash } from "@/app/assets/icons";
+import { iconClockwise, iconSearch, iconCamara, iconEye, iconEyeSlash, iconPen } from "@/app/assets/icons";
 import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -19,6 +19,7 @@ import { useUser } from "@/app/contexts/UserContext";
 import { capitalizeWords } from "@/app/assets/utils";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { X } from "lucide-react";
 
 export default function MiForo() {
     const { user } = useUser();
@@ -129,17 +130,32 @@ export default function MiForo() {
         }
     }, [form.isPublic]);
 
+    const handleErasePhoto = () => {
+        setForm({ ...form, photo: null });
+    };
+
     return (
         <main className="flex-grow px-20 py-10 h-[100%]">
             <form onSubmit={handleSubmit} className="flex flex-col gap-5 justify-between">
                 <div className="flex gap-10">
                     <div className="w-full">
                         <div className="flex justify-between">
-                            <h2 className="text-2xl font-bold mb-3" style={{ fontSize: '2rem' }}>
+                            <h2
+                                className="text-2xl font-bold mb-3 flex gap-3 items-center group"
+                                style={{ fontSize: '2rem' }}
+                            >
                                 {capitalizeWords(form.name) || "Nombre Completo"}
+
+                                <Link
+                                    href="/MiPerfil"
+                                    className="text-gray-500 hover:text-gray-400 hover:cursor-pointer
+                                    opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                                >
+                                    {iconPen({ size: 14 })}
+                                </Link>
                             </h2>
                             <div className="flex items-center space-x-2">
-                                <Switch 
+                                <Switch
                                     id="isPublic"
                                     name="isPublic"
                                     checked={form.isPublic}
@@ -151,8 +167,19 @@ export default function MiForo() {
                                 </Label>
                             </div>
                         </div>
-                        <h3 className="text-gray-600 font-semibold mb-1" style={{ fontSize: '1rem' }}>
+                        <h3
+                            className="text-gray-600 font-semibold mb-1 flex gap-3 items-center group"
+                            style={{ fontSize: '1rem' }}
+                        >
                             {capitalizeWords(form.profession) || "Profesión u Ocupación"}
+
+                            <Link
+                                href="/MiPerfil"
+                                className="text-gray-500 hover:text-gray-400 hover:cursor-pointer
+                                opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                            >
+                                {iconPen({ size: 12 })}
+                            </Link>
                         </h3>
                         <Textarea
                             id="description"
@@ -191,16 +218,31 @@ export default function MiForo() {
                             </Empty>
                         )}
                         {form.photo && (
-                            <Image
-                                onClick={handlePhotoClick}
-                                src={form.photo}
-                                alt="Foto de perfil"
-                                width={3000}
-                                height={3000}
-                                className="w-100 h-100 rounded object-cover
-                                min-w-100 min-h-100 hover:cursor-pointer
-                                hover:brightness-95 transition-all duration-200"
-                            />
+                            <div className="relative inline-block w-100 h-100 min-w-100 min-h-100 group">
+                                <Image
+                                    onClick={handlePhotoClick}
+                                    src={form.photo}
+                                    alt="Foto de perfil"
+                                    width={3000}
+                                    height={3000}
+                                    className="w-100 h-100 rounded object-cover
+                                    hover:cursor-pointer hover:brightness-95
+                                    transition-all duration-200"
+                                />
+
+                                {/* Hidden until hover */}
+                                <Button
+                                    type="button"
+                                    variant="destructive"
+                                    size="icon"
+                                    onClick={handleErasePhoto}
+                                    className="absolute top-2 right-2 rounded-full w-6 h-6 p-1 shadow-md 
+                                    opacity-0 group-hover:opacity-100 transition-opacity duration-200
+                                    hover:cursor-pointer hover:brightness-90"
+                                >
+                                    <X className="w-4 h-4" />
+                                </Button>
+                            </div>
                         )}
                     </div>
                 </div>
