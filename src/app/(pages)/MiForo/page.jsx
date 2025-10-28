@@ -1,5 +1,5 @@
 "use client";
-import { iconClockwise, iconSearch, iconCamara } from "@/app/assets/icons";
+import { iconClockwise, iconSearch, iconCamara, iconEye, iconEyeSlash } from "@/app/assets/icons";
 import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -17,6 +17,8 @@ import { toast } from "sonner";
 import { updateForum, getUserForum } from "@/lib/api/forums";
 import { useUser } from "@/app/contexts/UserContext";
 import { capitalizeWords } from "@/app/assets/utils";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 export default function MiForo() {
     const { user } = useUser();
@@ -27,6 +29,7 @@ export default function MiForo() {
         profession: "",
         description: "",
         photo: null,
+        isPublic: false
     });
 
     const onChange = (e) => {
@@ -62,7 +65,8 @@ export default function MiForo() {
                 user_id: user.id,
                 user_profession: form.profession,
                 user_description: form.description,
-                photo: form.photo
+                photo: form.photo,
+                is_public: form.isPublic
             });
 
             const data = await response.json();
@@ -75,7 +79,7 @@ export default function MiForo() {
             toast.warning("Error de conexión");
         }
     };
-    
+
     const fetchUserForum = async () => {
         try {
             const response = await getUserForum({ user_id: user.id });
@@ -88,6 +92,7 @@ export default function MiForo() {
                 profession: data.user_profession || "",
                 description: data.user_description || "",
                 photo: data.user.photo || null,
+                isPublic: data.is_public || false
             });
         } catch (err) {
             toast.warning("Error de conexión");
@@ -100,17 +105,55 @@ export default function MiForo() {
         }
     }, [user]);
 
+
+    const [isPublicLabel, setIsPublicLabel] = useState("Foro Privado");
+    const [isPublicIcon, setIsPublicIcon] = useState(iconEyeSlash({ color: "#999" }));
+    const handleOnPublicChange = (checked) => {
+        setForm({ ...form, isPublic: checked });
+        if (checked) {
+            setIsPublicLabel("Foro Público");
+            setIsPublicIcon(iconEye({ color: "#E7473C" }));
+        } else {
+            setIsPublicLabel("Foro Privado");
+            setIsPublicIcon(iconEyeSlash({ color: "#999" }));
+        }
+    };
+
+    useEffect(() => {
+        if (form.isPublic) {
+            setIsPublicLabel("Foro Público");
+            setIsPublicIcon(iconEye({ color: "#E7473C" }));
+        } else {
+            setIsPublicLabel("Foro Privado");
+            setIsPublicIcon(iconEyeSlash({ color: "#999" }));
+        }
+    }, [form.isPublic]);
+
     return (
         <main className="flex-grow px-20 py-10 h-[100%]">
             <form onSubmit={handleSubmit} className="flex flex-col gap-5 justify-between">
                 <div className="flex gap-10">
                     <div className="w-full">
-                        <h2 className="text-2xl font-bold mb-3" style={{ fontSize: '2rem' }}>
-                            {capitalizeWords(form.name) || "Nombre Completo"}
-                        </h2>
-                        <h2 className="text-gray-600 font-semibold mb-1" style={{ fontSize: '1rem' }}>
+                        <div className="flex justify-between">
+                            <h2 className="text-2xl font-bold mb-3" style={{ fontSize: '2rem' }}>
+                                {capitalizeWords(form.name) || "Nombre Completo"}
+                            </h2>
+                            <div className="flex items-center space-x-2">
+                                <Switch 
+                                    id="isPublic"
+                                    name="isPublic"
+                                    checked={form.isPublic}
+                                    onCheckedChange={handleOnPublicChange}
+                                />
+                                <Label htmlFor="isPublic">
+                                    {isPublicLabel}
+                                    {isPublicIcon}
+                                </Label>
+                            </div>
+                        </div>
+                        <h3 className="text-gray-600 font-semibold mb-1" style={{ fontSize: '1rem' }}>
                             {capitalizeWords(form.profession) || "Profesión u Ocupación"}
-                        </h2>
+                        </h3>
                         <Textarea
                             id="description"
                             name="description"
@@ -162,7 +205,7 @@ export default function MiForo() {
                     </div>
                 </div>
                 <Button type="submit" className="bg-[#E7473C] text-white
-                hover:bg-[#b0352c] hover:cursor-pointer">
+                hover:bg-[#b0352c] hover:cursor-pointer rounded">
                     Guardar Cambios
                 </Button>
             </form>
