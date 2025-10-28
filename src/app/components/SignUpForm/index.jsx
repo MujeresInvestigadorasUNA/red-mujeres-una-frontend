@@ -23,6 +23,8 @@ import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 
 export default function SignUpForm() {
+  const { setUserData, setToken } = useUser();
+
   const [showPassword, setShowPassword] = useState(false);
   const togglePassword = () => setShowPassword(!showPassword);
 
@@ -72,14 +74,14 @@ export default function SignUpForm() {
         const data = await response.json();
         alert("Registration successful!");
         // Redirect to login page or home
-        localStorage.setItem("access_token", data.access_token);
-        localStorage.setItem("user", JSON.stringify({
+        setToken(data.access_token);
+        setUserData({
           id: data.id,
           email: formData.email,
           first_name: formData.firstName,
           last_name: formData.lastName,
           user_type_id: 1,
-        }));
+        });
 
         window.location.href = "/";
       } else {

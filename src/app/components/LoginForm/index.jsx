@@ -15,8 +15,10 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
+import { useUser } from "@/app/contexts/UserContext";
 
 export default function LoginForm() {
+    const { setUserData, setToken } = useUser();
     const [showPassword, setShowPassword] = useState(false);
     const [form, setForm] = useState({ email: "", password: "" });
     const [loading, setLoading] = useState(false);
@@ -39,9 +41,9 @@ export default function LoginForm() {
                 return toast.warning(data.detail?.[0]?.msg || "Error al iniciar sesión");
             }
             const data = await response.json();
-            localStorage.setItem("access_token", data.access_token);
-            localStorage.setItem("user", JSON.stringify(data));
-            console.log(data);
+            setUserData(data);
+            setToken(data.access_token);
+            window.location.href = "/";
         } catch (err) {
             toast.warning("Error de conexión");
         } finally {
