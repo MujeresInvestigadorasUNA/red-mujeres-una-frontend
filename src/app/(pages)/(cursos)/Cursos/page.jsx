@@ -2,6 +2,7 @@
 import { iconClockwise, iconSearch } from "@/app/assets/icons";
 import CustomCard from "@/app/components/CustomCard";
 import { useUser } from "@/app/contexts/UserContext";
+import Link from "next/link";
 
 const COURSES_CARDS = [{
     id: 1,
@@ -53,10 +54,10 @@ export default function Cursos() {
             </p>
             <div className="flex items-stretch gap-3 mb-3">
                 {user && user.user_type_id != 1 && (
-                    <button className="bg-[#E7473C] text-white p-2 rounded text-nowrap px-4
+                    <Link href="/AgregarCurso" className="bg-[#E7473C] text-white p-2 rounded text-nowrap px-4
                     hover:cursor-pointer hover:bg-[#b0352c] font-semibold">
                         Añadir Curso
-                    </button>
+                    </Link>
                 )}
                 <span>
                     <select

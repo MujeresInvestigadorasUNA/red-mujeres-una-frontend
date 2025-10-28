@@ -254,10 +254,12 @@ export default function MiForo() {
             <section>
                 <h2 className="text-2xl font-bold mt-10 mb-5"> Mis Investigaciones </h2>
                 <div className="flex items-stretch gap-3 mb-3">
-                    <button className="bg-[#E7473C] text-white p-2 rounded text-nowrap px-4
+                    <Link
+                        href={"/AgregarCurso"}
+                        className="bg-[#E7473C] text-white p-2 rounded text-nowrap px-4
                     hover:cursor-pointer hover:bg-[#b0352c] font-semibold">
                         Añadir Investigación
-                    </button>
+                    </Link>
                     <span>
                         <select
                             defaultValue=""
@@ -323,10 +325,12 @@ export default function MiForo() {
             <section>
                 <h2 className="text-2xl font-bold mt-10 mb-5">Cursos Relacionados</h2>
                 <div className="flex items-stretch gap-3 mb-3">
-                    <button className="bg-[#E7473C] text-white p-2 rounded text-nowrap px-4
+                    <Link
+                        href={"/AgregarCurso"}
+                        className="bg-[#E7473C] text-white p-2 rounded text-nowrap px-4
                     hover:cursor-pointer hover:bg-[#b0352c] font-semibold">
                         Añadir Curso
-                    </button>
+                    </Link>
                     <span>
                         <select
                             defaultValue=""
