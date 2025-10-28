@@ -6,20 +6,28 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import Image from "next/image";
 import { useRef, useState } from "react";
+import { toast } from "sonner";
+import Image from "next/image";
+import { updateCourse } from "@/lib/api/courses";
 
 export default function Curso() {
     const photoInputRef = useRef(null);
 
     const [date, setDate] = useState(
         new Date(2025, 5, 12)
-    )
+    );
 
     const [course, setCourse] = useState({
-        title: "Qué es la Fisiología Dígestiva",
-        description: "Este curso ofrece una introducción a la fisiología del sistema digestivo, explorando sus funciones, órganos involucrados y procesos clave como la digestión, absorción de nutrientes y metabolismo.",
+        title: "",
         photo: '/images/curso1.png',
+        description: "",
+        modality: "",
+        maxRegistrationDate: "",
+        startDate: "",
+        endDate: "",
+        maxQuotas: 0,
+        isPublic: false
     });
 
     const onChange = (e) => {
@@ -56,10 +64,41 @@ export default function Curso() {
         }
     };
 
+    const handleOnSubmit = async (e) => {
+        e.preventDefault();
+        if (!course.title || !course.description || !course.startDate || !course.endDate
+            || !course.maxRegistrationDate || !course.maxQuotas
+        ) {
+            toast.warning("Por favor, complete todos los campos requeridos.");
+            return;
+        }
+
+        try {
+            const response = await updateCourse({
+                user_id: 1,
+                title: course.title,
+                photo: course.photo,
+                description: course.description,
+                modality: course.modality,
+                max_registration_date: course.maxRegistrationDate,
+                initial_date: course.startDate,
+                end_date: course.endDate,
+                max_quotas: course.maxQuotas,
+                is_public: course.isPublic
+            });
+            const data = await response.json();
+            if (!response.ok) {
+                return toast.warning(data.detail?.[0]?.msg || "Error al actualizar el curso.");
+            }
+            toast.success("Curso actualizado correctamente!!");
+        } catch (error) {
+            toast.error("Error al actualizar el curso. Intente nuevamente.");
+        }
+    }
 
     return (
         <main className="flex-grow h-[100%]">
-            <form className="flex flex-col" onSubmit={(e) => e.preventDefault()}>
+            <form className="flex flex-col" onSubmit={handleOnSubmit}>
                 <section className="relative w-full h-[400px]">
                     <div className="relative w-full h-full">
                         <Image
@@ -141,6 +180,8 @@ export default function Curso() {
                                     id="startDate"
                                     name="startDate"
                                     type="date"
+                                    value={course.startDate}
+                                    onChange={onChange}
                                     className="w-auto border-0 shadow-none p-0"
                                 />
                             </span>
@@ -148,9 +189,11 @@ export default function Curso() {
                             text-nowrap">
                                 {iconCalendar({ size: 12 })} Fecha Final:
                                 <Input
-                                    id="startDate"
-                                    name="startDate"
+                                    id="endDate"
+                                    name="endDate"
                                     type="date"
+                                    value={course.endDate}
+                                    onChange={onChange}
                                     className="w-auto border-0 shadow-none p-0"
                                 />
                             </span>
@@ -158,9 +201,11 @@ export default function Curso() {
                             text-nowrap">
                                 {iconCalendar({ size: 12 })} Fecha Máxima de Inscripción:
                                 <Input
-                                    id="startDate"
-                                    name="startDate"
+                                    id="maxRegistrationDate"
+                                    name="maxRegistrationDate"
                                     type="date"
+                                    value={course.maxRegistrationDate}
+                                    onChange={onChange}
                                     className="w-auto border-0 shadow-none p-0"
                                 />
                             </span>
@@ -168,9 +213,11 @@ export default function Curso() {
                             text-nowrap">
                                 {iconSearch({ size: 12 })} Cupos Disponibles:
                                 <Input
-                                    id="startDate"
-                                    name="startDate"
+                                    id="maxQuotas"
+                                    name="maxQuotas"
                                     type="number"
+                                    value={course.maxQuotas}
+                                    onChange={onChange}
                                     className="border-0 shadow-none
                                     w-20"
                                 />
