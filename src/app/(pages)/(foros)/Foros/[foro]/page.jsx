@@ -1,34 +1,90 @@
+"use client";
+import { capitalizeWords } from "@/app/assets/utils";
+import { getUserForum } from "@/lib/api/forums";
 import Image from "next/image";
 import Link from "next/link";
+import { use, useEffect, useState } from "react";
+import { toast } from "sonner";
 
-export default function Foro() {
+export default function forum({ params }) {
+    const [forum, setForum] = useState({
+        first_name: "Nombre",
+        last_name: "Apellidos",
+        profession: "Profesión u Ocupación",
+        description: "Biografía o descripción del forum...",
+        photo: ""
+    });
+    const { foro: foroId } = use(params);
+
+    const fetchForoData = async () => {
+        try {
+            const response = await getUserForum({ user_id: foroId });
+            const foroData = await response.json();
+
+            if (!response.ok) {
+                return toast.warning(foroData.detail?.[0]?.msg || "Error al obtener el forum");
+            }
+
+            setForum({
+                first_name: foroData.user.first_name,
+                last_name: foroData.user.last_name,
+                profession: foroData.user_profession,
+                description: foroData.user_description,
+                photo: foroData.user.photo,
+            });
+        }
+        catch (error) {
+            toast.error("Error al cargar el forum");
+        }
+    }
+
+    useEffect(() => {
+        if (foroId) {
+            fetchForoData();
+        }
+    }, [foroId]);
+
     return (
         <main className="flex-grow px-20 py-10 h-[100%]">
-            <section className="flex gap-20 justify-between">
-                <div>
-                    <h1 className="text-2xl font-bold">jinette López</h1>
-                    <p className="text-gray-600">Catedrática de Fisiología.</p>
-                    <p className="mt-3">
-                        jinette Aranda Ramírez es catedrática de Fisiología y doctora en
-                        Farmacia con una amplia trayectoria docente e investigadora. <br /> <br />
-
-                        Lleva a cabo su labor de investigadora en el Grupo de Investigación
-                        «Fisiología digestiva y nutrición» y el «Instituto Universitario de
-                        Nutrición y Tecnología de los Alimentos» de la Universidad de Granada
-                        y sus líneas de investigación se centran en las interacciones
-                        fármacos-nutrientes, en la valoración del estado nutricional en
-                        poblaciones en situaciones patológicas y en la educación en hábitos
-                        de vida saludable. Desde el año 2002 hasta la actualidad ha participado
-                        como Investigadora Principal en ocho proyectos y contratos de investigación.
-                    </p>
+            <section className="flex flex-col gap-5 justify-between">
+                <div className="flex gap-10">
+                    <div className="w-full">
+                        <h2
+                            className="text-2xl font-bold mb-3 flex gap-3 items-center group"
+                            style={{ fontSize: '2rem' }}
+                        >
+                            {capitalizeWords(forum?.first_name + " " + forum?.last_name) || "Nombre Completo"}
+                        </h2>
+                        <h3
+                            className="text-gray-600 font-semibold mb-1 flex gap-3 items-center group"
+                            style={{ fontSize: '1rem' }}
+                        >
+                            {capitalizeWords(forum?.profession) || "Profesión u Ocupación"}
+                        </h3>
+                        <p
+                            id="description"
+                            name="description"
+                            className="text-gray-600 mt-3 w-full h-80 border 
+                            rounded border-0 p-0 shadow-none resize-none pr-3
+                            text-sm"
+                        >
+                            {forum?.description || "Biografía o descripción del forum..."}
+                        </p>
+                    </div>
+                    <div className="relative inline-block w-100 h-100 min-w-100 min-h-100 group">
+                        {forum?.photo && (
+                            <Image
+                                src={forum.photo}
+                                alt="Foto de perfil"
+                                width={3000}
+                                height={3000}
+                                className="w-100 h-100 rounded object-cover
+                                hover:cursor-pointer hover:brightness-95
+                                transition-all duration-200"
+                            />
+                        )}
+                    </div>
                 </div>
-                <Image
-                    src="/images/jinette.png"
-                    alt="jinette López"
-                    width={300}
-                    height={300}
-                    className="object-cover rounded w-full h-100 mt-5 max-w-100 max-h-[300px] min-h-[300px] mb-3"
-                />
             </section>
             <section>
                 <h2 className="text-2xl font-bold mt-10 mb-5">Investigaciones Relacionadas</h2>

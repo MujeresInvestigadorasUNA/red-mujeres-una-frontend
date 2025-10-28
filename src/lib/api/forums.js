@@ -19,3 +19,11 @@ export async function getUserForum({ user_id }) {
   });
   return response;
 }
+
+export async function getForums() {
+  const response = await fetch(`http://127.0.0.1:8000/forums`, {
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+  });
+  return response;
+}
