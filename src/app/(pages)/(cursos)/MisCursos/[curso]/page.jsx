@@ -282,7 +282,6 @@ export default function MisCursos({ params }) {
                                 className="p-0 mt-3 border-0 shadow-none resize-none
                                 min-h-[10rem] h-[92%]"
                                 style={{ fontSize: '1rem' }}
-                                maxLength={500}
                             />
                         </div>
                         <Calendar
