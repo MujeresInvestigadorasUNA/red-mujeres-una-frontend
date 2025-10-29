@@ -21,6 +21,7 @@ export default function MisCursos({ params }) {
 
     const [course, setCourse] = useState({
         title: "",
+        taughtBy: "",
         photo: '/images/curso1.png',
         description: "",
         modality: "",
@@ -118,6 +119,7 @@ export default function MisCursos({ params }) {
             }
             setCourse({
                 title: data.title || "",
+                taughtBy: data.user.first_name + " " + data.user.last_name || "",
                 photo: data.photo || "",
                 description: data.description || "",
                 modality: data.modality || "",
@@ -212,7 +214,7 @@ export default function MisCursos({ params }) {
                             </h2>
                             <h3 className="text-gray-600 text-semibold text-nowrap
                             text-sm">
-                                Impartido por: Jinette Aranda Ramírez
+                                Impartido por: {course.taughtBy}
                             </h3>
                         </div>
                         <div className="flex gap-5">
