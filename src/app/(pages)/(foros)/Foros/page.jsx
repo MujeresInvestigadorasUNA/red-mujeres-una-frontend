@@ -70,12 +70,6 @@ export default function Foros() {
                 y sus investigaciones.
             </p>
             <div className="flex items-stretch gap-3 mb-3">
-                {user && user.user_type_id != 1 && (
-                    <button className="bg-[#E7473C] text-white p-2 rounded text-nowrap px-4
-                    hover:cursor-pointer hover:bg-[#b0352c] font-semibold">
-                        Mi Foro
-                    </button>
-                )}
                 <span>
                     <select
                         defaultValue=""

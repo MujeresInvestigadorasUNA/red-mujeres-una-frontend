@@ -150,9 +150,6 @@ export function CustomNavigationMenu() {
                                 <Link href="/MiPerfil">Mi Perfil</Link>
                             </DropdownMenuItem>
                             <DropdownMenuItem>
-                                <Link href="/MiForo">Mi Foro</Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>
                                 <button onClick={logout}>Cerrar sesión</button>
                             </DropdownMenuItem>
                         </DropdownMenuContent>
