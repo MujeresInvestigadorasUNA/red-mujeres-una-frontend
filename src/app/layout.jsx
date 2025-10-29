@@ -2,9 +2,9 @@
 import { Toaster } from "@/components/ui/sonner"
 import { UserProvider } from './contexts/UserContext';
 import { usePathname } from "next/navigation";
-import NavBar from "./components/NavBar";
 import Footer from "./components/Footer";
 import "./globals.css";
+import { CustomNavigationMenu } from "./components/NavigationMenu";
 
 export default function RootLayout({ children }) {
   const pathname = usePathname();
@@ -14,7 +14,7 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body>
         <UserProvider>
-          {!hideLayout && <NavBar />}
+          {!hideLayout && <CustomNavigationMenu />}
           {children}
           {!hideLayout && <Footer />}
         </UserProvider>
