@@ -1,45 +1,30 @@
 "use client";
-import { iconClockwise, iconSearch } from "@/app/assets/icons";
-import CustomCard from "@/app/components/CustomCard";
 import { useUser } from "@/app/contexts/UserContext";
+import { SearchIcon } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { ButtonGroup } from "@/components/ui/button-group"
+import { Input } from "@/components/ui/input"
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card"
+import Image from "next/image";
+import { iconClockwise, iconEye, iconHeart } from "@/app/assets/icons";
 
-const RESEARCHES_CARDS = [{
-    id: 1,
-    image: "/images/curso6.png",
-    title: "Investigación 1",
-    description: "Descripción de la investigación 1.",
-    url: "/Investigaciones/investigacion-1"
-}, {
-    id: 2,
-    image: "/images/investigacion2.png",
-    title: "Investigación 2",
-    description: "Descripción de la investigación 2.",
-    url: "/Investigaciones/investigacion-2"
-}, {
-    id: 3,
-    image: "/images/curso1.png",
-    title: "Investigación 3",
-    description: "Descripción de la investigación 3.",
-    url: "/Investigaciones/investigacion-3"
-}, {
-    id: 4,
-    image: "/images/curso5.png",
-    title: "Investigación 4",
-    description: "Descripción de la investigación 4.",
-    url: "/Investigaciones/investigacion-4"
-}, {
-    id: 5,
-    image: "/images/curso2.png",
-    title: "Investigación 5",
-    description: "Descripción de la investigación 5.",
-    url: "/Investigaciones/investigacion-5"
-}, {
-    id: 6,
-    image: "/images/curso4.png",
-    title: "Investigación 6",
-    description: "Descripción de la investigación 6.",
-    url: "/Investigaciones/investigacion-6"
-}];
+import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
+
 
 export default function Investigaciones() {
     const { user } = useUser();
@@ -48,49 +33,99 @@ export default function Investigaciones() {
         <main className="flex-grow px-20 py-10 h-[100%] toolsSection">
             <h1 className="text-2xl font-bold">Investigaciones</h1>
             <p className="mt-3 mb-5">
-                Encuentra aquí todas las investigaciones realizadas por cada una de las 
+                Encuentra aquí todas las investigaciones realizadas por cada una de las
                 integrantes de la Red de Mujeres Académicas, con su información más relevante.
             </p>
-            <div className="flex items-stretch gap-3 mb-3">
-                <span>
-                    <select
-                        defaultValue=""
-                        className="bg-[#ffffff] py-2 px-2 rounded h-full border border-gray-300"
-                    >
-                        <option value="" disabled>Filtrar Por</option>
-                        <option value="temas">Temas</option>
-                    </select>
-                </span>
-                <span className="flex w-full">
-                    <input
-                        type="search"
-                        placeholder="Buscar..."
-                        className="bg-[#ffffff] py-2 px-3 rounded-l w-full border border-gray-300"
+            <div className="flex gap-3 mb-5">
+                <Select className="bg-[#fff] rounded">
+                    <SelectTrigger className="w-[180px] bg-[#fff] rounded">
+                        <SelectValue placeholder="Seleccionar Filtro" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectGroup>
+                            <SelectItem value="title">Titulo</SelectItem>
+                            <SelectItem value="content">Contenido</SelectItem>
+                            <SelectItem value="topics">Temas</SelectItem>
+                            <SelectItem value="isPublic">Estado</SelectItem>
+                        </SelectGroup>
+                    </SelectContent>
+                </Select>
+                <ButtonGroup className="rounded bg-[#fff] w-full">
+                    <Input
+                        className="rounded"
+                        placeholder="Search..."
                     />
-                    <button className="bg-[#E7473C] text-white py-2 px-3 rounded-r text-sm 
-                    hover:cursor-pointer hover:bg-[#b0352c] font-semibold">
-                        {iconSearch({})}
-                    </button>
-                </span>
-                <button className="bg-[#E7473C] text-white py-2 px-3 rounded
-                hover:cursor-pointer hover:bg-[#b0352c] font-semibold">
+                    <Button
+                        className="bg-[#E7473C] hover:bg-[#831d16] rounded text-white
+                        hover:text-white hover:cursor-pointer"
+                        variant="outline"
+                        aria-label="Search"
+                    >
+                        <SearchIcon />
+                    </Button>
+                </ButtonGroup>
+                <Button className="bg-[#fff] hover:bg-[#f0f0f0] rounded text-[#831d16]
+                hover:text-[#831d16] hover:cursor-pointer shadow">
                     {iconClockwise({})}
-                </button>
+                </Button>
             </div>
-            <div className="flex gap-5 flex-wrap mt-5">
-                {RESEARCHES_CARDS.map((card) => (
-                    <div key={card.id} className="flex-fill flex-grow flex-shrink basis-[30%] min-w-[250px]">
-                        <CustomCard
-                            cardImage={card.image}
-                            cardTitle={card.title}
-                            cardDescription={card.description}
-                            cardURL={card.url}
-                            cardBgColor="#E7473C"
-                            cardTitleTextColor="#F0F0F0"
-                            cardTextColor="#F0F0F0"
-                        />
-                    </div>
-                ))}
+            <div className="flex flex-wrap gap-3">
+                <Link href={`/Investigaciones/1`} className="grow">
+                    <Card
+                        className="p-0 overflow-hidden rounded-lg
+                        hover:brightness-80 hover:cursor-pointer shadow border-none
+                        min-w-[300px]"
+                    >
+                        <CardHeader className="px-6 pt-7">
+                            <div className="flex items-center justify-between
+                            flex-wrap gap-2">
+                                <CardTitle className="text-nowrap">
+                                    Investigación Titulo
+                                </CardTitle>
+                                <div
+                                    className="flex gap-5 text-sm text-gray-600
+                                    text-nowrap"
+                                    style={{ fontSize: "0.8rem" }}
+                                >
+                                    <span
+                                        className="flex items-center gap-1"
+                                    >
+                                        {iconHeart({ size: 12 })}
+                                        100
+                                    </span>
+                                    <span
+                                        className="flex items-center gap-1"
+                                    >
+                                        {iconEye({ size: 12 })}
+                                        100
+                                    </span>
+                                </div>
+                            </div>
+                            <CardDescription>
+                                Descripción de la investigación lore
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="relative p-0 rounded bg-[#000]">
+                            <Image
+                                src="/images/curso1.png"
+                                alt="Investigación"
+                                width={3000}
+                                height={3000}
+                                className="object-cover brightness-80 max-h-60
+                                w-full"
+                            />
+                            {/* Overlay badges */}
+                            <div className="absolute bottom-5 left-4 flex gap-1">
+                                <Badge variant="secondary">
+                                    Badge
+                                </Badge>
+                                <Badge variant="secondary">Badge</Badge>
+                                <Badge variant="secondary">Badge</Badge>
+                                <Badge variant="secondary">Badge</Badge>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </Link>
             </div>
         </main>
     );

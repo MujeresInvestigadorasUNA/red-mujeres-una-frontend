@@ -1,11 +1,21 @@
 "use client";
-import { iconClockwise, iconSearch } from "@/app/assets/icons";
-import CustomCard from "@/app/components/CustomCard";
 import { useUser } from "@/app/contexts/UserContext";
-import { getCourses } from "@/lib/api/courses";
-import Link from "next/link";
+import { iconClockwise } from "@/app/assets/icons";
+import { SearchIcon } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { ButtonGroup } from "@/components/ui/button-group"
+import { Input } from "@/components/ui/input"
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 import { useEffect, useState } from "react";
-import { toast } from "sonner";
+import CustomCard2 from "@/app/components/CustomCard2";
+import { getCourses } from "@/lib/api/courses";
 
 export default function Cursos() {
     const { user } = useUser();
@@ -33,45 +43,51 @@ export default function Cursos() {
                 Encuentra aquí los cursos que imparten cada una de las integrantes de la 
                 Red de Mujeres Académicas, con su información relevante.
             </p>
-            <div className="flex items-stretch gap-3 mb-3">
-                <span>
-                    <select
-                        defaultValue=""
-                        className="bg-[#ffffff] py-2 px-2 rounded h-full border border-gray-300"
-                    >
-                        <option value="" disabled>Filtrar Por</option>
-                        <option value="temas">Temas</option>
-                    </select>
-                </span>
-                <span className="flex w-full">
-                    <input
-                        type="search"
-                        placeholder="Buscar..."
-                        className="bg-[#ffffff] py-2 px-3 rounded-l w-full border border-gray-300"
+            <div className="flex gap-3 mb-5">
+                <Select className="bg-[#fff] rounded">
+                    <SelectTrigger className="w-[180px] bg-[#fff] rounded">
+                        <SelectValue placeholder="Seleccionar Filtro" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectGroup>
+                            <SelectItem value="title">Nombre</SelectItem>
+                            <SelectItem value="description">Descripcion</SelectItem>
+                            <SelectItem value="startDate">Fecha Inicio</SelectItem>
+                            <SelectItem value="endDate">Fecha Final</SelectItem>
+                            <SelectItem value="registrationEndDate">Fecha Final Inscripción</SelectItem>
+                            <SelectItem value="spots">Cupos</SelectItem>
+                            <SelectItem value="status">Estado</SelectItem>
+                        </SelectGroup>
+                    </SelectContent>
+                </Select>
+                <ButtonGroup className="rounded bg-[#fff] w-full">
+                    <Input
+                        className="rounded"
+                        placeholder="Search..."
                     />
-                    <button className="bg-[#E7473C] text-white py-2 px-3 rounded-r text-sm 
-                    hover:cursor-pointer hover:bg-[#b0352c] font-semibold">
-                        {iconSearch({})}
-                    </button>
-                </span>
-                <button className="bg-[#E7473C] text-white py-2 px-3 rounded
-                hover:cursor-pointer hover:bg-[#b0352c] font-semibold">
+                    <Button
+                        className="bg-[#E7473C] hover:bg-[#831d16] rounded text-white
+                        hover:text-white hover:cursor-pointer"
+                        variant="outline"
+                        aria-label="Search"
+                    >
+                        <SearchIcon />
+                    </Button>
+                </ButtonGroup>
+                <Button className="bg-[#fff] hover:bg-[#f0f0f0] rounded text-[#831d16]
+                hover:text-[#831d16] hover:cursor-pointer shadow">
                     {iconClockwise({})}
-                </button>
+                </Button>
             </div>
-            <div className="flex gap-5 flex-wrap mt-5">
+            <div className="flex flex-wrap gap-3">
                 {courses.map((course, index) => (
-                    <div key={index} className="flex-fill flex-grow flex-shrink basis-[30%] min-w-[250px]">
-                        <CustomCard
-                            cardImage={course.photo }
-                            cardTitle={course.title}
-                            cardDescription={course.description}
-                            cardURL={course.id ? `/Cursos/${course.id}` : "#"}
-                            cardBgColor="#E7473C"
-                            cardTitleTextColor="#F0F0F0"
-                            cardTextColor="#F0F0F0"
-                        />
-                    </div>
+                    <CustomCard2
+                        key={index}
+                        cardHref={`/Cursos/${course.id}`}
+                        cardTitle={course.title}
+                        cardDescription={course.description}
+                        cardImage={course.photo}
+                    />
                 ))}
             </div>
         </main>

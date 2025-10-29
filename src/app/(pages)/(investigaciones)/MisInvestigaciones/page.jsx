@@ -14,18 +14,14 @@ import {
 } from "@/components/ui/select";
 import {
     Card,
-    CardAction,
     CardContent,
     CardDescription,
-    CardFooter,
     CardHeader,
     CardTitle,
 } from "@/components/ui/card"
 import Image from "next/image";
 import { iconClockwise, iconEye, iconHeart } from "@/app/assets/icons";
 
-import { HeartIcon } from "lucide-react"
-import { Toggle } from "@/components/ui/toggle"
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 
