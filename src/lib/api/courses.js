@@ -6,6 +6,14 @@ export async function getCourses() {
   return response;
 }
 
+export async function getPublicCourses() {
+  const response = await fetch(`http://127.0.0.1:8000/courses/public`, {
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+  });
+  return response;
+}
+
 export async function getCourseById({ course_id }) {
   const response = await fetch(`http://127.0.0.1:8000/courses/${course_id}`, {
     method: "GET",

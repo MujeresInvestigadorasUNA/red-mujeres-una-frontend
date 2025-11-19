@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/select";
 import { useEffect, useState } from "react";
 import CustomCard2 from "@/app/components/CustomCard2";
-import { getCourses } from "@/lib/api/courses";
+import { getCourses, getPublicCourses } from "@/lib/api/courses";
 
 export default function Cursos() {
     const { user } = useUser();
@@ -23,7 +23,7 @@ export default function Cursos() {
 
     const fetchCourses = async () => {
         try {
-            const response = await getCourses();
+            const response = await getPublicCourses();
             const data = await response.json();
             setCourses(data);
         }
