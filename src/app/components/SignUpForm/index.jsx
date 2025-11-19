@@ -21,6 +21,7 @@ import { Label } from "@radix-ui/react-label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
+import { useUser } from "@/app/contexts/UserContext";
 
 export default function SignUpForm() {
   const { setUserData, setToken } = useUser();

@@ -18,7 +18,7 @@ export default function RootLayout({ children }) {
           {children}
           {!hideLayout && <Footer />}
         </UserProvider>
-        <Toaster position="top-center" richColors  />
+        <Toaster position="bottom-center" richColors  />
       </body>
     </html>
   );

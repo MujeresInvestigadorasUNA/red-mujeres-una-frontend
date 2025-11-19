@@ -1,5 +1,5 @@
 "use client";
-import { iconBackgroundImage, iconCalendar, iconEye, iconEyeSlash, iconPenSquare, iconSearch } from "@/app/assets/icons";
+import { iconBackgroundImage, iconCalendar, iconEye, iconEyeSlash, iconPenSquare, iconReturn, iconSearch, iconTrash } from "@/app/assets/icons";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
@@ -9,7 +9,19 @@ import { Textarea } from "@/components/ui/textarea";
 import { use, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import Image from "next/image";
-import { getCourseById, updateCourse } from "@/lib/api/courses";
+import { deleteCourse, getCourseById, updateCourse } from "@/lib/api/courses";
+
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import Link from "next/link";
 
 export default function MisCursos({ params }) {
     const photoInputRef = useRef(null);
@@ -87,7 +99,7 @@ export default function MisCursos({ params }) {
 
         try {
             const response = await updateCourse({
-                user_id: 1,
+                user_id: cursoId,
                 title: course.title,
                 photo: course.photo,
                 description: course.description,
@@ -118,14 +130,14 @@ export default function MisCursos({ params }) {
                 return toast.warning(data.detail?.[0]?.msg || "Error al obtener los datos del curso.");
             }
             setCourse({
-                title: data.title || "",
-                taughtBy: data.user.first_name + " " + data.user.last_name || "",
-                photo: data.photo || "",
-                description: data.description || "",
-                modality: data.modality || "",
-                maxRegistrationDate: data.max_registration_date || "",
-                startDate: data.initial_date || "",
-                endDate: data.final_date || "",
+                title: data.title || "Título del Curso",
+                taughtBy: data.user.first_name + " " + data.user.last_name || "Nombre del Instructor",
+                photo: data.photo || "/images/defaultCourse.webp",
+                description: data.description || "Descripción del curso no disponible.",
+                modality: data.modality || "no disponible",
+                maxRegistrationDate: data.max_registration_date || "no disponible",
+                startDate: data.initial_date || "no disponible",
+                endDate: data.final_date || "no disponible",
                 maxQuotas: data.max_quotas || 0,
                 isPublic: data.is_public || false
             });
@@ -139,6 +151,21 @@ export default function MisCursos({ params }) {
             fetchCourseData();
         }
     }, [cursoId]);
+
+    const handleOnDelete = async () => {
+        try {
+            const response = await deleteCourse({ course_id: cursoId });
+            const data = await response.json();
+            if (!response.ok) {
+                return toast.warning(data.detail?.[0]?.msg || "Error al eliminar el curso.");
+            }
+            toast.success("Curso eliminado correctamente!!");
+            window.location.href = "/MisCursos";
+        }
+        catch (error) {
+            toast.error("Error al eliminar el curso. Intente nuevamente.");
+        }
+    }
 
     return (
         <main className="flex-grow h-[100%]">
@@ -170,7 +197,6 @@ export default function MisCursos({ params }) {
                             }}
                         />
                     </div>
-
                     <Input
                         id="photo"
                         name="photo"
@@ -205,6 +231,51 @@ export default function MisCursos({ params }) {
                             {iconBackgroundImage({})}
                         </Button>
                     </div>
+
+                    {/* Top-right icon */}
+                    <div className="absolute top-4 right-4 flex gap-4">
+                        <Dialog>
+                            <DialogTrigger asChild>
+                            <Button 
+                                className="p-2 rounded-full shadow-lg 
+                                bg-[#b0352c] hover:bg-[#9f2c2c] transition hover:cursor-pointer"
+                                title="Delete course"
+                                type="button"
+                            >
+                                {iconTrash({})}
+                            </Button>
+                            </DialogTrigger>
+                            <DialogContent className="sm:max-w-[425px]">
+                            <DialogHeader>
+                                <DialogTitle>Eliminar Curso</DialogTitle>
+                                <DialogDescription>
+                                ¿Está seguro que desea eliminar este curso? Esta acción no se puede deshacer.
+                                </DialogDescription>
+                            </DialogHeader>
+                            <DialogFooter>
+                                <DialogClose asChild>
+                                <Button variant="outline">Cancelar</Button>
+                                </DialogClose>
+                                <Button variant="destructive" onClick={handleOnDelete}>
+                                    Eliminar
+                                </Button>
+                            </DialogFooter>
+                            </DialogContent>
+                        </Dialog>
+                    </div>
+
+                    {/* Top-left icon */}
+                    <div className="absolute top-4 left-4 flex gap-4">
+                        <Link 
+                            href="/MisCursos" 
+                            className="bg-white p-2 rounded-full shadow-lg 
+                            hover:bg-gray-100 transition hover:cursor-pointer"
+                            title="Go back to My Courses"
+                        >
+                            {iconReturn({})}
+                        </Link>
+                    </div>
+
                 </section>
                 <section className="flex-grow px-20 py-10 h-[100%]">
                     <div className="flex justify-between mb-5">

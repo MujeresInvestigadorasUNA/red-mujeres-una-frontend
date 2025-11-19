@@ -8,23 +8,28 @@ import {
     CardDescription,
     CardHeader,
     CardTitle
-} from "@/components/ui/card"
+} from "@/components/ui/card";
 
 export default function CustomCard2({
-    cardHref = "/",
-    cardTitle = "Card Title",
-    cardDescription = "Card Description",
-    cardImage = null
+    cardHref,
+    cardTitle,
+    cardDescription,
+    cardImage,
 }) {
+    const HREF = cardHref ?? "/";
+    const TITLE = cardTitle ?? "Card Title";
+    const DESCRIPTION = cardDescription ?? "Card Description";
+    const IMAGE = cardImage ?? "/images/defaultCourse.webp";
+
     return (
-        <Link href={cardHref} className="grow">
+        <Link href={HREF} className="grow">
             <Card className="p-0 overflow-hidden rounded-lg hover:brightness-80
             hover:cursor-pointer shadow border-none min-w-[300px]">
                 <CardHeader className="px-6 pt-7">
                     <div className="flex items-center justify-between flex-wrap 
                     gap-2">
                         <CardTitle className="text-nowrap">
-                            {cardTitle}
+                            {TITLE}
                         </CardTitle>
                         <div
                             className="flex gap-5 text-sm text-gray-600 text-nowrap"
@@ -45,15 +50,15 @@ export default function CustomCard2({
                         </div>
                     </div>
                     <CardDescription>
-                        {cardDescription.length > 400
-                            ? cardDescription.slice(0, 400) + '…'
-                            : cardDescription
+                        {DESCRIPTION.length > 400
+                            ? DESCRIPTION.slice(0, 150) + '…'
+                            : DESCRIPTION
                         }
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="relative p-0 rounded bg-[#000]">
                     <Image
-                        src={cardImage}
+                        src={IMAGE}
                         alt="Investigación"
                         width={3000}
                         height={3000}

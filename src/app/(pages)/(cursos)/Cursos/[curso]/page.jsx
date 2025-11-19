@@ -29,13 +29,13 @@ export default function Curso({ params }) {
             const response = await getCourseById({ course_id: courseId });
             const data = await response.json();
             setCourse({
-                title: data.title || "",
-                photo: data.photo || "",
-                description: data.description || "",   
-                taughtBy: data.user.first_name + " " + data.user.last_name || "",
-                startDate: data.initial_date || "",
-                endDate: data.final_date || "",
-                maxRegistrationDate: data.max_registration_date || "",
+                title: data.title || "Título del Curso",
+                photo: data.photo || "/images/defaultCourse.webp",
+                description: data.description || "Descripción del curso no disponible.",   
+                taughtBy: data.user.first_name + " " + data.user.last_name || "Nombre del Instructor",
+                startDate: data.initial_date || "no disponible",
+                endDate: data.final_date || "no disponible",
+                maxRegistrationDate: data.max_registration_date || "no disponible",
                 maxQuotas: data.max_quotas || 0
             });
         }

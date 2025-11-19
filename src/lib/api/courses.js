@@ -60,3 +60,11 @@ export async function updateCourse({
   });
   return response;
 }
+
+export async function deleteCourse({ course_id }) {
+  const response = await fetch(`http://127.0.0.1:8000/courses/${course_id}`, {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+  });
+  return response;
+}
