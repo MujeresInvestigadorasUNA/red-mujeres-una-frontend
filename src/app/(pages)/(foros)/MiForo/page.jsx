@@ -203,7 +203,7 @@ export default function MiForo() {
                         />
                         {form.photo ? null : (
                             <Empty className="border border-dashed border-[#999] bg-[#f9f9f9]
-                            h-100 w-100 hover:cursor-pointer hover:border-[#666]
+                            h-100 w-full hover:cursor-pointer hover:border-[#666]
                             hover:brightness-95 transition-all duration-200"
                                 onClick={handlePhotoClick}>
                                 <EmptyHeader>
@@ -218,14 +218,14 @@ export default function MiForo() {
                             </Empty>
                         )}
                         {form.photo && (
-                            <div className="relative inline-block w-100 h-100 min-w-100 min-h-100 group">
+                            <div className="relative inline-block w-full h-100 min-w-full min-h-100 group">
                                 <Image
                                     onClick={handlePhotoClick}
                                     src={form.photo}
                                     alt="Foto de perfil"
                                     width={3000}
                                     height={3000}
-                                    className="w-100 h-100 rounded object-cover
+                                    className="w-full h-100 rounded object-cover
                                     hover:cursor-pointer hover:brightness-95
                                     transition-all duration-200 corner-img"
                                 />

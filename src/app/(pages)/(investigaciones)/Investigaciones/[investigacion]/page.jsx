@@ -82,7 +82,7 @@ export default function Investigacion() {
                             alt="Investigación 1"
                             width={300}
                             height={200}
-                            className="object-cover rounded w-full h-100 mt-5 min-w-100 max-h-[200px] min-h-[200px] mb-3"
+                            className="object-cover rounded w-full h-100 mt-5 min-w-full max-h-[200px] min-h-[200px] mb-3"
                         />
                         <Link href="/investigaciones/investigacion-1" className="text-md font-bold">Impacto de la nutrición en la salud digestiva</Link>
                         <p className="text-gray-600">Resumen de la investigación 1.</p>
@@ -93,7 +93,7 @@ export default function Investigacion() {
                             alt="Investigación 1"
                             width={300}
                             height={200}
-                            className="object-cover rounded w-full h-100 mt-5 min-w-100 max-h-[200px] min-h-[200px] mb-3"
+                            className="object-cover rounded w-full h-100 mt-5 min-w-full max-h-[200px] min-h-[200px] mb-3"
                         />
                         <Link href="/investigaciones/investigacion-1" className="text-md font-bold">Impacto de la nutrición en la salud digestiva</Link>
                         <p className="text-gray-600">Resumen de la investigación 1.</p>
@@ -104,7 +104,7 @@ export default function Investigacion() {
                             alt="Investigación 1"
                             width={300}
                             height={200}
-                            className="object-cover rounded w-full h-100 mt-5 min-w-100 max-h-[200px] min-h-[200px] mb-3"
+                            className="object-cover rounded w-full h-100 mt-5 min-w-full max-h-[200px] min-h-[200px] mb-3"
                         />
                         <Link href="/investigaciones/investigacion-1" className="text-md font-bold">Impacto de la nutrición en la salud digestiva</Link>
                         <p className="text-gray-600">Resumen de la investigación 1.</p>
