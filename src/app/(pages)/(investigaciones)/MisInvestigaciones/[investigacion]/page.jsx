@@ -1,12 +1,7 @@
 "use client";
+import RichEditor from "@/app/components/RichEditor";
 import Image from "next/image";
 import Link from "next/link";
-import dynamic from 'next/dynamic';
-
-const RichTextEditor = dynamic(
-  () => import('@/app/components/RichTextEditor'),
-  { ssr: false } // This ensures it only renders on the client
-);
 
 export default function Investigacion() {
 
@@ -19,9 +14,6 @@ export default function Investigacion() {
                 digestivo transforma los alimentos en moléculas más simples, permitiendo la obtención
                 de energía y la reparación de tejidos.
             </p>
-            
-            <RichTextEditor />
-
             <Image
                 src="/images/curso1.png"
                 alt="Fisiología Digestiva y Nutrición"
