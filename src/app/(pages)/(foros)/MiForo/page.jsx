@@ -184,11 +184,11 @@ export default function MiForo() {
                         <Textarea
                             id="description"
                             name="description"
-                            className="text-gray-600 mt-3 w-full h-80 border 
-                            rounded border-0 p-0 shadow-none resize-none pr-3"
                             value={form.description}
                             placeholder="Escribe una breve descripción sobre ti..."
                             onChange={onChange}
+                            className="text-gray-600 mt-3 w-full h-80 border 
+                            rounded border-0 p-0 shadow-none resize-none pr-3"
                         ></Textarea>
                     </div>
                     <div>
@@ -227,9 +227,8 @@ export default function MiForo() {
                                     height={3000}
                                     className="w-100 h-100 rounded object-cover
                                     hover:cursor-pointer hover:brightness-95
-                                    transition-all duration-200"
+                                    transition-all duration-200 corner-img"
                                 />
-
                                 {/* Hidden until hover */}
                                 <Button
                                     type="button"

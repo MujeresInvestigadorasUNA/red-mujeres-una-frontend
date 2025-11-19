@@ -22,6 +22,15 @@ export async function getCoursesByUserId({ user_id }) {
   return response;
 }
 
+export async function createCourse({ user_id }) {
+  const response = await fetch(`http://127.0.0.1:8000/courses/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ user_id }),
+  });
+  return response;
+}
+
 export async function updateCourse({
   user_id,
   title,

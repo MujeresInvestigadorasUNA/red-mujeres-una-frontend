@@ -14,7 +14,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { useEffect, useState } from "react";
-import { getCoursesByUserId } from "@/lib/api/courses";
+import { createCourse, getCoursesByUserId } from "@/lib/api/courses";
 import CustomCard2 from "@/app/components/CustomCard2";
 
 export default function MisCursos() {
@@ -37,11 +37,27 @@ export default function MisCursos() {
         }
     }, [user]);
 
+    const handleOnAddCourse = async () => {
+        try {
+            const response = await createCourse({ user_id: user.id });
+            if (response.ok) {
+                fetchCourses();
+            } else {
+                console.error("Error creating course:", response.statusText);
+            }
+        } catch (error) {
+            console.error("Error creating course:", error);
+        }
+    };
+
     return (
         <main className="flex-grow px-20 py-10 h-[100%] toolsSection">
             <div className="flex gap-3 mb-5">
-                <Button className="bg-[#E7473C] hover:bg-[#831d16] text-white
-                hover:text-white hover:cursor-pointer rounded">
+                <Button
+                    onClick={handleOnAddCourse}
+                    className="bg-[#E7473C] hover:bg-[#831d16] text-white
+                    hover:text-white hover:cursor-pointer rounded"
+                >
                     Agregar Curso
                 </Button>
                 <Select className="bg-[#fff] rounded">
