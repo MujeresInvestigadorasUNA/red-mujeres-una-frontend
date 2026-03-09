@@ -1,5 +1,6 @@
+
 export async function loginUser({ email, password }) {
-  const response = await fetch("http://127.0.0.1:8000/users/login", {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password }),
@@ -8,7 +9,7 @@ export async function loginUser({ email, password }) {
 }
 
 export async function getUserInfo({ user_id }) {
-  const response = await fetch(`http://127.0.0.1:8000/users/${user_id}/`, {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${user_id}/`, {
     method: "GET",
     cache: "no-store",
     headers: { "Content-Type": "application/json" },
@@ -16,25 +17,35 @@ export async function getUserInfo({ user_id }) {
   return response;
 }
 
-export async function registerUser({ first_name, last_name, email, password, user_type_id }) {
-  const response = await fetch("http://127.0.0.1:8000/users/", {
+export async function registerUser({email, password, first_name, last_name, user_type_id }) {
+  const formData = new FormData();
+  formData.append("email", email);
+  formData.append("password", password);
+  formData.append("first_name", first_name);
+  formData.append("last_name", last_name);
+  formData.append("user_type_id", String(user_type_id));
+  
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/register`, {
     method: "POST",
+    mode: "cors",
     headers: {
-      "Content-Type": "application/json",
+      "Accept": "application/json",
     },
-    body: JSON.stringify({ 
-      first_name, 
-      last_name, 
-      email, 
-      password, 
-      user_type_id 
-    }),
+    body: formData,
   });
-  return response;
+  
+  const responseText = await response.text();
+  
+  // Return a new response with the text we already read
+  return new Response(responseText, {
+    status: response.status,
+    statusText: response.statusText,
+    headers: response.headers,
+  });
 }
 
 export async function updateUser({ id, first_name, last_name, profession, email, password, user_type_id}) {
-  const response = await fetch(`http://127.0.0.1:8000/users/${id}/`, {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${id}/`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",

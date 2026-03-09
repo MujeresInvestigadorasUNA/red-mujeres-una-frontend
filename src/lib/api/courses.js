@@ -1,5 +1,5 @@
 export async function getCourses() {
-  const response = await fetch(`http://127.0.0.1:8000/courses`, {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses`, {
     method: "GET",
     headers: { "Content-Type": "application/json" },
   });
@@ -7,7 +7,7 @@ export async function getCourses() {
 }
 
 export async function getPublicCourses() {
-  const response = await fetch(`http://127.0.0.1:8000/courses/public`, {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/public`, {
     method: "GET",
     headers: { "Content-Type": "application/json" },
   });
@@ -15,7 +15,7 @@ export async function getPublicCourses() {
 }
 
 export async function getCourseById({ course_id }) {
-  const response = await fetch(`http://127.0.0.1:8000/courses/${course_id}`, {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/${course_id}`, {
     method: "GET",
     headers: { "Content-Type": "application/json" },
   });
@@ -23,7 +23,7 @@ export async function getCourseById({ course_id }) {
 }
 
 export async function getCoursesByUserId({ user_id }) {
-  const response = await fetch(`http://127.0.0.1:8000/courses/user/${user_id}`, {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/user/${user_id}`, {
     method: "GET",
     headers: { "Content-Type": "application/json" },
   });
@@ -31,7 +31,7 @@ export async function getCoursesByUserId({ user_id }) {
 }
 
 export async function createCourse({ user_id }) {
-  const response = await fetch(`http://127.0.0.1:8000/courses/`, {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ user_id }),
@@ -51,7 +51,7 @@ export async function updateCourse({
   max_quotas,
   is_public
 }) {
-  const response = await fetch(`http://127.0.0.1:8000/courses/${user_id}`, {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/${user_id}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -70,7 +70,7 @@ export async function updateCourse({
 }
 
 export async function deleteCourse({ course_id }) {
-  const response = await fetch(`http://127.0.0.1:8000/courses/${course_id}`, {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/${course_id}`, {
     method: "DELETE",
     headers: { "Content-Type": "application/json" },
   });

@@ -87,7 +87,12 @@ export default function SignUpForm() {
         window.location.href = "/";
       } else {
         const data = await response.json();
-        setError(data.detail || "Something went wrong");
+        // Handle error detail which could be a string or array of objects
+        if (Array.isArray(data.detail)) {
+          setError(data.detail.map(err => err.msg).join(", "));
+        } else {
+          setError(data.detail || "Something went wrong");
+        }
       }
     } catch (err) {
       setError("Server error. Please try again.");
