@@ -1,73 +1,77 @@
 "use client";
-import { iconClockwise, iconSearch, iconCamara, iconEye, iconEyeSlash, iconPen } from "@/app/assets/icons";
-import { useState, useRef, useEffect } from "react";
+import { iconPen } from "@/app/assets/icons";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-    Empty,
-    EmptyDescription,
-    EmptyHeader,
-    EmptyMedia,
-    EmptyTitle,
-} from "@/components/ui/empty";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { updateForum, getUserForum } from "@/lib/api/forums";
+import { getUserInfo, updateUser } from "@/lib/api/auth";
 import { useUser } from "@/app/contexts/UserContext";
 import { capitalizeWords } from "@/app/assets/utils";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { X } from "lucide-react";
 
 export default function MiForo() {
-    const { user } = useUser();
-    const photoInputRef = useRef(null);
+    const { user, accessToken } = useUser();
+    const blobContainerSasToken =
+        process.env.NEXT_PUBLIC_BLOB_CONTAINER_IMAGE_SAS_TOKEN ||
+        process.env.NEXT_PUBLIC_BLOB_CONTAINER_IMAGES_SAS_TOKEN ||
+        "";
 
     const [form, setForm] = useState({
         name: "",
         profession: "",
         description: "",
         photo: null,
-        isPublic: false
     });
 
-    const onChange = (e) => {
-        if (e.target.name === "photo") {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onloadend = () => {
-                    console.log(reader.result);
-                    setForm({ ...form, photo: reader.result }); // reader.result is base64
-                };
+    const [userProfile, setUserProfile] = useState({
+        firstName: "",
+        lastName: "",
+        email: "",
+        userTypeId: null,
+        userProfession: "",
+        photo: null,
+        isPublic: false,
+    });
 
-                reader.readAsDataURL(file); // converts to base64
-            }
-        } else {
-            setForm({ ...form, [e.target.name]: e.target.value });
+    const withBlobSasToken = (imageUrl) => {
+        if (!imageUrl || !blobContainerSasToken) return imageUrl;
+        if (imageUrl.startsWith("blob:") || imageUrl.startsWith("data:") || imageUrl.startsWith("/")) {
+            return imageUrl;
         }
+        if (!imageUrl.includes("blob.core.windows.net") || imageUrl.includes("sig=")) {
+            return imageUrl;
+        }
+
+        const normalizedToken = blobContainerSasToken.startsWith("?")
+            ? blobContainerSasToken.slice(1)
+            : blobContainerSasToken;
+
+        return imageUrl.includes("?")
+            ? `${imageUrl}&${normalizedToken}`
+            : `${imageUrl}?${normalizedToken}`;
     };
 
-    const handlePhotoClick = () => {
-        photoInputRef.current.click(); // trigger hidden input
-    };
+    const onChange = (e) => setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!form.name || !form.profession || !form.description) {
-            return toast.error("Por favor, complete todos los campos");
+        if (!form.description) {
+            return toast.error("Por favor, agrega una descripción del foro");
         }
 
         try {
-            const response = await updateForum({
-                user_id: user.id,
-                user_profession: form.profession,
+            const response = await updateUser({
+                id: user.id,
+                first_name: userProfile.firstName,
+                last_name: userProfile.lastName,
+                email: userProfile.email,
+                user_type_id: userProfile.userTypeId,
+                user_profession: userProfile.userProfession,
                 user_description: form.description,
-                photo: form.photo,
-                is_public: form.isPublic
+                is_public: userProfile.isPublic,
+                access_token: accessToken,
             });
 
             const data = await response.json();
@@ -83,17 +87,31 @@ export default function MiForo() {
 
     const fetchUserForum = async () => {
         try {
-            const response = await getUserForum({ user_id: user.id });
+            const response = await getUserInfo({ user_id: user.id });
             const data = await response.json();
             if (!response.ok) {
                 return toast.warning(data.detail?.[0]?.msg || "Error al obtener el foro");
             }
+
+            const firstName = data.first_name || "";
+            const lastName = data.last_name || "";
+            const userProfession = data.user_profession || data.profession || "";
+
             setForm({
-                name: data.user.first_name + " " + data.user.last_name || "",
-                profession: data.user_profession || "",
+                name: `${firstName} ${lastName}`.trim(),
+                profession: userProfession,
                 description: data.user_description || "",
-                photo: data.user.photo || null,
-                isPublic: data.is_public || false
+                photo: data.photo || null,
+            });
+
+            setUserProfile({
+                firstName,
+                lastName,
+                email: data.email || user?.email || "",
+                userTypeId: data.user_type_id || user?.user_type_id || null,
+                userProfession,
+                photo: data.photo || null,
+                isPublic: data.is_public || false,
             });
         } catch (err) {
             toast.warning("Error de conexión");
@@ -105,34 +123,6 @@ export default function MiForo() {
             fetchUserForum();
         }
     }, [user]);
-
-
-    const [isPublicLabel, setIsPublicLabel] = useState("Foro Privado");
-    const [isPublicIcon, setIsPublicIcon] = useState(iconEyeSlash({ color: "#999" }));
-    const handleOnPublicChange = (checked) => {
-        setForm({ ...form, isPublic: checked });
-        if (checked) {
-            setIsPublicLabel("Foro Público");
-            setIsPublicIcon(iconEye({ color: "#E7473C" }));
-        } else {
-            setIsPublicLabel("Foro Privado");
-            setIsPublicIcon(iconEyeSlash({ color: "#999" }));
-        }
-    };
-
-    useEffect(() => {
-        if (form.isPublic) {
-            setIsPublicLabel("Foro Público");
-            setIsPublicIcon(iconEye({ color: "#E7473C" }));
-        } else {
-            setIsPublicLabel("Foro Privado");
-            setIsPublicIcon(iconEyeSlash({ color: "#999" }));
-        }
-    }, [form.isPublic]);
-
-    const handleErasePhoto = () => {
-        setForm({ ...form, photo: null });
-    };
 
     return (
         <main className="flex-grow px-20 py-10 h-[100%]">
@@ -154,18 +144,6 @@ export default function MiForo() {
                                     {iconPen({ size: 14 })}
                                 </Link>
                             </h2>
-                            <div className="flex items-center space-x-2">
-                                <Switch
-                                    id="isPublic"
-                                    name="isPublic"
-                                    checked={form.isPublic}
-                                    onCheckedChange={handleOnPublicChange}
-                                />
-                                <Label htmlFor="isPublic">
-                                    {isPublicLabel}
-                                    {isPublicIcon}
-                                </Label>
-                            </div>
                         </div>
                         <h3
                             className="text-gray-600 font-semibold mb-1 flex gap-3 items-center group"
@@ -191,57 +169,15 @@ export default function MiForo() {
                             rounded border-0 p-0 shadow-none resize-none pr-3"
                         ></Textarea>
                     </div>
-                    <div>
-                        <Input
-                            id="photo"
-                            name="photo"
-                            type="file"
-                            accept="image/*"
-                            ref={photoInputRef}
-                            onChange={onChange}
-                            className="hidden"
-                        />
-                        {form.photo ? null : (
-                            <Empty className="border border-dashed border-[#999] bg-[#f9f9f9]
-                            h-100 w-full hover:cursor-pointer hover:border-[#666]
-                            hover:brightness-95 transition-all duration-200"
-                                onClick={handlePhotoClick}>
-                                <EmptyHeader>
-                                    <EmptyMedia variant="icon">
-                                        {iconCamara({ size: 48, color: "#999" })}
-                                    </EmptyMedia>
-                                    <EmptyTitle>Una Foto Profesional</EmptyTitle>
-                                    <EmptyDescription>
-                                        Sube una foto profesional para que otros sepan quién eres.
-                                    </EmptyDescription>
-                                </EmptyHeader>
-                            </Empty>
-                        )}
+                    <div className="w-full max-w-[320px]">
                         {form.photo && (
-                            <div className="relative inline-block w-full h-100 min-w-full min-h-100 group">
-                                <Image
-                                    onClick={handlePhotoClick}
-                                    src={form.photo}
-                                    alt="Foto de perfil"
-                                    width={3000}
-                                    height={3000}
-                                    className="w-full h-100 rounded object-cover
-                                    hover:cursor-pointer hover:brightness-95
-                                    transition-all duration-200 corner-img"
-                                />
-                                {/* Hidden until hover */}
-                                <Button
-                                    type="button"
-                                    variant="destructive"
-                                    size="icon"
-                                    onClick={handleErasePhoto}
-                                    className="absolute top-2 right-2 rounded-full w-6 h-6 p-1 shadow-md 
-                                    opacity-0 group-hover:opacity-100 transition-opacity duration-200
-                                    hover:cursor-pointer hover:brightness-90"
-                                >
-                                    <X className="w-4 h-4" />
-                                </Button>
-                            </div>
+                            <Image
+                                src={withBlobSasToken(form.photo)}
+                                alt="Foto de perfil"
+                                width={3000}
+                                height={3000}
+                                className="w-full h-[320px] rounded object-cover"
+                            />
                         )}
                     </div>
                 </div>
