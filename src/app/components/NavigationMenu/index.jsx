@@ -151,8 +151,8 @@ export function CustomNavigationMenu() {
                                     {user.first_name ? user.first_name[0].toUpperCase() : "U"}
                                 </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent className="w-40 mr-5" align="start" variant="dark">
-                                <DropdownMenuLabel className="font-normal text-sm text-gray-500 text-center">
+                            <DropdownMenuContent className="w-56 max-w-[calc(100vw-2rem)] mr-5" align="start" variant="dark">
+                                <DropdownMenuLabel className="font-normal text-sm text-gray-500 text-center whitespace-normal break-all leading-tight px-1">
                                     {user.email}
                                 </DropdownMenuLabel>
                                 <DropdownMenuSeparator />
