@@ -2,10 +2,10 @@ import Link from "next/link";
 
 export default function Footer() {
     return (
-        <footer className="flex justify-between pl-10 pr-20 py-10 border-t 
-            border-gray-200 shadow toolsSection text-[#666]"
+        <footer className="flex flex-wrap justify-between gap-8 border-t
+            border-gray-200 px-6 py-10 shadow toolsSection text-[#666] md:px-10 lg:px-20"
         >
-            <div>
+            <div className="min-w-[220px] flex-1 basis-[260px]">
                 Red de Mujeres Académicas UNA
                 <div className="flex gap-3 mt-3">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-facebook" viewBox="0 0 16 16">
@@ -16,19 +16,19 @@ export default function Footer() {
                     </svg>
                 </div>
             </div>
-            <div className="flex flex-col gap-3 mt-3">
+            <div className="mt-3 flex min-w-[160px] flex-1 basis-[180px] flex-col gap-3">
                 <h3 className="font-bold"> Foros </h3>
                 <Link href="/"> General </Link>
                 <Link href="/"> Específico </Link>
                 <Link href="/"> Otro </Link>
             </div>
-            <div className="flex flex-col gap-3 mt-3">
+            <div className="mt-3 flex min-w-[160px] flex-1 basis-[180px] flex-col gap-3">
                 <h3 className="font-bold"> Cursos </h3>
                 <Link href="/"> General </Link>
                 <Link href="/"> Específico </Link>
                 <Link href="/"> Otro </Link>
             </div>
-            <div className="flex flex-col gap-3 mt-3">
+            <div className="mt-3 flex min-w-[160px] flex-1 basis-[180px] flex-col gap-3">
                 <h3 className="font-bold"> Investigaciones </h3>
                 <Link href="/"> General </Link>
                 <Link href="/"> Específico </Link>

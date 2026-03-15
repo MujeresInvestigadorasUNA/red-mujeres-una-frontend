@@ -124,41 +124,47 @@ export default function Home() {
       </section>
       <section className="px-20 py-10 toolsSection">
         <h2 className="text-[#E7473C] text-xl font-bold">Herramientas de la Red</h2>
-        <div className="mt-4 flex gap-5">
-          <CustomCard
-            cardImage="/images/tool1.png"
-            cardTitle="Foros de discusión"
-            cardDescription="Revisa los foros con toda la información de
-            cada una de las mujeres de la Red."
-            cardURL="/Foros"
-            cardBgColor="#E7473C"
-            cardTitleTextColor="#F0F0F0"
-            cardTextColor="#F0F0F0"
-          />
-          <CustomCard
-            cardImage="/images/tool2.png"
-            cardTitle="Cursos en línea"
-            cardDescription="Accede a una variedad de cursos en línea diseñados
-            para empoderar a las mujeres académicas."
-            cardURL="/Cursos"
-            cardBgColor="#E7473C"
-            cardTitleTextColor="#F0F0F0"
-            cardTextColor="#F0F0F0"
-          />
-          <CustomCard
-            cardImage="/images/tool3.png"
-            cardTitle="Recursos de investigación"
-            cardDescription="Explora una colección de recursos de investigación
-            para apoyar tu trabajo académico."
-            cardURL="/Investigaciones"
-            cardBgColor="#E7473C"
-            cardTitleTextColor="#F0F0F0"
-            cardTextColor="#F0F0F0"
-          />
+        <div className="mt-4 flex flex-wrap gap-5">
+          <div className="min-w-[260px] flex-1 basis-[280px]">
+            <CustomCard
+              cardImage="/images/tool1.png"
+              cardTitle="Foros de discusión"
+              cardDescription="Revisa los foros con toda la información de
+              cada una de las mujeres de la Red."
+              cardURL="/Foros"
+              cardBgColor="#E7473C"
+              cardTitleTextColor="#F0F0F0"
+              cardTextColor="#F0F0F0"
+            />
+          </div>
+          <div className="min-w-[260px] flex-1 basis-[280px]">
+            <CustomCard
+              cardImage="/images/tool2.png"
+              cardTitle="Cursos en línea"
+              cardDescription="Accede a una variedad de cursos en línea diseñados
+              para empoderar a las mujeres académicas."
+              cardURL="/Cursos"
+              cardBgColor="#E7473C"
+              cardTitleTextColor="#F0F0F0"
+              cardTextColor="#F0F0F0"
+            />
+          </div>
+          <div className="min-w-[260px] flex-1 basis-[280px]">
+            <CustomCard
+              cardImage="/images/tool3.png"
+              cardTitle="Recursos de investigación"
+              cardDescription="Explora una colección de recursos de investigación
+              para apoyar tu trabajo académico."
+              cardURL="/Investigaciones"
+              cardBgColor="#E7473C"
+              cardTitleTextColor="#F0F0F0"
+              cardTextColor="#F0F0F0"
+            />
+          </div>
         </div>
       </section>
-      <section className="flex gap-10 px-20 py-10 bg-[#b62116] text-[#F0F0F0] cursesSection">
-        <div className="flex flex-col gap-2 w-1/3">
+      <section className="flex flex-wrap items-stretch gap-10 px-20 py-10 bg-[#b62116] text-[#F0F0F0] cursesSection">
+        <div className="flex min-w-[280px] flex-1 basis-[320px] flex-col gap-2">
           <h2 className="text-xl font-bold mb-2">Cursos Populares</h2>
           <CustomCard
             cardTitle="Introducción a la Investigación Académica"
@@ -195,14 +201,16 @@ export default function Home() {
             Ver Todos
           </Link>
         </div>
-        <div className="w-2/3 h-full bg-white rounded shadow-md p-3">
-          <Image
-            src="/images/cursos.png"
-            alt="Curso 1"
-            width={200}
-            height={200}
-            className="object-cover rounded w-full h-100 bg-[#fff] "
-          />
+        <div className="min-w-[280px] flex-1 basis-[420px] self-stretch rounded bg-white p-3 shadow-md">
+          <div className="relative h-full min-h-[320px] w-full overflow-hidden rounded">
+            <Image
+              src="/images/cursos.png"
+              alt="Curso 1"
+              fill
+              sizes="(min-width: 1024px) 50vw, 100vw"
+              className="object-cover bg-[#fff]"
+            />
+          </div>
         </div>
       </section>
       <section className="px-20 py-10 toolsSection">
