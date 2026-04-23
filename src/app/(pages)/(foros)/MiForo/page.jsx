@@ -87,7 +87,7 @@ export default function MiForo() {
 
     const fetchUserForum = async () => {
         try {
-            const response = await getUserInfo({ user_id: user.id });
+            const response = await getUserInfo({ user_id: user.id, access_token: accessToken });
             const data = await response.json();
             if (!response.ok) {
                 return toast.warning(data.detail?.[0]?.msg || "Error al obtener el foro");
@@ -122,7 +122,7 @@ export default function MiForo() {
         if (user?.id) {
             fetchUserForum();
         }
-    }, [user]);
+    }, [user, accessToken]);
 
     return (
         <main className="flex-grow px-20 py-10 h-[100%]">

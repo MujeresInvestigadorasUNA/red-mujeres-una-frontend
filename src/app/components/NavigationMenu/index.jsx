@@ -27,6 +27,11 @@ export function CustomNavigationMenu() {
     const { user, logout } = useUser();
     const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
+    const logoutButtonHandler = () => {
+        logout("/IniciarSesion");
+        setMobileMenuOpen(false);
+    }
+
     return (
         <nav className="sticky top-0 z-10 px-4 py-2 text-white mainSection md:px-5">
             <div className="flex items-center justify-between gap-3">
@@ -160,7 +165,7 @@ export function CustomNavigationMenu() {
                                     <Link href="/MiPerfil">Mi Perfil</Link>
                                 </DropdownMenuItem>
                                 <DropdownMenuItem>
-                                    <button onClick={logout}>Cerrar sesión</button>
+                                    <button onClick={logoutButtonHandler}>Cerrar sesión</button>
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
@@ -190,10 +195,7 @@ export function CustomNavigationMenu() {
                                 <button
                                     type="button"
                                     className="text-left"
-                                    onClick={() => {
-                                        logout();
-                                        setMobileMenuOpen(false);
-                                    }}
+                                    onClick={logoutButtonHandler}
                                 >
                                     Cerrar sesión
                                 </button>

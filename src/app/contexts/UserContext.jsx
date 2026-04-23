@@ -30,12 +30,11 @@ export const UserProvider = ({ children }) => {
   };
 
   // Logout function
-  const logout = () => {
+  const logout = (redirectTo = '/') => {
     setUser(null);
     setAccessToken(null);
-    localStorage.removeItem('user');
-    localStorage.removeItem('access_token');
-    window.location.href = '/';
+    localStorage.clear();
+    window.location.href = redirectTo;
   };
 
   return (

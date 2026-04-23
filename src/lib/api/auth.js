@@ -8,11 +8,21 @@ export async function loginUser({ email, password }) {
   return response;
 }
 
-export async function getUserInfo({ user_id }) {
+export async function getUserInfo({ user_id, access_token }) {
+  const tokenFromStorage = typeof window !== "undefined"
+    ? localStorage.getItem("access_token")
+    : null;
+  const token = access_token || tokenFromStorage;
+  const headers = { "Content-Type": "application/json" };
+
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
   const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${user_id}/`, {
     method: "GET",
     cache: "no-store",
-    headers: { "Content-Type": "application/json" },
+    headers,
   });
   return response;
 }

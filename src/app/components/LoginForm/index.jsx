@@ -38,7 +38,16 @@ export default function LoginForm() {
             const response = await loginUser({ email: form.email, password: form.password });
             if (!response.ok) {
                 const data = await response.json();
-                return toast.warning(data.detail?.[0]?.msg || "Error al iniciar sesión");
+                const detail = data?.detail;
+
+                if (response.status === 400 && detail === "Invalid credentials") {
+                    return toast.warning("Correo o contraseña incorrectos. Verifica tus datos e inténtalo de nuevo.");
+                }
+
+                const parsedDetail =
+                    Array.isArray(detail) ? detail[0]?.msg : typeof detail === "string" ? detail : null;
+
+                return toast.warning(parsedDetail || "No fue posible iniciar sesión. Inténtalo nuevamente.");
             }
             const data = await response.json();
             setUserData(data);

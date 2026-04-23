@@ -13,7 +13,7 @@ import { Switch } from "@/components/ui/switch";
 import { X } from "lucide-react";
 
 export default function MiPerfil() {
-    const { user, accessToken, setUserData } = useUser();
+    const { user, accessToken, setUserData, logout } = useUser();
     const photoInputRef = useRef(null);
     const blobContainerSasToken =
         process.env.NEXT_PUBLIC_BLOB_CONTAINER_IMAGE_SAS_TOKEN ||
@@ -83,11 +83,42 @@ export default function MiPerfil() {
         setForm((prev) => ({ ...prev, isPublic: checked }));
     };
 
+    const redirectToLoginOnExpiredToken = (status, detail) => {
+        if (status !== 401 || detail !== "Token expired") {
+            return false;
+        }
+
+        toast.error("Tu sesion ha expirado. Inicia sesion nuevamente.");
+        logout("/IniciarSesion");
+        return true;
+    };
+
+    const normalizeTextField = (value) => {
+        const trimmedValue = value.trim();
+        if (!trimmedValue) return "";
+
+        return `${trimmedValue.charAt(0).toUpperCase()}${trimmedValue.slice(1)}`;
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        const normalizedForm = {
+            ...form,
+            firstName: normalizeTextField(form.firstName),
+            lastName: normalizeTextField(form.lastName),
+            userProfession: normalizeTextField(form.userProfession),
+        };
+
+        setForm(normalizedForm);
+
         // Basic form validation
-        if (!form.firstName || !form.lastName || !form.email || !form.userProfession) {
+        if (
+            !normalizedForm.firstName ||
+            !normalizedForm.lastName ||
+            !normalizedForm.email ||
+            !normalizedForm.userProfession
+        ) {
             toast.error("Por favor, complete todos los campos requeridos");
             return;
         }
@@ -95,18 +126,23 @@ export default function MiPerfil() {
         try {
             const response = await updateUser({
                 id: user.id,
-                first_name: form.firstName,
-                last_name: form.lastName,
-                user_profession: form.userProfession,
-                user_description: form.userDescription,
-                is_public: form.isPublic,
-                email: form.email,
+                first_name: normalizedForm.firstName,
+                last_name: normalizedForm.lastName,
+                user_profession: normalizedForm.userProfession,
+                user_description: normalizedForm.userDescription,
+                is_public: normalizedForm.isPublic,
+                email: normalizedForm.email,
                 user_type_id: user.user_type_id,
                 access_token: accessToken,
             });
 
             if (!response.ok) {
                 const data = await response.json();
+
+                if (redirectToLoginOnExpiredToken(response.status, data.detail)) {
+                    return;
+                }
+
                 return toast.warning(data.detail?.[0]?.msg || "Error al guardar los cambios");
             }
 
@@ -119,6 +155,11 @@ export default function MiPerfil() {
 
                 if (!uploadResponse.ok) {
                     const uploadData = await uploadResponse.json();
+
+                    if (redirectToLoginOnExpiredToken(uploadResponse.status, uploadData.detail)) {
+                        return;
+                    }
+
                     return toast.warning(uploadData.detail?.[0]?.msg || "Error al actualizar la foto de perfil");
                 }
             }
@@ -127,13 +168,13 @@ export default function MiPerfil() {
 
             setUserData({
                 id: user.id,
-                first_name: latestData?.first_name || form.firstName,
-                last_name: latestData?.last_name || form.lastName,
-                user_profession: latestData?.user_profession || form.userProfession,
-                user_description: latestData?.user_description || form.userDescription,
-                is_public: latestData?.is_public ?? form.isPublic,
-                photo: latestData?.photo || form.photo,
-                email: latestData?.email || form.email,
+                first_name: latestData?.first_name || normalizedForm.firstName,
+                last_name: latestData?.last_name || normalizedForm.lastName,
+                user_profession: latestData?.user_profession || normalizedForm.userProfession,
+                user_description: latestData?.user_description || normalizedForm.userDescription,
+                is_public: latestData?.is_public ?? normalizedForm.isPublic,
+                photo: latestData?.photo || normalizedForm.photo,
+                email: latestData?.email || normalizedForm.email,
                 user_type_id: latestData?.user_type_id || user.user_type_id,
             });
             toast.success("Perfil actualizado correctamente");
@@ -145,7 +186,7 @@ export default function MiPerfil() {
 
     const fetchUserInfo = async () => {
         try {
-            const response = await getUserInfo({ user_id: user.id });
+            const response = await getUserInfo({ user_id: user.id, access_token: accessToken });
             const data = await response.json();
             if (!response.ok) {
                 toast.warning(data.detail?.[0]?.msg || "Error al obtener la información del usuario");
@@ -171,7 +212,7 @@ export default function MiPerfil() {
     useEffect(() => {
         if (!user?.id) return;
         fetchUserInfo();
-    }, [user]);
+    }, [user, accessToken]);
 
     useEffect(() => {
         return () => {
