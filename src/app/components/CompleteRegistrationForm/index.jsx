@@ -189,8 +189,20 @@ export default function CompleteRegistrationForm() {
           return;
         }
 
-        const signInResult = await signInWithEmailAndPassword(auth, verifiedEmail, temporaryPassword);
-        firebaseUser = signInResult.user;
+        try {
+          const signInResult = await signInWithEmailAndPassword(auth, verifiedEmail, temporaryPassword);
+          firebaseUser = signInResult.user;
+        } catch (signInErr) {
+          if (signInErr?.code === "auth/invalid-credential") {
+            if (signupSessionId) {
+              localStorage.removeItem(`signup_session_${signupSessionId}`);
+            }
+            localStorage.removeItem("signup_active_session_id");
+            setError("La sesion temporal de registro vencio o es invalida. Vuelve al paso 1 y solicita un nuevo link.");
+            return;
+          }
+          throw signInErr;
+        }
       }
 
       await reload(firebaseUser);
@@ -240,6 +252,10 @@ export default function CompleteRegistrationForm() {
       window.location.href = "/IniciarSesion";
     } catch (err) {
       console.error(err);
+      if (err?.code === "auth/invalid-credential") {
+        setError("Credenciales invalidas en Firebase. Repite el proceso desde el paso 1.");
+        return;
+      }
       setError("Ocurrio un error al completar el registro.");
     } finally {
       setLoading(false);

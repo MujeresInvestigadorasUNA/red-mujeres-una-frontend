@@ -33,6 +33,18 @@ export default function SignUpForm() {
   const [verificationLinkSent, setVerificationLinkSent] = useState(false);
   const [signupSessionId, setSignupSessionId] = useState("");
 
+  const persistSignupSession = ({ sessionId, emailValue, temporaryPassword }) => {
+    localStorage.setItem(
+      `signup_session_${sessionId}`,
+      JSON.stringify({
+        email: emailValue,
+        temporaryPassword,
+        createdAt: Date.now(),
+      })
+    );
+    localStorage.setItem("signup_active_session_id", sessionId);
+  };
+
   useEffect(() => {
     const existingSessionId = localStorage.getItem("signup_active_session_id") || "";
     if (!existingSessionId) {
@@ -107,22 +119,18 @@ export default function SignUpForm() {
       const sessionId = createSignupSessionId();
       const temporaryPassword = `Tmp#${Math.random().toString(36).slice(-10)}A1`;
 
-      localStorage.setItem(
-        `signup_session_${sessionId}`,
-        JSON.stringify({
-          email,
-          temporaryPassword,
-          createdAt: Date.now(),
-        })
-      );
-      localStorage.setItem("signup_active_session_id", sessionId);
-      setSignupSessionId(sessionId);
-
       const firebaseCredentials = await createUserWithEmailAndPassword(
         auth,
         email,
         temporaryPassword
       );
+
+      persistSignupSession({
+        sessionId,
+        emailValue: email,
+        temporaryPassword,
+      });
+      setSignupSessionId(sessionId);
 
       await sendEmailVerification(firebaseCredentials.user, {
         url: buildVerificationRedirectUrl(sessionId),
@@ -135,6 +143,7 @@ export default function SignUpForm() {
       );
     } catch (err) {
       console.error(err);
+      localStorage.removeItem("signup_active_session_id");
       setError(getFirebaseErrorMessage(err?.code));
     } finally {
       setLoading(false);
@@ -186,6 +195,16 @@ export default function SignUpForm() {
       setSuccess("Link de verificacion reenviado. Revisa tu bandeja de entrada y spam.");
     } catch (err) {
       console.error(err);
+      if (err?.code === "auth/invalid-credential") {
+        if (signupSessionId) {
+          localStorage.removeItem(`signup_session_${signupSessionId}`);
+        }
+        localStorage.removeItem("signup_active_session_id");
+        setVerificationLinkSent(false);
+        setSignupSessionId("");
+        setError("La sesion temporal vencio o es invalida. Vuelve a enviar el link desde el paso 1.");
+        return;
+      }
       setError("No se pudo reenviar el correo de verificacion.");
     } finally {
       setLoading(false);
