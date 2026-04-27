@@ -1,5 +1,8 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import {
   Carousel,
   CarouselContent,
@@ -8,6 +11,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import CustomCard from "./components/CustomCard";
+import { getResearch } from "@/lib/api/research";
 
 const FORUMS_CARDS = [{
   id: 1,
@@ -46,46 +50,47 @@ const FORUMS_CARDS = [{
   url: "/Foros/brenda-jimenez"
 }];
 
-const RESEARCH_CARDS = [
-  {
-    id: 1,
-    image: "/images/curso1.png",
-    title: "Introducción a la Investigación Académica",
-    description:
-      "Un curso básico para entender los fundamentos de la investigación académica.",
-    url: "/Cursos",
-    bgColor: "#E7473C",
-    titleTextColor: "#F0F0F0",
-    textColor: "#F0F0F0",
-    withImage: true
-  },
-  {
-    id: 2,
-    image: "/images/curso2.png",
-    title: "Gestión del Tiempo para Académicas",
-    description:
-      "Aprende técnicas efectivas de gestión del tiempo para equilibrar tus responsabilidades académicas y personales.",
-    url: "/Cursos",
-    bgColor: "#E7473C",
-    titleTextColor: "#F0F0F0",
-    textColor: "#F0F0F0",
-    withImage: true
-  },
-  {
-    id: 3,
-    image: "/images/curso3.png",
-    title: "Redacción Académica",
-    description:
-      "Mejora tus habilidades de redacción académica y aprende a comunicar tus ideas de manera efectiva.",
-    url: "/Cursos",
-    bgColor: "#E7473C",
-    titleTextColor: "#F0F0F0",
-    textColor: "#F0F0F0",
-    withImage: true
-  },
+const RESEARCH_PLACEHOLDER_IMAGES = [
+  "/images/curso1.png",
+  "/images/curso2.png",
+  "/images/curso3.png",
 ];
 
+const RESEARCH_PLACEHOLDER_DESCRIPTION = "Explora esta investigación destacada y accede a recursos académicos de calidad.";
+
 export default function Home() {
+  const [researchCards, setResearchCards] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchResearchData = async () => {
+      try {
+        const data = await getResearch();
+        
+        // Transform API response to card format
+        const transformedCards = data.map((research, index) => ({
+          id: research.id,
+          image: RESEARCH_PLACEHOLDER_IMAGES[index % RESEARCH_PLACEHOLDER_IMAGES.length],
+          title: research.title,
+          description: RESEARCH_PLACEHOLDER_DESCRIPTION,
+          url: research.research_link || "/Investigaciones",
+          bgColor: "#E7473C",
+          titleTextColor: "#F0F0F0",
+          textColor: "#F0F0F0",
+          withImage: true
+        }));
+        
+        setResearchCards(transformedCards);
+      } catch (error) {
+        console.error("Failed to fetch research:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchResearchData();
+  }, []);
+
   return (
     <main className="flex-grow h-[100%]">
       <section className="bg-[#E7473C] px-10 py-10 text-[#F0F0F0] min-h-[calc(100vh-80px)] mainSection">
@@ -215,30 +220,36 @@ export default function Home() {
       </section>
       <section className="px-20 py-10 toolsSection">
         <h2 className="text-xl font-bold mb-5">Investigaciones Recientes</h2>
-        <Carousel
+        {loading ? (
+          <p className="text-center text-gray-500">Cargando investigaciones...</p>
+        ) : researchCards.length > 0 ? (
+          <Carousel
             opts={{
               align: "start",
             }}
             className="w-full"
           >
-          <CarouselContent>
-            {RESEARCH_CARDS.map((research, index) => (
-              <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/2">
-                <CustomCard
-                  cardImage={research.image}
-                  cardTitle={research.title}
-                  cardDescription={research.description}
-                  cardURL={research.url}
-                  cardBgColor={research.bgColor}
-                  cardTitleTextColor={research.titleTextColor}
-                  cardTextColor={research.textColor}
-                />
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-          <CarouselPrevious className="hover:cursor-pointer"/>
-          <CarouselNext className="hover:cursor-pointer"/>
-        </Carousel>
+            <CarouselContent>
+              {researchCards.map((research, index) => (
+                <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/2">
+                  <CustomCard
+                    cardImage={research.image}
+                    cardTitle={research.title}
+                    cardDescription={research.description}
+                    cardURL={research.url}
+                    cardBgColor={research.bgColor}
+                    cardTitleTextColor={research.titleTextColor}
+                    cardTextColor={research.textColor}
+                  />
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselPrevious className="hover:cursor-pointer"/>
+            <CarouselNext className="hover:cursor-pointer"/>
+          </Carousel>
+        ) : (
+          <p className="text-center text-gray-500">No hay investigaciones disponibles.</p>
+        )}
       </section>
     </main>
   );
