@@ -27,7 +27,14 @@ export async function getUserInfo({ user_id, access_token }) {
   return response;
 }
 
-export async function registerUser({email, password, first_name, last_name, user_type_id }) {
+export async function registerUser({
+  email,
+  password,
+  first_name,
+  last_name,
+  user_type_id,
+  firebase_id_token,
+}) {
   const formData = new FormData();
   formData.append("email", email);
   formData.append("password", password);
@@ -40,6 +47,7 @@ export async function registerUser({email, password, first_name, last_name, user
     mode: "cors",
     headers: {
       "Accept": "application/json",
+      ...(firebase_id_token ? { Authorization: `Bearer ${firebase_id_token}` } : {}),
     },
     body: formData,
   });
