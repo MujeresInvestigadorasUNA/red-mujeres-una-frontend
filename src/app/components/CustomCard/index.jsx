@@ -18,7 +18,7 @@ export default function CustomCard({
             hover:brightness-80 transition-all duration-200 h-full
             bg-[${cardBgColor}] text-[${cardTextColor}]`}>
                 <CardContent className="p-0 flex flex-col">
-                    {cardWithImage && (
+                    {cardWithImage && cardImage && (
                         <Image
                             src={cardImage}
                             alt={cardTitle}

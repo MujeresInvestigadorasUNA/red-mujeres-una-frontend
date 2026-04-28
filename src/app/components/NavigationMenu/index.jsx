@@ -44,100 +44,114 @@ export function CustomNavigationMenu() {
                         className="border-[#8A192A] border-3 rounded-full shadow"
                     />
                 </Link>
-                <NavigationMenu className="hidden md:flex">
-                    <NavigationMenuList>
-                        <NavigationMenuItem>
-                            <NavigationMenuTrigger
-                                className="bg-transparent text-white"
-                            >
-                                Foros
-                            </NavigationMenuTrigger>
-                            <NavigationMenuContent>
-                                <ul className="grid w-[300px] gap-4">
-                                    <li>
-                                        <NavigationMenuLink asChild>
-                                            <Link href="/Foros">
-                                                <div className="font-medium">Explorar Foros</div>
-                                                <div className="text-muted-foreground">
-                                                    Explora todos los foros publicados por la comunidad.
-                                                </div>
-                                            </Link>
-                                        </NavigationMenuLink>
-                                        <NavigationMenuLink asChild>
-                                            <Link href="/MiForo">
-                                                <div className="font-medium">Mi Foro</div>
-                                                <div className="text-muted-foreground">
-                                                    Accede a tu foro personal y gestiona tus publicaciones.
-                                                </div>
-                                            </Link>
-                                        </NavigationMenuLink>
-                                    </li>
-                                </ul>
-                            </NavigationMenuContent>
-                        </NavigationMenuItem>
-                        <NavigationMenuItem>
-                            <NavigationMenuTrigger
-                                className="bg-transparent hover:bg-transparent
-                            focus:bg-transparent active:bg-transparent text-white"
-                            >
-                                Investigaciones
-                            </NavigationMenuTrigger>
-                            <NavigationMenuContent>
-                                <ul className="grid w-[300px] gap-4">
-                                    <li>
-                                        <NavigationMenuLink asChild>
-                                            <Link href="/Investigaciones">
-                                                <div className="font-medium">Explorar Investigaciones</div>
-                                                <div className="text-muted-foreground">
-                                                    Explora todas las investigaciones publicadas por la comunidad.
-                                                </div>
-                                            </Link>
-                                        </NavigationMenuLink>
-                                        <NavigationMenuLink asChild>
-                                            <Link href="/MisInvestigaciones">
-                                                <div className="font-medium">Mis Investigaciones</div>
-                                                <div className="text-muted-foreground">
-                                                    Accede a tus investigaciones personales y gestiona tus publicaciones.
-                                                </div>
-                                            </Link>
-                                        </NavigationMenuLink>
-                                    </li>
-                                </ul>
-                            </NavigationMenuContent>
-                        </NavigationMenuItem>
-                        <NavigationMenuItem>
-                            <NavigationMenuTrigger
-                                className="bg-transparent hover:bg-transparent
-                            focus:bg-transparent active:bg-transparent text-white"
-                            >
-                                Cursos
-                            </NavigationMenuTrigger>
-                            <NavigationMenuContent>
-                                <ul className="grid w-[300px] gap-4">
-                                    <li>
-                                        <NavigationMenuLink asChild>
-                                            <Link href="/Cursos">
-                                                <div className="font-medium">Explorar Cursos</div>
-                                                <div className="text-muted-foreground">
-                                                    Explora todos los cursos disponibles en la plataforma.
-                                                </div>
-                                            </Link>
-                                        </NavigationMenuLink>
-                                        <NavigationMenuLink asChild>
-                                            <Link href="/MisCursos">
-                                                <div className="font-medium">Mis Cursos</div>
-                                                <div className="text-muted-foreground">
-                                                    Accede a tus cursos personales y gestiona tus inscripciones.
-                                                </div>
-                                            </Link>
-                                        </NavigationMenuLink>
-                                    </li>
-                                </ul>
-                            </NavigationMenuContent>
-                        </NavigationMenuItem>
-                    </NavigationMenuList>
-                    <NavigationMenuViewport />
-                </NavigationMenu>
+                {user ? (
+                    <NavigationMenu className="hidden md:flex">
+                        <NavigationMenuList>
+                            <NavigationMenuItem>
+                                <NavigationMenuTrigger
+                                    className="bg-transparent text-white"
+                                >
+                                    Foros
+                                </NavigationMenuTrigger>
+                                <NavigationMenuContent>
+                                    <ul className="grid w-[300px] gap-4">
+                                        <li>
+                                            <NavigationMenuLink asChild>
+                                                <Link href="/Foros">
+                                                    <div className="font-medium">Explorar Foros</div>
+                                                    <div className="text-muted-foreground">
+                                                        Explora todos los foros publicados por la comunidad.
+                                                    </div>
+                                                </Link>
+                                            </NavigationMenuLink>
+                                            <NavigationMenuLink asChild>
+                                                <Link href="/MiForo">
+                                                    <div className="font-medium">Mi Foro</div>
+                                                    <div className="text-muted-foreground">
+                                                        Accede a tu foro personal y gestiona tus publicaciones.
+                                                    </div>
+                                                </Link>
+                                            </NavigationMenuLink>
+                                        </li>
+                                    </ul>
+                                </NavigationMenuContent>
+                            </NavigationMenuItem>
+                            <NavigationMenuItem>
+                                <NavigationMenuTrigger
+                                    className="bg-transparent hover:bg-transparent
+                                focus:bg-transparent active:bg-transparent text-white"
+                                >
+                                    Investigaciones
+                                </NavigationMenuTrigger>
+                                <NavigationMenuContent>
+                                    <ul className="grid w-[300px] gap-4">
+                                        <li>
+                                            <NavigationMenuLink asChild>
+                                                <Link href="/Investigaciones">
+                                                    <div className="font-medium">Explorar Investigaciones</div>
+                                                    <div className="text-muted-foreground">
+                                                        Explora todas las investigaciones publicadas por la comunidad.
+                                                    </div>
+                                                </Link>
+                                            </NavigationMenuLink>
+                                            <NavigationMenuLink asChild>
+                                                <Link href="/MisInvestigaciones">
+                                                    <div className="font-medium">Mis Investigaciones</div>
+                                                    <div className="text-muted-foreground">
+                                                        Accede a tus investigaciones personales y gestiona tus publicaciones.
+                                                    </div>
+                                                </Link>
+                                            </NavigationMenuLink>
+                                        </li>
+                                    </ul>
+                                </NavigationMenuContent>
+                            </NavigationMenuItem>
+                            <NavigationMenuItem>
+                                <NavigationMenuTrigger
+                                    className="bg-transparent hover:bg-transparent
+                                focus:bg-transparent active:bg-transparent text-white"
+                                >
+                                    Cursos
+                                </NavigationMenuTrigger>
+                                <NavigationMenuContent>
+                                    <ul className="grid w-[300px] gap-4">
+                                        <li>
+                                            <NavigationMenuLink asChild>
+                                                <Link href="/Cursos">
+                                                    <div className="font-medium">Explorar Cursos</div>
+                                                    <div className="text-muted-foreground">
+                                                        Explora todos los cursos disponibles en la plataforma.
+                                                    </div>
+                                                </Link>
+                                            </NavigationMenuLink>
+                                            <NavigationMenuLink asChild>
+                                                <Link href="/MisCursos">
+                                                    <div className="font-medium">Mis Cursos</div>
+                                                    <div className="text-muted-foreground">
+                                                        Accede a tus cursos personales y gestiona tus inscripciones.
+                                                    </div>
+                                                </Link>
+                                            </NavigationMenuLink>
+                                        </li>
+                                    </ul>
+                                </NavigationMenuContent>
+                            </NavigationMenuItem>
+                        </NavigationMenuList>
+                        <NavigationMenuViewport />
+                    </NavigationMenu>
+                ) : (
+                    <div className="hidden md:flex items-center gap-6 text-white">
+                        <Link href="/Foros" className="hover:text-red-300 transition">
+                            Foros
+                        </Link>
+                        <Link href="/Investigaciones" className="hover:text-red-300 transition">
+                            Investigaciones
+                        </Link>
+                        <Link href="/Cursos" className="hover:text-red-300 transition">
+                            Cursos
+                        </Link>
+                    </div>
+                )}
                 <div className="flex items-center justify-end gap-2 min-w-[160px]">
                     <button
                         type="button"
@@ -181,12 +195,22 @@ export function CustomNavigationMenu() {
             </div>
             {mobileMenuOpen && (
                 <div className="mt-3 grid gap-2 rounded bg-[#b62116] p-3 text-sm shadow md:hidden">
-                    <Link href="/Foros" onClick={() => setMobileMenuOpen(false)}>Explorar Foros</Link>
-                    <Link href="/MiForo" onClick={() => setMobileMenuOpen(false)}>Mi Foro</Link>
-                    <Link href="/Investigaciones" onClick={() => setMobileMenuOpen(false)}>Explorar Investigaciones</Link>
-                    <Link href="/MisInvestigaciones" onClick={() => setMobileMenuOpen(false)}>Mis Investigaciones</Link>
-                    <Link href="/Cursos" onClick={() => setMobileMenuOpen(false)}>Explorar Cursos</Link>
-                    <Link href="/MisCursos" onClick={() => setMobileMenuOpen(false)}>Mis Cursos</Link>
+                    {user ? (
+                        <>
+                            <Link href="/Foros" onClick={() => setMobileMenuOpen(false)}>Explorar Foros</Link>
+                            <Link href="/MiForo" onClick={() => setMobileMenuOpen(false)}>Mi Foro</Link>
+                            <Link href="/Investigaciones" onClick={() => setMobileMenuOpen(false)}>Explorar Investigaciones</Link>
+                            <Link href="/MisInvestigaciones" onClick={() => setMobileMenuOpen(false)}>Mis Investigaciones</Link>
+                            <Link href="/Cursos" onClick={() => setMobileMenuOpen(false)}>Explorar Cursos</Link>
+                            <Link href="/MisCursos" onClick={() => setMobileMenuOpen(false)}>Mis Cursos</Link>
+                        </>
+                    ) : (
+                        <>
+                            <Link href="/Foros" onClick={() => setMobileMenuOpen(false)}>Foros</Link>
+                            <Link href="/Investigaciones" onClick={() => setMobileMenuOpen(false)}>Investigaciones</Link>
+                            <Link href="/Cursos" onClick={() => setMobileMenuOpen(false)}>Cursos</Link>
+                        </>
+                    )}
                     <div className="mt-2 border-t border-white/30 pt-2">
                         {user ? (
                             <div className="grid gap-2">

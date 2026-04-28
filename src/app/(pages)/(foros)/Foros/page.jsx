@@ -2,57 +2,25 @@
 import { iconClockwise, iconSearch } from "@/app/assets/icons";
 import CustomCard from "@/app/components/CustomCard";
 import { useUser } from "@/app/contexts/UserContext";
-import { getForums } from "@/lib/api/forums";
+import { getResearchers } from "@/lib/api/forums";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-const FORUMS_CARDS = [{
-    id: 1,
-    image: "/images/jinette.png",
-    title: "Jinette Naranjo",
-    description:
-        "Jinette Naranjo es catedrática de Fisiología y doctora en Farmacia con una amplia trayectoria docente e investigadora.",
-    url: "/Foros/jinette-naranjo"
-}, {
-    id: 2,
-    image: "/images/kattia.png",
-    title: "Kattia Vasconcelos ",
-    description:
-        "Kattia Vasconcelos es psicóloga graduada de la Universidad de Costa Rica, doctora por la Universidad Nacional Autónoma de México (UNAM).",
-    url: "/Foros/kattia-vasconcelos"
-}, {
-    id: 3,
-    image: "/images/mildred.png",
-    title: "Mildred Arguedas",
-    description:
-        "Bioeticista con amplia experiencia en ética de la investigación y la atención en salud.",
-    url: "/Foros/mildred-arguedas"
-}, {
-    id: 4,
-    image: "/images/anayudel.png",
-    title: "Anayudel Gutierrez",
-    description:
-        "Investigadora del CIEM con un enfoque en estudios de género y políticas públicas.",
-    url: "/Foros/anayudel-gutierrez"
-}, {
-    id: 5,
-    image: "/images/brenda.png",
-    title: "Brenda Jiménez",
-    description:
-        "Investigadora con experiencia en ciencias sociales y desarrollo comunitario.",
-    url: "/Foros/brenda-jimenez"
-}];
+const FORUM_PLACEHOLDER_IMAGE = "/images/jinette.png";
 
 export default function Foros() {
-    const { user } = useUser();
     const [forums, setForums] = useState([]);
 
     const fetchForums = async () => {
-        const response = await getForums();
-        if (response.ok) {
-            const data = await response.json();
-            setForums(data);
-        } else {
+        try {
+            const data = await getResearchers(0);
+            if (data && data.length > 0) {
+                setForums(data);
+            } else {
+                toast.error("No hay foros disponibles");
+            }
+        } catch (error) {
+            console.error("Error fetching forums:", error);
             toast.error("Error al cargar los foros");
         }
     };
@@ -99,10 +67,10 @@ export default function Foros() {
                 {forums.map((forum, index) => (
                     <div key={index} className="flex-fill flex-grow flex-shrink basis-[30%] min-w-[250px]">
                         <CustomCard
-                            cardImage={forum?.user?.photo}
-                            cardTitle={forum.user?.first_name + " " + forum.user?.last_name}
+                            cardImage={forum?.photo || FORUM_PLACEHOLDER_IMAGE}
+                            cardTitle={forum.first_name + " " + forum.last_name}
                             cardDescription={forum.user_description}
-                            cardURL={`/Foros/${forum.user_id}`}
+                            cardURL={`/Foros/${forum.id}`}
                             cardBgColor="#E7473C"
                             cardTitleTextColor="#F0F0F0"
                             cardTextColor="#F0F0F0"
