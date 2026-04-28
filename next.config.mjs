@@ -6,6 +6,10 @@ const nextConfig = {
         protocol: "https",
         hostname: "rdmaunablob.blob.core.windows.net",
       },
+      {
+        protocol: "https",
+        hostname: "rdmaunablob2.blob.core.windows.net",
+      },
     ],
   },
 };
