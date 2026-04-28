@@ -1,4 +1,4 @@
-export async function getResearch() {
+export async function getResearch(limit = 5) {
   const tokenFromStorage = typeof window !== "undefined"
     ? localStorage.getItem("access_token")
     : null;
@@ -12,7 +12,11 @@ export async function getResearch() {
   }
 
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/research/`, {
+    const url = limit 
+      ? `${process.env.NEXT_PUBLIC_API_URL}/research/?limit=${limit}`
+      : `${process.env.NEXT_PUBLIC_API_URL}/research/`;
+
+    const response = await fetch(url, {
       method: "GET",
       headers,
     });

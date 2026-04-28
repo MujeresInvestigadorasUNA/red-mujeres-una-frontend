@@ -1,9 +1,36 @@
-export async function getCourses() {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses`, {
-    method: "GET",
-    headers: { "Content-Type": "application/json" },
-  });
-  return response;
+export async function getCourses(limit = 5) {
+  const tokenFromStorage = typeof window !== "undefined"
+    ? localStorage.getItem("access_token")
+    : null;
+
+  const headers = {
+    Accept: "application/json",
+  };
+
+  if (tokenFromStorage) {
+    headers.Authorization = `Bearer ${tokenFromStorage}`;
+  }
+
+  try {
+    const url = limit
+      ? `${process.env.NEXT_PUBLIC_API_URL}/courses/?limit=${limit}`
+      : `${process.env.NEXT_PUBLIC_API_URL}/courses/`;
+
+    const response = await fetch(url, {
+      method: "GET",
+      headers,
+    });
+
+    if (!response.ok) {
+      console.error("Error fetching courses:", response.statusText);
+      return [];
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching courses:", error);
+    return [];
+  }
 }
 
 export async function getPublicCourses() {

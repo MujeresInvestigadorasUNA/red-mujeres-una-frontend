@@ -12,43 +12,8 @@ import {
 } from "@/components/ui/carousel";
 import CustomCard from "./components/CustomCard";
 import { getResearch } from "@/lib/api/research";
-
-const FORUMS_CARDS = [{
-  id: 1,
-  image: "/images/jinette.png",
-  title: "Jinette Naranjo",
-  description:
-    "Jinette Naranjo es catedrática de Fisiología y doctora en Farmacia con una amplia trayectoria docente e investigadora.",
-  url: "/Foros/jinette-naranjo"
-}, {
-  id: 2,
-  image: "/images/kattia.png",
-  title: "Kattia Vasconcelos",
-  description:
-    "Vasconcelos es psicóloga graduada de la Universidad de Costa Rica, doctora por la Universidad Nacional Autónoma de México (UNAM).",
-  url: "/Foros/kattia-vasconcelos"
-}, {
-  id: 3,
-  image: "/images/mildred.png",
-  title: "Mildred Soto",
-  description:
-    "Bioeticista con amplia experiencia en ética de la investigación y la atención en salud.",
-  url: "/Foros/mildred-soto"
-}, {
-  id: 4,
-  image: "/images/anayudel.png",
-  title: "Anayudel Gutierrez",
-  description:
-    "Investigadora del CIEM con un enfoque en estudios de género y políticas públicas.",
-  url: "/Foros/anayudel-gutierrez"
-}, {
-  id: 5,
-  image: "/images/brenda.png",
-  title: "Brenda Jiménez",
-  description:
-    "Investigadora con experiencia en ciencias sociales y desarrollo comunitario.",
-  url: "/Foros/brenda-jimenez"
-}];
+import { getCourses } from "@/lib/api/courses";
+import { getResearchers } from "@/lib/api/forums";
 
 const RESEARCH_PLACEHOLDER_IMAGES = [
   "/images/curso1.png",
@@ -56,11 +21,18 @@ const RESEARCH_PLACEHOLDER_IMAGES = [
   "/images/curso3.png",
 ];
 
+const COURSE_PLACEHOLDER_IMAGE = "/images/curso1.png";
+const FORUM_PLACEHOLDER_IMAGE = "/images/jinette.png";
+
 const RESEARCH_PLACEHOLDER_DESCRIPTION = "Explora esta investigación destacada y accede a recursos académicos de calidad.";
 
 export default function Home() {
   const [researchCards, setResearchCards] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [courseCards, setCourseCards] = useState([]);
+  const [forumCards, setForumCards] = useState([]);
+  const [loadingResearch, setLoadingResearch] = useState(true);
+  const [loadingCourses, setLoadingCourses] = useState(true);
+  const [loadingForums, setLoadingForums] = useState(true);
 
   useEffect(() => {
     const fetchResearchData = async () => {
@@ -84,11 +56,65 @@ export default function Home() {
       } catch (error) {
         console.error("Failed to fetch research:", error);
       } finally {
-        setLoading(false);
+        setLoadingResearch(false);
       }
     };
 
     fetchResearchData();
+  }, []);
+
+  useEffect(() => {
+    const fetchCoursesData = async () => {
+      try {
+        const data = await getCourses();
+        
+        // Transform API response to card format
+        const transformedCards = data.map((course) => ({
+          id: course.id,
+          image: course.photo || COURSE_PLACEHOLDER_IMAGE,
+          title: course.title,
+          description: course.description || "Accede a este curso y mejora tus habilidades académicas.",
+          url: `/Cursos/${course.id}`,
+          bgColor: "#F0F0F0",
+          titleTextColor: "#831d16",
+          textColor: "#E7473C",
+          withImage: false
+        }));
+        
+        setCourseCards(transformedCards);
+      } catch (error) {
+        console.error("Failed to fetch courses:", error);
+      } finally {
+        setLoadingCourses(false);
+      }
+    };
+
+    fetchCoursesData();
+  }, []);
+
+  useEffect(() => {
+    const fetchForumsData = async () => {
+      try {
+        const data = await getResearchers();
+        
+        // Transform API response to card format
+        const transformedCards = data.map((researcher) => ({
+          id: researcher.id,
+          image: researcher.photo || FORUM_PLACEHOLDER_IMAGE,
+          title: `${researcher.first_name} ${researcher.last_name}`,
+          description: researcher.user_description || researcher.user_profession || "Investigadora destacada de la Red.",
+          url: `/Foros/${researcher.id}`
+        }));
+        
+        setForumCards(transformedCards);
+      } catch (error) {
+        console.error("Failed to fetch forums:", error);
+      } finally {
+        setLoadingForums(false);
+      }
+    };
+
+    fetchForumsData();
   }, []);
 
   return (
@@ -104,27 +130,33 @@ export default function Home() {
         </p>
         <div className="mt-10 px-10">
           <h2 className="text-xl font-bold mt-10 mb-5">Foros Destacados</h2>
-          <Carousel
-            opts={{
-              align: "start",
-            }}
-            className="w-full"
-          >
-            <CarouselContent>
-              {FORUMS_CARDS.map((forum, index) => (
-                <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/4">
-                  <CustomCard
-                    cardImage={forum.image}
-                    cardTitle={forum.title}
-                    cardDescription={forum.description}
-                    cardURL={forum.url}
-                  />
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <CarouselPrevious className="hover:cursor-pointer border-[#F0F0F0] bg-[#831d16] text-[#F0F0F0] shadow-md hover:bg-[#6f1913]"/>
-            <CarouselNext className="hover:cursor-pointer border-[#F0F0F0] bg-[#831d16] text-[#F0F0F0] shadow-md hover:bg-[#6f1913]"/>
-          </Carousel>
+          {loadingForums ? (
+            <p className="text-center text-gray-300">Cargando foros...</p>
+          ) : forumCards.length > 0 ? (
+            <Carousel
+              opts={{
+                align: "start",
+              }}
+              className="w-full"
+            >
+              <CarouselContent>
+                {forumCards.map((forum, index) => (
+                  <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/4">
+                    <CustomCard
+                      cardImage={forum.image}
+                      cardTitle={forum.title}
+                      cardDescription={forum.description}
+                      cardURL={forum.url}
+                    />
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious className="hover:cursor-pointer border-[#F0F0F0] bg-[#831d16] text-[#F0F0F0] shadow-md hover:bg-[#6f1913]"/>
+              <CarouselNext className="hover:cursor-pointer border-[#F0F0F0] bg-[#831d16] text-[#F0F0F0] shadow-md hover:bg-[#6f1913]"/>
+            </Carousel>
+          ) : (
+            <p className="text-center text-gray-300">No hay foros disponibles.</p>
+          )}
         </div>
       </section>
       <section className="px-20 py-10 toolsSection">
@@ -171,33 +203,24 @@ export default function Home() {
       <section className="flex flex-wrap items-stretch gap-10 px-20 py-10 bg-[#b62116] text-[#F0F0F0] cursesSection">
         <div className="flex min-w-[280px] flex-1 basis-[320px] flex-col gap-2">
           <h2 className="text-xl font-bold mb-2">Cursos Populares</h2>
-          <CustomCard
-            cardTitle="Introducción a la Investigación Académica"
-            cardDescription="Un curso básico para entender los fundamentos de la investigación académica."
-            cardURL="/Cursos"
-            cardBgColor="#F0F0F0"
-            cardTitleTextColor="#831d16"
-            cardTextColor="#E7473C"
-            cardWithImage={false}
-          />
-          <CustomCard
-            cardTitle="Gestión del Tiempo para Académicas"
-            cardDescription="Aprende técnicas efectivas de gestión del tiempo para equilibrar tus responsabilidades académicas y personales."
-            cardURL="/Cursos"
-            cardBgColor="#F0F0F0"
-            cardTitleTextColor="#831d16"
-            cardTextColor="#E7473C"
-            cardWithImage={false}
-          />
-          <CustomCard
-            cardTitle="Redacción Académica"
-            cardDescription="Mejora tus habilidades de redacción académica con este curso avanzado."
-            cardURL="/Cursos"
-            cardBgColor="#F0F0F0"
-            cardTitleTextColor="#831d16"
-            cardTextColor="#E7473C"
-            cardWithImage={false}
-          />
+          {loadingCourses ? (
+            <p className="text-center text-gray-200">Cargando cursos...</p>
+          ) : courseCards.length > 0 ? (
+            courseCards.map((course) => (
+              <CustomCard
+                key={course.id}
+                cardTitle={course.title}
+                cardDescription={course.description}
+                cardURL={course.url}
+                cardBgColor={course.bgColor}
+                cardTitleTextColor={course.titleTextColor}
+                cardTextColor={course.textColor}
+                cardWithImage={course.withImage}
+              />
+            ))
+          ) : (
+            <p className="text-center text-gray-200">No hay cursos disponibles.</p>
+          )}
           <Link
             href="/Cursos"
             className="bg-[#E7473C] text-white text-center px-4 py-2 rounded
@@ -220,7 +243,7 @@ export default function Home() {
       </section>
       <section className="px-20 py-10 toolsSection">
         <h2 className="text-xl font-bold mb-5">Investigaciones Recientes</h2>
-        {loading ? (
+        {loadingResearch ? (
           <p className="text-center text-gray-500">Cargando investigaciones...</p>
         ) : researchCards.length > 0 ? (
           <Carousel

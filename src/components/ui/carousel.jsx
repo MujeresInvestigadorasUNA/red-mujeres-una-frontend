@@ -160,6 +160,7 @@ function CarouselPrevious({
         : "-top-12 left-1/2 -translate-x-1/2 rotate-90", className)}
       disabled={!canScrollPrev}
       onClick={scrollPrev}
+      suppressHydrationWarning
       {...props}>
       <ArrowLeft />
       <span className="sr-only">Previous slide</span>
@@ -185,6 +186,7 @@ function CarouselNext({
         : "-bottom-12 left-1/2 -translate-x-1/2 rotate-90", className)}
       disabled={!canScrollNext}
       onClick={scrollNext}
+      suppressHydrationWarning
       {...props}>
       <ArrowRight />
       <span className="sr-only">Next slide</span>
