@@ -87,12 +87,15 @@ export default function Cursos() {
                 {loadingCourses ? (
                     <>
                         {[...Array(6)].map((_, index) => (
-                            <div key={index} className="flex-1 min-w-[250px] basis-[calc(50%-8px)]">
-                                <div className="p-3 rounded-lg bg-gray-100">
-                                    <Skeleton className="h-40 w-full rounded-lg mb-3" />
-                                    <Skeleton className="h-6 w-3/4 mb-2" />
-                                    <Skeleton className="h-4 w-full mb-2" />
-                                    <Skeleton className="h-4 w-5/6" />
+                            <div key={index} className="grow min-w-[300px]">
+                                <div className="p-0 overflow-hidden rounded-lg border-none shadow">
+                                    <div className="px-6 pt-7 pb-4">
+                                        <Skeleton className="h-6 w-3/4 mb-2" />
+                                        <Skeleton className="h-4 w-full mb-3" />
+                                    </div>
+                                    <div className="relative p-0 rounded bg-gray-100">
+                                        <Skeleton className="h-60 w-full rounded-none" />
+                                    </div>
                                 </div>
                             </div>
                         ))}
