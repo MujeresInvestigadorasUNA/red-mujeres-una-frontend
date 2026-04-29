@@ -5,6 +5,7 @@ import { SearchIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ButtonGroup } from "@/components/ui/button-group"
 import { Input } from "@/components/ui/input"
+import { Skeleton } from "@/components/ui/skeleton";
 import {
     Select,
     SelectContent,
@@ -13,40 +14,113 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { createCourse, getCoursesByUserId } from "@/lib/api/courses";
 import CustomCard2 from "@/app/components/CustomCard2";
+import { toast } from "sonner";
 
 export default function MisCursos() {
     const { user } = useUser();
-    const [courses, setCourses] = useState([]);
+    const [allCourses, setAllCourses] = useState([]);
+    const [displayedCourses, setDisplayedCourses] = useState([]);
+    const [loadingCourses, setLoadingCourses] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
+    const [displayCount, setDisplayCount] = useState(6);
+    const [filterType, setFilterType] = useState("");
+    const [searchQuery, setSearchQuery] = useState("");
+    const ITEMS_PER_PAGE = 6;
+
+    const userId = useMemo(() => user?.id ?? user?.user_id ?? null, [user]);
 
     const fetchCourses = async () => {
+        if (!userId) {
+            setLoadingCourses(false);
+            return;
+        }
+
         try {
-            const response = await getCoursesByUserId({ user_id: user.id });
+            const response = await getCoursesByUserId({ user_id: userId });
             const data = await response.json();
-            setCourses(data);
-        } catch (error) {
-            console.error("Error fetching courses:", error);
+            setAllCourses(data);
+            setDisplayedCourses(data.slice(0, ITEMS_PER_PAGE));
+        }
+        catch (error) {
+            console.error("Error al cargar los cursos:", error);
+            toast.error("Error al cargar los cursos.");
+        } finally {
+            setLoadingCourses(false);
         }
     };
 
-    useEffect(() => {
-        if (user && user.id) {
-            fetchCourses();
+    const handleLoadMore = async () => {
+        setLoadingMore(true);
+        setTimeout(() => {
+            const newDisplayCount = displayCount + ITEMS_PER_PAGE;
+            setDisplayedCourses(allCourses.slice(0, newDisplayCount));
+            setDisplayCount(newDisplayCount);
+            setLoadingMore(false);
+        }, 300);
+    };
+
+    const applyFilter = (courses, query) => {
+        if (!query.trim()) {
+            return courses;
         }
-    }, [user]);
+        
+        const lowerQuery = query.toLowerCase();
+        
+        return courses.filter((course) => {
+            switch (filterType) {
+                case "titulo":
+                    return course.title?.toLowerCase().includes(lowerQuery) || false;
+                case "descripcion":
+                    return course.description?.toLowerCase().includes(lowerQuery) || false;
+                case "fechaInicio":
+                    return course.startDate?.toLowerCase().includes(lowerQuery) || false;
+                default:
+                    return true;
+            }
+        });
+    };
+
+    const handleSearch = () => {
+        const filtered = applyFilter(allCourses, searchQuery);
+        setDisplayedCourses(filtered.slice(0, ITEMS_PER_PAGE));
+        setDisplayCount(ITEMS_PER_PAGE);
+    };
+
+    const handleFilterChange = (value) => {
+        setFilterType(value);
+        setSearchQuery("");
+        setDisplayedCourses(allCourses.slice(0, ITEMS_PER_PAGE));
+        setDisplayCount(ITEMS_PER_PAGE);
+    };
+
+    const handleRefresh = () => {
+        setSearchQuery("");
+        setFilterType("");
+        setDisplayedCourses(allCourses.slice(0, ITEMS_PER_PAGE));
+        setDisplayCount(ITEMS_PER_PAGE);
+    };
+
+    useEffect(() => {
+        setLoadingCourses(true);
+        fetchCourses();
+    }, [userId]);
 
     const handleOnAddCourse = async () => {
         try {
-            const response = await createCourse({ user_id: user.id });
+            const response = await createCourse({ user_id: userId });
             if (response.ok) {
+                toast.success("Curso creado correctamente.");
                 fetchCourses();
             } else {
                 console.error("Error creating course:", response.statusText);
+                toast.error("Error al crear el curso.");
             }
         } catch (error) {
             console.error("Error creating course:", error);
+            toast.error("Error al crear el curso.");
         }
     };
 
@@ -60,28 +134,28 @@ export default function MisCursos() {
                 >
                     Agregar Curso
                 </Button>
-                <Select className="bg-[#fff] rounded">
+                <Select value={filterType} onValueChange={handleFilterChange}>
                     <SelectTrigger className="w-[180px] bg-[#fff] rounded">
-                        <SelectValue placeholder="Seleccionar Filtro" />
+                        <SelectValue placeholder="Filtrar Por" />
                     </SelectTrigger>
                     <SelectContent>
                         <SelectGroup>
-                            <SelectItem value="title">Nombre</SelectItem>
-                            <SelectItem value="description">Descripcion</SelectItem>
-                            <SelectItem value="startDate">Fecha Inicio</SelectItem>
-                            <SelectItem value="endDate">Fecha Final</SelectItem>
-                            <SelectItem value="registrationEndDate">Fecha Final Inscripción</SelectItem>
-                            <SelectItem value="spots">Cupos</SelectItem>
-                            <SelectItem value="status">Estado</SelectItem>
+                            <SelectItem value="titulo">Nombre</SelectItem>
+                            <SelectItem value="descripcion">Descripción</SelectItem>
+                            <SelectItem value="fechaInicio">Fecha Inicio</SelectItem>
                         </SelectGroup>
                     </SelectContent>
                 </Select>
                 <ButtonGroup className="rounded bg-[#fff] w-full">
                     <Input
                         className="rounded"
-                        placeholder="Search..."
+                        placeholder="Buscar..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                     />
                     <Button
+                        onClick={handleSearch}
                         className="bg-[#E7473C] hover:bg-[#831d16] rounded text-white
                         hover:text-white hover:cursor-pointer"
                         variant="outline"
@@ -90,22 +164,59 @@ export default function MisCursos() {
                         <SearchIcon />
                     </Button>
                 </ButtonGroup>
-                <Button className="bg-[#fff] hover:bg-[#f0f0f0] rounded text-[#831d16]
-                hover:text-[#831d16] hover:cursor-pointer shadow">
+                <Button 
+                    onClick={handleRefresh}
+                    className="bg-[#fff] hover:bg-[#f0f0f0] rounded text-[#831d16]
+                    hover:text-[#831d16] hover:cursor-pointer shadow"
+                >
                     {iconClockwise({})}
                 </Button>
             </div>
             <div className="flex flex-wrap gap-3">
-                {courses.map((course, index) => (
-                    <CustomCard2
-                        key={index}
-                        cardHref={`/MisCursos/${course.id}`}
-                        cardTitle={course.title}
-                        cardDescription={course.description}
-                        cardImage={course.photo}
-                    />
-                ))}
+                {loadingCourses ? (
+                    <>
+                        {[...Array(6)].map((_, index) => (
+                            <div key={index} className="grow min-w-[300px]">
+                                <div className="p-0 overflow-hidden rounded-lg border-none shadow">
+                                    <div className="px-6 pt-7 pb-4">
+                                        <Skeleton className="h-6 w-3/4 mb-2" />
+                                        <Skeleton className="h-4 w-full mb-3" />
+                                    </div>
+                                    <div className="relative p-0 rounded bg-gray-100">
+                                        <Skeleton className="h-60 w-full rounded-none" />
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </>
+                ) : displayedCourses.length > 0 ? (
+                    displayedCourses.map((course, index) => (
+                        <CustomCard2
+                            key={course.id || index}
+                            cardHref={`/MisCursos/${course.id}`}
+                            cardTitle={course.title}
+                            cardDescription={course.description}
+                            cardImage={course.photo}
+                        />
+                    ))
+                ) : (
+                    <div className="w-full text-center py-10">
+                        <p className="text-gray-500 text-lg">No hay cursos disponibles.</p>
+                    </div>
+                )}
             </div>
+            {displayCount < allCourses.length && !loadingCourses && (
+                <div className="flex justify-center mt-8">
+                    <Button
+                        onClick={handleLoadMore}
+                        disabled={loadingMore}
+                        className="bg-[#E7473C] hover:bg-[#831d16] rounded text-white
+                        hover:text-white hover:cursor-pointer w-full"
+                    >
+                        {loadingMore ? "Cargando..." : "Cargar más"}
+                    </Button>
+                </div>
+            )}
         </main>
     );
 }

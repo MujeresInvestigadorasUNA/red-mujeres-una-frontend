@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { ButtonGroup } from "@/components/ui/button-group"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
     Select,
     SelectContent,
@@ -33,9 +34,9 @@ import { iconClockwise, iconEye, iconHeart } from "@/app/assets/icons";
 
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState, useEffect } from "react";
 import { UploadCloudIcon } from "lucide-react";
-import { createResearch } from "@/lib/api/research";
+import { createResearch, getResearchByUserId } from "@/lib/api/research";
 import { toast } from "sonner";
 
 export default function MisInvestigaciones() {
@@ -47,8 +48,80 @@ export default function MisInvestigaciones() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [title, setTitle] = useState("");
     const [document, setDocument] = useState(null);
+    const [allResearch, setAllResearch] = useState([]);
+    const [displayedResearch, setDisplayedResearch] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
+    const [displayCount, setDisplayCount] = useState(6);
+    const [filterType, setFilterType] = useState("");
+    const [searchQuery, setSearchQuery] = useState("");
+    const ITEMS_PER_PAGE = 6;
 
     const userId = useMemo(() => user?.id ?? user?.user_id ?? null, [user]);
+
+    useEffect(() => {
+        const fetchUserResearch = async () => {
+            if (!userId) {
+                setLoading(false);
+                return;
+            }
+            setLoading(true);
+            const data = await getResearchByUserId(userId);
+            setAllResearch(data);
+            setDisplayedResearch(data.slice(0, ITEMS_PER_PAGE));
+            setLoading(false);
+        };
+        fetchUserResearch();
+    }, [userId]);
+
+    const handleLoadMore = async () => {
+        setLoadingMore(true);
+        setTimeout(() => {
+            const newDisplayCount = displayCount + ITEMS_PER_PAGE;
+            setDisplayedResearch(allResearch.slice(0, newDisplayCount));
+            setDisplayCount(newDisplayCount);
+            setLoadingMore(false);
+        }, 300);
+    };
+
+    const applyFilter = (research, query) => {
+        if (!query.trim()) {
+            return research;
+        }
+
+        const lowerQuery = query.toLowerCase();
+
+        return research.filter((item) => {
+            switch (filterType) {
+                case "titulo":
+                    return item.title?.toLowerCase().includes(lowerQuery) || false;
+                case "contenido":
+                    return item.description?.toLowerCase().includes(lowerQuery) || false;
+                default:
+                    return true;
+            }
+        });
+    };
+
+    const handleSearch = () => {
+        const filtered = applyFilter(allResearch, searchQuery);
+        setDisplayedResearch(filtered.slice(0, ITEMS_PER_PAGE));
+        setDisplayCount(ITEMS_PER_PAGE);
+    };
+
+    const handleFilterChange = (value) => {
+        setFilterType(value);
+        setSearchQuery("");
+        setDisplayedResearch(allResearch.slice(0, ITEMS_PER_PAGE));
+        setDisplayCount(ITEMS_PER_PAGE);
+    };
+
+    const handleRefresh = () => {
+        setSearchQuery("");
+        setFilterType("");
+        setDisplayedResearch(allResearch.slice(0, ITEMS_PER_PAGE));
+        setDisplayCount(ITEMS_PER_PAGE);
+    };
 
     const resetResearchForm = () => {
         setTitle("");
@@ -150,6 +223,12 @@ export default function MisInvestigaciones() {
             toast.success("Investigación creada correctamente.");
             setIsModalOpen(false);
             resetResearchForm();
+
+            // Refresh the research list
+            const updatedData = await getResearchByUserId(userId);
+            setAllResearch(updatedData);
+            setDisplayedResearch(updatedData.slice(0, ITEMS_PER_PAGE));
+            setDisplayCount(ITEMS_PER_PAGE);
         } catch (error) {
             console.error(error);
             toast.error("Error de conexión al crear la investigación.");
@@ -168,25 +247,27 @@ export default function MisInvestigaciones() {
                 >
                     Agregar Investigación
                 </Button>
-                <Select className="bg-[#fff] rounded">
+                <Select value={filterType} onValueChange={handleFilterChange}>
                     <SelectTrigger className="w-[180px] bg-[#fff] rounded">
                         <SelectValue placeholder="Seleccionar Filtro" />
                     </SelectTrigger>
                     <SelectContent>
                         <SelectGroup>
-                            <SelectItem value="title">Titulo</SelectItem>
-                            <SelectItem value="content">Contenido</SelectItem>
-                            <SelectItem value="topics">Temas</SelectItem>
-                            <SelectItem value="isPublic">Estado</SelectItem>
+                            <SelectItem value="titulo">Titulo</SelectItem>
+                            <SelectItem value="contenido">Contenido</SelectItem>
                         </SelectGroup>
                     </SelectContent>
                 </Select>
                 <ButtonGroup className="rounded bg-[#fff] w-full">
                     <Input
                         className="rounded"
-                        placeholder="Search..."
+                        placeholder="Buscar..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                     />
                     <Button
+                        onClick={handleSearch}
                         className="bg-[#E7473C] hover:bg-[#831d16] rounded text-white
                         hover:text-white hover:cursor-pointer"
                         variant="outline"
@@ -195,69 +276,108 @@ export default function MisInvestigaciones() {
                         <SearchIcon />
                     </Button>
                 </ButtonGroup>
-                <Button className="bg-[#fff] hover:bg-[#f0f0f0] rounded text-[#831d16]
-                hover:text-[#831d16] hover:cursor-pointer shadow">
+                <Button 
+                    onClick={handleRefresh}
+                    className="bg-[#fff] hover:bg-[#f0f0f0] rounded text-[#831d16]
+                    hover:text-[#831d16] hover:cursor-pointer shadow">
                     {iconClockwise({})}
                 </Button>
             </div>
             <div className="flex flex-wrap gap-3">
-                <Link href={`/MisInvestigaciones/1`} className="grow">
-                    <Card 
-                        className="p-0 overflow-hidden rounded-lg
-                        hover:brightness-80 hover:cursor-pointer shadow border-none
-                        min-w-[300px]"
-                    >
-                        <CardHeader className="px-6 pt-7">
-                            <div className="flex items-center justify-between
-                            flex-wrap gap-2">
-                                <CardTitle className="text-nowrap">
-                                    Investigación Titulo
-                                </CardTitle>
-                                <div 
-                                    className="flex gap-5 text-sm text-gray-600
-                                    text-nowrap"
-                                    style={{fontSize: "0.8rem"}}
-                                >
-                                    <span
-                                        className="flex items-center gap-1"
-                                    >
-                                        {iconHeart({ size: 12 })}
-                                        100
-                                    </span>
-                                    <span
-                                        className="flex items-center gap-1"
-                                    >
-                                        {iconEye({ size: 12 })}
-                                        100
-                                    </span>
+                {loading ? (
+                    <>
+                        {[...Array(6)].map((_, index) => (
+                            <div key={index} className="grow min-w-[300px]">
+                                <div className="p-0 overflow-hidden rounded-lg border-none shadow">
+                                    <div className="px-6 pt-7 pb-4">
+                                        <Skeleton className="h-6 w-3/4 mb-2" />
+                                        <Skeleton className="h-4 w-full mb-3" />
+                                    </div>
+                                    <div className="relative p-0 rounded bg-gray-100">
+                                        <Skeleton className="h-60 w-full rounded-none" />
+                                    </div>
                                 </div>
                             </div>
-                            <CardDescription>
-                                Descripción de la investigación lore
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent className="relative p-0 rounded bg-[#000]">
-                            <Image
-                                src="/images/curso1.png"
-                                alt="Investigación"
-                                width={3000}
-                                height={3000}
-                                className="object-cover brightness-80 max-h-60
-                                w-full"
-                            />
-                            {/* Overlay badges */}
-                            <div className="absolute bottom-5 left-4 flex gap-1">
-                                <Badge variant="secondary">
-                                    Badge
-                                </Badge>
-                                <Badge variant="secondary">Badge</Badge>
-                                <Badge variant="secondary">Badge</Badge>
-                                <Badge variant="secondary">Badge</Badge>
-                            </div>
-                        </CardContent>
-                    </Card>
-                </Link>
+                        ))}
+                    </>
+                ) : displayedResearch.length > 0 ? (
+                    displayedResearch.map((item) => (
+                        <Link key={item.id} href={`/MisInvestigaciones/${item.id}`} className="grow">
+                            <Card
+                                className="p-0 overflow-hidden rounded-lg
+                                hover:brightness-80 hover:cursor-pointer shadow border-none
+                                min-w-[300px]"
+                            >
+                                <CardHeader className="px-6 pt-7">
+                                    <div className="flex items-center justify-between
+                                    flex-wrap gap-2">
+                                        <CardTitle className="text-nowrap">
+                                            {item.title}
+                                        </CardTitle>
+                                        <div
+                                            className="flex gap-5 text-sm text-gray-600
+                                            text-nowrap"
+                                            style={{ fontSize: "0.8rem" }}
+                                        >
+                                            <span
+                                                className="flex items-center gap-1"
+                                            >
+                                                {iconHeart({ size: 12 })}
+                                                0
+                                            </span>
+                                            <span
+                                                className="flex items-center gap-1"
+                                            >
+                                                {iconEye({ size: 12 })}
+                                                0
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <CardDescription>
+                                        {item.description || "Sin descripción"}
+                                    </CardDescription>
+                                </CardHeader>
+                                <CardContent className="relative p-0 rounded">
+                                    <Image
+                                        src={item.vector_link || "/images/curso1.png"}
+                                        alt={item.title}
+                                        width={3000}
+                                        height={3000}
+                                        className="object-cover brightness-80 max-h-60
+                                        w-full"
+                                        onError={(e) => {
+                                            e.target.src = "/images/curso1.png";
+                                        }}
+                                    />
+                                    {/* Overlay badges */}
+                                    <div className="absolute bottom-5 left-4 flex gap-1">
+                                        <Badge variant="secondary">
+                                            Badge
+                                        </Badge>
+                                        <Badge variant="secondary">Badge</Badge>
+                                        <Badge variant="secondary">Badge</Badge>
+                                        <Badge variant="secondary">Badge</Badge>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </Link>
+                    ))
+                ) : (
+                    <p>No hay investigaciones disponibles</p>
+                )}
             </div>
+            {displayCount < allResearch.length && !loading && (
+                <div className="flex justify-center mt-8">
+                    <Button
+                        onClick={handleLoadMore}
+                        disabled={loadingMore}
+                        className="bg-[#E7473C] hover:bg-[#831d16] rounded text-white
+                        hover:text-white hover:cursor-pointer w-full"
+                    >
+                        {loadingMore ? "Cargando..." : "Cargar más"}
+                    </Button>
+                </div>
+            )}
 
             <Dialog
                 open={isModalOpen}

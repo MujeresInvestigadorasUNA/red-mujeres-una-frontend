@@ -222,7 +222,6 @@ export default function Curso({ params }) {
                     </div>
                 </section>
             </div>
-            <hr className="my-10" />
             <section className="px-20 py-10">
                 <h2 className="text-2xl font-bold mb-5">Cursos Relacionados</h2>
                 <div className="flex gap-3 mb-5 mt-5">
@@ -297,36 +296,6 @@ export default function Curso({ params }) {
                         <p className="text-gray-600 w-full text-center py-5">No hay cursos relacionados disponibles.</p>
                     )}
                 </div>
-            </section>
-            <hr className="my-10" />
-            <section className="flex gap-20 justify-between mt-10 px-20 py-10">
-                <div>
-                    <h1 className="text-2xl font-bold">jinette López</h1>
-                    <p className="text-gray-600">Catedrática de Fisiología.</p>
-                    <p className="mt-3">
-                        jinette Aranda Ramírez es catedrática de Fisiología y doctora en
-                        Farmacia con una amplia trayectoria docente e investigadora. <br /> <br />
-
-                        Lleva a cabo su labor de investigadora en el Grupo de Investigación
-                        «Fisiología digestiva y nutrición» y el «Instituto Universitario de
-                        Nutrición y Tecnología de los Alimentos» de la Universidad de Granada
-                        y sus líneas de investigación se centran en las interacciones
-                        fármacos-nutrientes, en la valoración del estado nutricional en
-                        poblaciones en situaciones patológicas y en la educación en hábitos
-                        de vida saludable. Desde el año 2002 hasta la actualidad ha participado
-                        como Investigadora Principal en ocho proyectos y contratos de investigación.
-                    </p>
-                    <button className="bg-gray-800 text-white py-2 px-4 rounded mt-3">
-                        Ver Foro Personal
-                    </button>
-                </div>
-                <Image
-                    src="/images/jinette.png"
-                    alt="jinette López"
-                    width={300}
-                    height={300}
-                    className="object-cover rounded w-full h-100 mt-5 max-w-full max-h-[300px] min-h-[300px] mb-3"
-                />
             </section>
         </main>
     );
