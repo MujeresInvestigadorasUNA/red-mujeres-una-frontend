@@ -1,7 +1,7 @@
 "use client";
 import { iconCalendar, iconPenSquare, iconSearch } from "@/app/assets/icons";
 import { Calendar } from "@/components/ui/calendar";
-import { getCourseById } from "@/lib/api/courses";
+import { getCourseById, getCourses } from "@/lib/api/courses";
 import Image from "next/image";
 import Link from "next/link";
 import { use, useEffect, useState } from "react";
@@ -20,6 +20,12 @@ import {
 } from "@/components/ui/select";
 import { iconClockwise } from "@/app/assets/icons";
 
+const PLACEHOLDER_IMAGES = [
+    "/images/curso1.png",
+    "/images/curso2.png",
+    "/images/curso3.png",
+];
+
 export default function Curso({ params }) {
     const { curso: courseId } = use(params);
     const [course, setCourse] = useState({
@@ -37,32 +43,11 @@ export default function Curso({ params }) {
         new Date(2025, 5, 12)
     );
 
-    const [relatedCourses, setRelatedCourses] = useState([
-        {
-            id: 1,
-            title: "Impacto de la nutrición en la salud digestiva",
-            description: "Resumen de la investigación 1.",
-            image: "/images/investigacion1.png",
-            instructor: "Dra. García"
-        },
-        {
-            id: 2,
-            title: "Impacto de la nutrición en la salud digestiva",
-            description: "Resumen de la investigación 1.",
-            image: "/images/investigacion1.png",
-            instructor: "Dra. García"
-        },
-        {
-            id: 3,
-            title: "Impacto de la nutrición en la salud digestiva",
-            description: "Resumen de la investigación 1.",
-            image: "/images/investigacion1.png",
-            instructor: "Dra. García"
-        }
-    ]);
-    const [displayedCourses, setDisplayedCourses] = useState(relatedCourses);
+    const [relatedCourses, setRelatedCourses] = useState([]);
+    const [displayedCourses, setDisplayedCourses] = useState([]);
     const [filterType, setFilterType] = useState("");
     const [searchQuery, setSearchQuery] = useState("");
+    const [loadingRelated, setLoadingRelated] = useState(true);
 
     const fetchCourseInfo = async () => {
         try {
@@ -88,6 +73,29 @@ export default function Curso({ params }) {
         fetchCourseInfo();
     }, []);
 
+    useEffect(() => {
+        const fetchRelatedCourses = async () => {
+            try {
+                setLoadingRelated(true);
+                const allCourses = await getCourses();
+                
+                // Filter out the current course
+                const related = allCourses.filter(c => c.id !== parseInt(courseId));
+                setRelatedCourses(related);
+                setDisplayedCourses(related);
+            } catch (error) {
+                console.error("Error fetching related courses:", error);
+                toast.error("Error al cargar cursos relacionados.");
+            } finally {
+                setLoadingRelated(false);
+            }
+        };
+        
+        if (courseId) {
+            fetchRelatedCourses();
+        }
+    }, [courseId]);
+
     const applyFilter = (courses, query) => {
         if (!query.trim()) {
             return courses;
@@ -98,11 +106,14 @@ export default function Curso({ params }) {
         return courses.filter((course) => {
             switch (filterType) {
                 case "instructor":
-                    return course.instructor?.toLowerCase().includes(lowerQuery) || false;
+                    const instructorName = course.user 
+                        ? `${course.user.first_name} ${course.user.last_name}`.toLowerCase()
+                        : "";
+                    return instructorName.includes(lowerQuery);
                 case "titulo":
                     return course.title?.toLowerCase().includes(lowerQuery) || false;
                 case "fechaInicio":
-                    return course.startDate?.toLowerCase().includes(lowerQuery) || false;
+                    return course.initial_date?.toLowerCase().includes(lowerQuery) || false;
                 default:
                     return true;
             }
@@ -258,18 +269,28 @@ export default function Curso({ params }) {
                     </Button>
                 </div>
                 <div className="flex gap-5 flex-wrap mt-5">
-                    {displayedCourses.length > 0 ? (
-                        displayedCourses.map((course) => (
+                    {loadingRelated ? (
+                        <p className="text-gray-600 w-full text-center py-5">Cargando cursos relacionados...</p>
+                    ) : displayedCourses.length > 0 ? (
+                        displayedCourses.map((course, index) => (
                             <div key={course.id} className="flex-grow">
-                                <Image
-                                    src={course.image}
-                                    alt={course.title}
-                                    width={300}
-                                    height={200}
-                                    className="object-cover rounded w-full h-100 mt-5 min-w-full max-h-[200px] min-h-[200px] mb-3"
-                                />
-                                <Link href={`/cursos/curso-${course.id}`} className="text-md font-bold">{course.title}</Link>
-                                <p className="text-gray-600">{course.description}</p>
+                                <Link href={`/Cursos/${course.id}`}>
+                                    <Image
+                                        src={course.photo || PLACEHOLDER_IMAGES[index % PLACEHOLDER_IMAGES.length]}
+                                        alt={course.title}
+                                        width={300}
+                                        height={200}
+                                        className="object-cover rounded w-full h-100 mt-5 min-w-full max-h-[200px] min-h-[200px] mb-3 hover:brightness-80 transition cursor-pointer"
+                                        onError={(e) => {
+                                            e.target.src = PLACEHOLDER_IMAGES[index % PLACEHOLDER_IMAGES.length];
+                                        }}
+                                    />
+                                    <p className="text-md font-bold hover:text-[#E7473C] transition">{course.title}</p>
+                                </Link>
+                                <p className="text-gray-600 text-sm">{course.description || "Sin descripción disponible"}</p>
+                                {course.user && (
+                                    <p className="text-gray-500 text-xs">Por: {course.user.first_name} {course.user.last_name}</p>
+                                )}
                             </div>
                         ))
                     ) : (

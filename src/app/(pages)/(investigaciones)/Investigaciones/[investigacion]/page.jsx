@@ -2,6 +2,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { useParams } from "next/navigation";
 import { toast } from "sonner";
 import { SearchIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -16,34 +17,52 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { iconClockwise } from "@/app/assets/icons";
+import { getResearch } from "@/lib/api/research";
+
+const PLACEHOLDER_IMAGES = [
+    "/images/curso1.png",
+    "/images/curso2.png",
+    "/images/curso3.png",
+];
+
+const PLACEHOLDER_DESCRIPTION = "Exploración detallada de esta investigación académica de la Red de Mujeres Académicas.";
 
 export default function Investigacion() {
-    const [relatedResearch, setRelatedResearch] = useState([
-        {
-            id: 1,
-            title: "Impacto de la nutrición en la salud digestiva",
-            description: "Resumen de la investigación 1.",
-            image: "/images/investigacion1.png",
-            author: "Dra. García"
-        },
-        {
-            id: 2,
-            title: "Impacto de la nutrición en la salud digestiva",
-            description: "Resumen de la investigación 1.",
-            image: "/images/investigacion1.png",
-            author: "Dra. García"
-        },
-        {
-            id: 3,
-            title: "Impacto de la nutrición en la salud digestiva",
-            description: "Resumen de la investigación 1.",
-            image: "/images/investigacion1.png",
-            author: "Dra. García"
-        }
-    ]);
-    const [displayedResearch, setDisplayedResearch] = useState(relatedResearch);
+    const params = useParams();
+    const researchId = params.investigacion;
+    
+    const [currentResearch, setCurrentResearch] = useState(null);
+    const [relatedResearch, setRelatedResearch] = useState([]);
+    const [displayedResearch, setDisplayedResearch] = useState([]);
     const [filterType, setFilterType] = useState("");
     const [searchQuery, setSearchQuery] = useState("");
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchResearchData = async () => {
+            try {
+                setLoading(true);
+                const allResearch = await getResearch();
+                
+                // Find the current research by ID
+                const current = allResearch.find(r => r.id === parseInt(researchId));
+                setCurrentResearch(current);
+                
+                // Get related research (all except current)
+                const related = allResearch.filter(r => r.id !== parseInt(researchId));
+                setRelatedResearch(related);
+                setDisplayedResearch(related);
+            } catch (error) {
+                console.error("Error fetching research data:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        
+        if (researchId) {
+            fetchResearchData();
+        }
+    }, [researchId]);
 
     const applyFilter = (research, query) => {
         if (!query.trim()) {
@@ -55,7 +74,7 @@ export default function Investigacion() {
         return research.filter((item) => {
             switch (filterType) {
                 case "investigador":
-                    return item.author?.toLowerCase().includes(lowerQuery) || false;
+                    return item.user_id?.toString().includes(lowerQuery) || false;
                 case "titulo":
                     return item.title?.toLowerCase().includes(lowerQuery) || false;
                 default:
@@ -75,131 +94,125 @@ export default function Investigacion() {
         setDisplayedResearch(relatedResearch);
     };
 
-    useEffect(() => {
-        setDisplayedResearch(relatedResearch);
-    }, []);
-
     return (
         <main className="flex-grow px-20 py-10 h-[100%]">
-            <h1 className="text-2xl font-bold">Fisiología Digestiva y Nutrición</h1>
-            <p className="mt-3">
-                La Fisiología Digestiva y Nutrición estudia cómo el cuerpo descompone los alimentos, 
-                absorbe nutrientes y los utiliza para mantener sus funciones vitales. El sistema 
-                digestivo transforma los alimentos en moléculas más simples, permitiendo la obtención 
-                de energía y la reparación de tejidos.
-            </p>
-            <Image
-                src="/images/curso1.png"
-                alt="Fisiología Digestiva y Nutrición"
-                width={600}
-                height={400}
-                className="object-cover rounded mt-5 w-full max-h-[400px]"
-            />
-            <p className="px-20 my-8">
-                La digestión inicia en la boca, donde los dientes trituran los alimentos y las 
-                enzimas de la saliva comienzan su descomposición. Luego, el bolo alimenticio viaja 
-                por el esófago hasta el estómago, donde los ácidos y enzimas continúan el proceso de 
-                degradación. El quimo resultante pasa al intestino delgado, donde se lleva a cabo la 
-                absorción de la mayoría de los nutrientes gracias a la acción de la bilis, las enzimas 
-                pancreáticas y la microbiota intestinal. <br /><br />
-
-                Los nutrientes esenciales incluyen carbohidratos, proteínas, grasas, vitaminas y 
-                minerales. Cada uno desempeña un papel específico: los carbohidratos proporcionan 
-                energía, las proteínas ayudan en la reparación de tejidos, las grasas almacenan 
-                energía y regulan funciones celulares, mientras que las vitaminas y minerales son 
-                clave para procesos metabólicos y la función del sistema inmune.<br /><br />
-
-                Diferentes factores pueden influir en la eficiencia del sistema digestivo, 
-                como la edad, la dieta, el estrés y enfermedades digestivas. Una alimentación 
-                equilibrada, rica en fibra y agua, favorece el tránsito intestinal y la absorción de nutrientes. 
-            </p>
-            <div className="flex gap-3">
-                <Image
-                    src="/images/curso2.png"
-                    alt="Fisiología Digestiva y Nutrición"
-                    width={600}
-                    height={400}
-                    className="object-cover rounded mt-5 w-full max-h-[400px]"
-                />
-                <Image
-                    src="/images/curso3.png"
-                    alt="Fisiología Digestiva y Nutrición"
-                    width={600}
-                    height={400}
-                    className="object-cover rounded mt-5 w-full max-h-[400px]"
-                />
-            </div>
-            <p className="px-20 my-8">
-                Comprender la fisiología digestiva y la nutrición es clave para mejorar la salud 
-                y prevenir enfermedades. Una alimentación equilibrada, junto con hábitos saludables, 
-                garantiza que el cuerpo reciba los nutrientes necesarios para su correcto funcionamiento. 
-                Cuidar el sistema digestivo no solo mejora la absorción de nutrientes, sino 
-                que también tiene un impacto positivo en el bienestar general del organismo.
-            </p>
-            <section>
-                <h2 className="text-2xl font-bold mt-10 mb-5">Investigaciones Relacionadas</h2>
-                <div className="flex gap-3 mb-5 mt-5">
-                    <Select value={filterType} onValueChange={handleFilterChange}>
-                        <SelectTrigger className="w-[180px] bg-[#fff] rounded">
-                            <SelectValue placeholder="Filtrar Por" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectGroup>
-                                <SelectItem value="investigador">Investigador</SelectItem>
-                                <SelectItem value="titulo">Titulo</SelectItem>
-                            </SelectGroup>
-                        </SelectContent>
-                    </Select>
-                    <ButtonGroup className="rounded bg-[#fff] w-full">
-                        <Input
-                            className="rounded"
-                            placeholder="Buscar..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                        />
-                        <Button
-                            onClick={handleSearch}
-                            className="bg-[#E7473C] hover:bg-[#831d16] rounded text-white
-                            hover:text-white hover:cursor-pointer"
-                            variant="outline"
-                            aria-label="Search"
-                        >
-                            <SearchIcon />
-                        </Button>
-                    </ButtonGroup>
-                    <Button
-                        onClick={() => {
-                            setSearchQuery("");
-                            setFilterType("");
-                            setDisplayedResearch(relatedResearch);
+            {loading ? (
+                <div className="text-center py-10">
+                    <p>Cargando investigación...</p>
+                </div>
+            ) : currentResearch ? (
+                <>
+                    <h1 className="text-2xl font-bold">{currentResearch.title}</h1>
+                    <p className="mt-3">
+                        {currentResearch.description || PLACEHOLDER_DESCRIPTION}
+                    </p>
+                    <Image
+                        src={currentResearch.vector_link || PLACEHOLDER_IMAGES[0]}
+                        alt={currentResearch.title}
+                        width={600}
+                        height={400}
+                        className="object-cover rounded mt-5 w-full max-h-[400px]"
+                        onError={(e) => {
+                            e.target.src = PLACEHOLDER_IMAGES[0];
                         }}
-                        className="bg-[#fff] hover:bg-[#f0f0f0] rounded text-[#831d16]
-                        hover:text-[#831d16] hover:cursor-pointer shadow"
-                    >
-                        {iconClockwise({})}
-                    </Button>
-                </div>
-                <div className="flex gap-5 flex-wrap mt-5">
-                    {displayedResearch.length > 0 ? (
-                        displayedResearch.map((research) => (
-                            <div key={research.id} className="flex-grow">
-                                <Image
-                                    src={research.image}
-                                    alt={research.title}
-                                    width={300}
-                                    height={200}
-                                    className="object-cover rounded w-full h-100 mt-5 min-w-full max-h-[200px] min-h-[200px] mb-3"
+                    />
+                    <p className="px-20 my-8">
+                        {currentResearch.description || PLACEHOLDER_DESCRIPTION}
+                    </p>
+                    <div className="flex gap-3">
+                        <Image
+                            src={PLACEHOLDER_IMAGES[1]}
+                            alt="Research"
+                            width={600}
+                            height={400}
+                            className="object-cover rounded mt-5 w-full max-h-[400px]"
+                        />
+                        <Image
+                            src={PLACEHOLDER_IMAGES[2]}
+                            alt="Research"
+                            width={600}
+                            height={400}
+                            className="object-cover rounded mt-5 w-full max-h-[400px]"
+                        />
+                    </div>
+                    <p className="px-20 my-8">
+                        Accede al archivo de investigación completo a través del enlace proporcionado para obtener información detallada.
+                    </p>
+                    <section>
+                        <h2 className="text-2xl font-bold mt-10 mb-5">Investigaciones Relacionadas</h2>
+                        <div className="flex gap-3 mb-5 mt-5">
+                            <Select value={filterType} onValueChange={handleFilterChange}>
+                                <SelectTrigger className="w-[180px] bg-[#fff] rounded">
+                                    <SelectValue placeholder="Filtrar Por" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectGroup>
+                                        <SelectItem value="investigador">Investigador ID</SelectItem>
+                                        <SelectItem value="titulo">Titulo</SelectItem>
+                                    </SelectGroup>
+                                </SelectContent>
+                            </Select>
+                            <ButtonGroup className="rounded bg-[#fff] w-full">
+                                <Input
+                                    className="rounded"
+                                    placeholder="Buscar..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                                 />
-                                <Link href={`/investigaciones/investigacion-${research.id}`} className="text-md font-bold">{research.title}</Link>
-                                <p className="text-gray-600">{research.description}</p>
-                            </div>
-                        ))
-                    ) : (
-                        <p className="text-gray-600 w-full text-center py-5">No hay investigaciones relacionadas disponibles.</p>
-                    )}
+                                <Button
+                                    onClick={handleSearch}
+                                    className="bg-[#E7473C] hover:bg-[#831d16] rounded text-white
+                                    hover:text-white hover:cursor-pointer"
+                                    variant="outline"
+                                    aria-label="Search"
+                                >
+                                    <SearchIcon />
+                                </Button>
+                            </ButtonGroup>
+                            <Button
+                                onClick={() => {
+                                    setSearchQuery("");
+                                    setFilterType("");
+                                    setDisplayedResearch(relatedResearch);
+                                }}
+                                className="bg-[#fff] hover:bg-[#f0f0f0] rounded text-[#831d16]
+                                hover:text-[#831d16] hover:cursor-pointer shadow"
+                            >
+                                {iconClockwise({})}
+                            </Button>
+                        </div>
+                        <div className="flex gap-5 flex-wrap mt-5">
+                            {displayedResearch.length > 0 ? (
+                                displayedResearch.map((research, index) => (
+                                    <div key={research.id} className="flex-grow">
+                                        <Link href={`/Investigaciones/${research.id}`}>
+                                            <Image
+                                                src={research.vector_link || PLACEHOLDER_IMAGES[index % PLACEHOLDER_IMAGES.length]}
+                                                alt={research.title}
+                                                width={300}
+                                                height={200}
+                                                className="object-cover rounded w-full h-100 mt-5 min-w-full max-h-[200px] min-h-[200px] mb-3 hover:brightness-80 transition cursor-pointer"
+                                                onError={(e) => {
+                                                    e.target.src = PLACEHOLDER_IMAGES[index % PLACEHOLDER_IMAGES.length];
+                                                }}
+                                            />
+                                            <p className="text-md font-bold hover:text-[#E7473C] transition">{research.title}</p>
+                                        </Link>
+                                        <p className="text-gray-600 text-sm">Investigador: {research.user_id}</p>
+                                    </div>
+                                ))
+                            ) : (
+                                <p className="text-gray-600 w-full text-center py-5">No hay investigaciones relacionadas disponibles.</p>
+                            )}
+                        </div>
+                    </section>
+                </>
+            ) : (
+                <div className="text-center py-10">
+                    <p>Investigación no encontrada</p>
                 </div>
-            </section>
+            )}
         </main>
     );
 }
