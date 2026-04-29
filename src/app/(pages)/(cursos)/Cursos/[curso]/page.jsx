@@ -6,6 +6,19 @@ import Image from "next/image";
 import Link from "next/link";
 import { use, useEffect, useState } from "react";
 import { toast } from "sonner";
+import { SearchIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ButtonGroup } from "@/components/ui/button-group";
+import { Input } from "@/components/ui/input";
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import { iconClockwise } from "@/app/assets/icons";
 
 export default function Curso({ params }) {
     const { curso: courseId } = use(params);
@@ -23,6 +36,33 @@ export default function Curso({ params }) {
     const [date, setDate] = useState(
         new Date(2025, 5, 12)
     );
+
+    const [relatedCourses, setRelatedCourses] = useState([
+        {
+            id: 1,
+            title: "Impacto de la nutrición en la salud digestiva",
+            description: "Resumen de la investigación 1.",
+            image: "/images/investigacion1.png",
+            instructor: "Dra. García"
+        },
+        {
+            id: 2,
+            title: "Impacto de la nutrición en la salud digestiva",
+            description: "Resumen de la investigación 1.",
+            image: "/images/investigacion1.png",
+            instructor: "Dra. García"
+        },
+        {
+            id: 3,
+            title: "Impacto de la nutrición en la salud digestiva",
+            description: "Resumen de la investigación 1.",
+            image: "/images/investigacion1.png",
+            instructor: "Dra. García"
+        }
+    ]);
+    const [displayedCourses, setDisplayedCourses] = useState(relatedCourses);
+    const [filterType, setFilterType] = useState("");
+    const [searchQuery, setSearchQuery] = useState("");
 
     const fetchCourseInfo = async () => {
         try {
@@ -47,6 +87,38 @@ export default function Curso({ params }) {
     useEffect(() => {
         fetchCourseInfo();
     }, []);
+
+    const applyFilter = (courses, query) => {
+        if (!query.trim()) {
+            return courses;
+        }
+        
+        const lowerQuery = query.toLowerCase();
+        
+        return courses.filter((course) => {
+            switch (filterType) {
+                case "instructor":
+                    return course.instructor?.toLowerCase().includes(lowerQuery) || false;
+                case "titulo":
+                    return course.title?.toLowerCase().includes(lowerQuery) || false;
+                case "fechaInicio":
+                    return course.startDate?.toLowerCase().includes(lowerQuery) || false;
+                default:
+                    return true;
+            }
+        });
+    };
+
+    const handleSearch = () => {
+        const filtered = applyFilter(relatedCourses, searchQuery);
+        setDisplayedCourses(filtered);
+    };
+
+    const handleFilterChange = (value) => {
+        setFilterType(value);
+        setSearchQuery("");
+        setDisplayedCourses(relatedCourses);
+    };
 
 
     return (
@@ -142,54 +214,67 @@ export default function Curso({ params }) {
             <hr className="my-10" />
             <section className="px-20 py-10">
                 <h2 className="text-2xl font-bold mb-5">Cursos Relacionados</h2>
-                <div className="flex gap-4 mt-5">
-                    <div className="w-full">
-                        <label htmlFor="filtro-cursos" className="font-semibold">Filtrar Cursos:</label>
-                        <input type="text" id="filtro-cursos" placeholder="Buscar..." className="rounded border border-gray-300 px-3 py-2 w-full mt-2" />
-                    </div>
-                    <div className="w-70">
-                        <label htmlFor="filtro-cursos" className="font-semibold">Filtrar Por:</label>
-                        <select id="filtro-cursos" className="rounded border border-gray-300 px-3 py-2 w-full mt-2">
-                            <option value="todos">Todos</option>
-                            <option value="temas">Temas</option>
-                            <option value="autoras">Autoras</option>
-                        </select>
-                    </div>
+                <div className="flex gap-3 mb-5 mt-5">
+                    <Select value={filterType} onValueChange={handleFilterChange}>
+                        <SelectTrigger className="w-[180px] bg-[#fff] rounded">
+                            <SelectValue placeholder="Filtrar Por" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectGroup>
+                                <SelectItem value="instructor">Instructor</SelectItem>
+                                <SelectItem value="titulo">Titulo</SelectItem>
+                                <SelectItem value="fechaInicio">Fecha de Inicio</SelectItem>
+                            </SelectGroup>
+                        </SelectContent>
+                    </Select>
+                    <ButtonGroup className="rounded bg-[#fff] w-full">
+                        <Input
+                            className="rounded"
+                            placeholder="Buscar..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                        />
+                        <Button
+                            onClick={handleSearch}
+                            className="bg-[#E7473C] hover:bg-[#831d16] rounded text-white
+                            hover:text-white hover:cursor-pointer"
+                            variant="outline"
+                            aria-label="Search"
+                        >
+                            <SearchIcon />
+                        </Button>
+                    </ButtonGroup>
+                    <Button
+                        onClick={() => {
+                            setSearchQuery("");
+                            setFilterType("");
+                            setDisplayedCourses(relatedCourses);
+                        }}
+                        className="bg-[#fff] hover:bg-[#f0f0f0] rounded text-[#831d16]
+                        hover:text-[#831d16] hover:cursor-pointer shadow"
+                    >
+                        {iconClockwise({})}
+                    </Button>
                 </div>
                 <div className="flex gap-5 flex-wrap mt-5">
-                    <div className="flex-grow">
-                        <Image
-                            src="/images/investigacion1.png"
-                            alt="Investigación 1"
-                            width={300}
-                            height={200}
-                            className="object-cover rounded w-full h-100 mt-5 min-w-full max-h-[200px] min-h-[200px] mb-3"
-                        />
-                        <Link href="/investigaciones/investigacion-1" className="text-md font-bold">Impacto de la nutrición en la salud digestiva</Link>
-                        <p className="text-gray-600">Resumen de la investigación 1.</p>
-                    </div>
-                    <div className="flex-grow">
-                        <Image
-                            src="/images/investigacion1.png"
-                            alt="Investigación 1"
-                            width={300}
-                            height={200}
-                            className="object-cover rounded w-full h-100 mt-5 min-w-full max-h-[200px] min-h-[200px] mb-3"
-                        />
-                        <Link href="/investigaciones/investigacion-1" className="text-md font-bold">Impacto de la nutrición en la salud digestiva</Link>
-                        <p className="text-gray-600">Resumen de la investigación 1.</p>
-                    </div>
-                    <div className="flex-grow">
-                        <Image
-                            src="/images/investigacion1.png"
-                            alt="Investigación 1"
-                            width={300}
-                            height={200}
-                            className="object-cover rounded w-full h-100 mt-5 min-w-full max-h-[200px] min-h-[200px] mb-3"
-                        />
-                        <Link href="/investigaciones/investigacion-1" className="text-md font-bold">Impacto de la nutrición en la salud digestiva</Link>
-                        <p className="text-gray-600">Resumen de la investigación 1.</p>
-                    </div>
+                    {displayedCourses.length > 0 ? (
+                        displayedCourses.map((course) => (
+                            <div key={course.id} className="flex-grow">
+                                <Image
+                                    src={course.image}
+                                    alt={course.title}
+                                    width={300}
+                                    height={200}
+                                    className="object-cover rounded w-full h-100 mt-5 min-w-full max-h-[200px] min-h-[200px] mb-3"
+                                />
+                                <Link href={`/cursos/curso-${course.id}`} className="text-md font-bold">{course.title}</Link>
+                                <p className="text-gray-600">{course.description}</p>
+                            </div>
+                        ))
+                    ) : (
+                        <p className="text-gray-600 w-full text-center py-5">No hay cursos relacionados disponibles.</p>
+                    )}
                 </div>
             </section>
             <hr className="my-10" />

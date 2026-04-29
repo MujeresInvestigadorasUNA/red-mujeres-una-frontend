@@ -7,6 +7,19 @@ import Image from "next/image";
 import Link from "next/link";
 import { use, useEffect, useState } from "react";
 import { toast } from "sonner";
+import { SearchIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ButtonGroup } from "@/components/ui/button-group";
+import { Input } from "@/components/ui/input";
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import { iconClockwise } from "@/app/assets/icons";
 
 const FORUM_PLACEHOLDER_IMAGE = "/images/jinette.png";
 
@@ -20,8 +33,14 @@ export default function forum({ params }) {
     });
     const [research, setResearch] = useState([]);
     const [courses, setCourses] = useState([]);
+    const [displayedResearch, setDisplayedResearch] = useState([]);
+    const [displayedCourses, setDisplayedCourses] = useState([]);
     const [loadingResearch, setLoadingResearch] = useState(false);
     const [loadingCourses, setLoadingCourses] = useState(false);
+    const [researchFilterType, setResearchFilterType] = useState("");
+    const [researchSearchQuery, setResearchSearchQuery] = useState("");
+    const [coursesFilterType, setCoursesFilterType] = useState("");
+    const [coursesSearchQuery, setCoursesSearchQuery] = useState("");
     const { foro: foroId } = use(params);
 
     const fetchForoData = async () => {
@@ -50,7 +69,9 @@ export default function forum({ params }) {
         try {
             setLoadingResearch(true);
             const researchData = await getResearchByUserId(foroId);
-            setResearch(Array.isArray(researchData) ? researchData : []);
+            const dataArray = Array.isArray(researchData) ? researchData : [];
+            setResearch(dataArray);
+            setDisplayedResearch(dataArray);
         } catch (error) {
             console.error("Error fetching research:", error);
             toast.error("Error al cargar investigaciones");
@@ -66,7 +87,9 @@ export default function forum({ params }) {
             
             if (response.ok) {
                 const coursesData = await response.json();
-                setCourses(Array.isArray(coursesData) ? coursesData : []);
+                const dataArray = Array.isArray(coursesData) ? coursesData : [];
+                setCourses(dataArray);
+                setDisplayedCourses(dataArray);
             } else {
                 console.error("Error fetching courses:", response.statusText);
             }
@@ -77,6 +100,72 @@ export default function forum({ params }) {
             setLoadingCourses(false);
         }
     }
+
+    const applyResearchFilter = (researchData, query) => {
+        if (!query.trim()) {
+            return researchData;
+        }
+        
+        const lowerQuery = query.toLowerCase();
+        
+        return researchData.filter((item) => {
+            switch (researchFilterType) {
+                case "investigador":
+                    return item.author?.toLowerCase().includes(lowerQuery) || 
+                           item.user_name?.toLowerCase().includes(lowerQuery) || 
+                           false;
+                case "titulo":
+                    return item.title?.toLowerCase().includes(lowerQuery) || false;
+                default:
+                    return true;
+            }
+        });
+    };
+
+    const applyCoursesFilter = (coursesData, query) => {
+        if (!query.trim()) {
+            return coursesData;
+        }
+        
+        const lowerQuery = query.toLowerCase();
+        
+        return coursesData.filter((course) => {
+            switch (coursesFilterType) {
+                case "instructor":
+                    return course.instructor?.toLowerCase().includes(lowerQuery) || 
+                           course.user_name?.toLowerCase().includes(lowerQuery) || 
+                           false;
+                case "titulo":
+                    return course.title?.toLowerCase().includes(lowerQuery) || false;
+                case "fechaInicio":
+                    return course.startDate?.toLowerCase().includes(lowerQuery) || false;
+                default:
+                    return true;
+            }
+        });
+    };
+
+    const handleResearchSearch = () => {
+        const filtered = applyResearchFilter(research, researchSearchQuery);
+        setDisplayedResearch(filtered);
+    };
+
+    const handleCoursesSearch = () => {
+        const filtered = applyCoursesFilter(courses, coursesSearchQuery);
+        setDisplayedCourses(filtered);
+    };
+
+    const handleResearchFilterChange = (value) => {
+        setResearchFilterType(value);
+        setResearchSearchQuery("");
+        setDisplayedResearch(research);
+    };
+
+    const handleCoursesFilterChange = (value) => {
+        setCoursesFilterType(value);
+        setCoursesSearchQuery("");
+        setDisplayedCourses(courses);
+    };
 
     useEffect(() => {
         if (foroId) {
@@ -128,25 +217,53 @@ export default function forum({ params }) {
             </section>
             <section>
                 <h2 className="text-2xl font-bold mt-10 mb-5">Investigaciones Relacionadas</h2>
-                <div className="flex gap-4 mt-5">
-                    <div className="w-full">
-                        <label htmlFor="filtro-investigaciones" className="font-semibold">Filtrar Investigaciones:</label>
-                        <input type="text" id="filtro-investigaciones" placeholder="Buscar..." className="rounded border border-gray-300 px-3 py-2 w-full mt-2" />
-                    </div>
-                    <div className="w-70">
-                        <label htmlFor="filtro-investigaciones" className="font-semibold">Filtrar Por:</label>
-                        <select id="filtro-investigaciones" className="rounded border border-gray-300 px-3 py-2 w-full mt-2">
-                            <option value="todos">Todos</option>
-                            <option value="temas">Temas</option>
-                            <option value="autoras">Autoras</option>
-                        </select>
-                    </div>
+                <div className="flex gap-3 mb-5 mt-5">
+                    <Select value={researchFilterType} onValueChange={handleResearchFilterChange}>
+                        <SelectTrigger className="w-[180px] bg-[#fff] rounded">
+                            <SelectValue placeholder="Filtrar Por" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectGroup>
+                                <SelectItem value="investigador">Investigador</SelectItem>
+                                <SelectItem value="titulo">Titulo</SelectItem>
+                            </SelectGroup>
+                        </SelectContent>
+                    </Select>
+                    <ButtonGroup className="rounded bg-[#fff] w-full">
+                        <Input
+                            className="rounded"
+                            placeholder="Buscar..."
+                            value={researchSearchQuery}
+                            onChange={(e) => setResearchSearchQuery(e.target.value)}
+                            onKeyDown={(e) => e.key === "Enter" && handleResearchSearch()}
+                        />
+                        <Button
+                            onClick={handleResearchSearch}
+                            className="bg-[#E7473C] hover:bg-[#831d16] rounded text-white
+                            hover:text-white hover:cursor-pointer"
+                            variant="outline"
+                            aria-label="Search"
+                        >
+                            <SearchIcon />
+                        </Button>
+                    </ButtonGroup>
+                    <Button
+                        onClick={() => {
+                            setResearchSearchQuery("");
+                            setResearchFilterType("");
+                            setDisplayedResearch(research);
+                        }}
+                        className="bg-[#fff] hover:bg-[#f0f0f0] rounded text-[#831d16]
+                        hover:text-[#831d16] hover:cursor-pointer shadow"
+                    >
+                        {iconClockwise({})}
+                    </Button>
                 </div>
                 <div className="flex gap-5 flex-wrap mt-5">
                     {loadingResearch ? (
                         <p className="text-gray-600">Cargando investigaciones...</p>
-                    ) : research.length > 0 ? (
-                        research.map((item) => (
+                    ) : displayedResearch.length > 0 ? (
+                        displayedResearch.map((item) => (
                             <div key={item.id} className="flex-grow max-w-xs">
                                 <div className="rounded border border-gray-300 p-3">
                                     <h3 className="text-md font-bold mb-2">{item.title}</h3>
@@ -170,25 +287,54 @@ export default function forum({ params }) {
             </section>
             <section>
                 <h2 className="text-2xl font-bold mt-10 mb-5">Cursos Relacionados</h2>
-                <div className="flex gap-4 mt-5">
-                    <div className="w-full">
-                        <label htmlFor="filtro-cursos" className="font-semibold">Filtrar Cursos:</label>
-                        <input type="text" id="filtro-cursos" placeholder="Buscar..." className="rounded border border-gray-300 px-3 py-2 w-full mt-2" />
-                    </div>
-                    <div className="w-70">
-                        <label htmlFor="filtro-cursos" className="font-semibold">Filtrar Por:</label>
-                        <select id="filtro-cursos" className="rounded border border-gray-300 px-3 py-2 w-full mt-2">
-                            <option value="todos">Todos</option>
-                            <option value="temas">Temas</option>
-                            <option value="autoras">Autoras</option>
-                        </select>
-                    </div>
+                <div className="flex gap-3 mb-5 mt-5">
+                    <Select value={coursesFilterType} onValueChange={handleCoursesFilterChange}>
+                        <SelectTrigger className="w-[180px] bg-[#fff] rounded">
+                            <SelectValue placeholder="Filtrar Por" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectGroup>
+                                <SelectItem value="instructor">Instructor</SelectItem>
+                                <SelectItem value="titulo">Titulo</SelectItem>
+                                <SelectItem value="fechaInicio">Fecha de Inicio</SelectItem>
+                            </SelectGroup>
+                        </SelectContent>
+                    </Select>
+                    <ButtonGroup className="rounded bg-[#fff] w-full">
+                        <Input
+                            className="rounded"
+                            placeholder="Buscar..."
+                            value={coursesSearchQuery}
+                            onChange={(e) => setCoursesSearchQuery(e.target.value)}
+                            onKeyDown={(e) => e.key === "Enter" && handleCoursesSearch()}
+                        />
+                        <Button
+                            onClick={handleCoursesSearch}
+                            className="bg-[#E7473C] hover:bg-[#831d16] rounded text-white
+                            hover:text-white hover:cursor-pointer"
+                            variant="outline"
+                            aria-label="Search"
+                        >
+                            <SearchIcon />
+                        </Button>
+                    </ButtonGroup>
+                    <Button
+                        onClick={() => {
+                            setCoursesSearchQuery("");
+                            setCoursesFilterType("");
+                            setDisplayedCourses(courses);
+                        }}
+                        className="bg-[#fff] hover:bg-[#f0f0f0] rounded text-[#831d16]
+                        hover:text-[#831d16] hover:cursor-pointer shadow"
+                    >
+                        {iconClockwise({})}
+                    </Button>
                 </div>
                 <div className="flex gap-5 flex-wrap mt-5">
                     {loadingCourses ? (
                         <p className="text-gray-600">Cargando cursos...</p>
-                    ) : courses.length > 0 ? (
-                        courses.map((course) => (
+                    ) : displayedCourses.length > 0 ? (
+                        displayedCourses.map((course) => (
                             <div key={course.id} className="flex-grow max-w-xs">
                                 {course.photo && (
                                     <Image
