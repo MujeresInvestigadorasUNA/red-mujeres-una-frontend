@@ -42,14 +42,15 @@ export default function Investigacion() {
         const fetchResearchData = async () => {
             try {
                 setLoading(true);
-                const allResearch = await getResearch();
+                // Fetch all research without limit to ensure we find the target research
+                const allResearch = await getResearch(null);
                 
-                // Find the current research by ID
-                const current = allResearch.find(r => r.id === parseInt(researchId));
+                // Find the current research by ID (convert both to string for comparison)
+                const current = allResearch.find(r => String(r.id) === String(researchId));
                 setCurrentResearch(current);
                 
                 // Get related research (all except current)
-                const related = allResearch.filter(r => r.id !== parseInt(researchId));
+                const related = allResearch.filter(r => String(r.id) !== String(researchId));
                 setRelatedResearch(related);
                 setDisplayedResearch(related);
             } catch (error) {

@@ -163,41 +163,37 @@ export default function Curso({ params }) {
                     </div>
                 </section>
                 <section className="flex-grow h-[100%] px-20 py-10">
-                    <div className="flex justify-between mb-5">
+                    <div className="flex flex-col gap-4 mb-5">
                         <div className="flex flex-col gap-2">
                             <h2 className="text-3xl font-bold text-wrap">
                                 Datos del Curso
                             </h2>
-                            <h3 className="text-gray-600 text-semibold text-nowrap
+                            <h3 className="text-gray-600 text-semibold text-wrap
                             text-sm">
                                 Impartido por: {course.taughtBy}
                             </h3>
                         </div>
-                        <div className="flex gap-5">
-                            <span className="flex items-center gap-2 text-sm text-gray-600
-                            text-nowrap">
+                        <div className="flex flex-wrap gap-5">
+                            <span className="flex items-center gap-2 text-sm text-gray-600">
                                 {iconCalendar({ size: 12 })} Fecha Inicial:
                                 {" " + course.startDate}
                             </span>
-                            <span className="flex items-center gap-2 text-sm text-gray-600
-                            text-nowrap">
+                            <span className="flex items-center gap-2 text-sm text-gray-600">
                                 {iconCalendar({ size: 12 })} Fecha Final:
                                 {" " + course.endDate}
                             </span>
-                            <span className="flex items-center gap-2 text-sm text-gray-600
-                            text-nowrap">
+                            <span className="flex items-center gap-2 text-sm text-gray-600">
                                 {iconCalendar({ size: 12 })} Fecha Máxima de Inscripción:
                                 {" " + course.maxRegistrationDate}
                             </span>
-                            <span className="flex items-center gap-2 text-sm text-gray-600
-                            text-nowrap">
+                            <span className="flex items-center gap-2 text-sm text-gray-600">
                                 {iconSearch({ size: 12 })} Cupos Disponibles:
                                 {" " + course.maxQuotas}
                             </span>
                         </div>
                     </div>
-                    <div className="flex flex-wrap gap-10 mt-8 bg-gray-100 p-5 rounded-lg">
-                        <div className="max-w-[60vw] flex-grow w-full">
+                    <div className="flex gap-10 mt-8 bg-gray-100 p-5 rounded-lg">
+                        <div className="flex-1 min-w-0">
                             <span className="flex gap-2 justify-start items-center">
                                 {iconPenSquare({})}
                                 <h5 className="font-bold">Descripción</h5>
@@ -216,8 +212,7 @@ export default function Curso({ params }) {
                             onSelect={setDate}
                             buttonVariant="ghost"
                             className="rounded-lg border [--cell-size:--spacing(11)] 
-                            md:[--cell-size:--spacing(12)] flex-grow
-                            max-w-[500px]"
+                            md:[--cell-size:--spacing(12)] flex-shrink-0"
                         />
                     </div>
                 </section>
