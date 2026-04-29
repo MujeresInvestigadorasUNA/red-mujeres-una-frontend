@@ -5,6 +5,7 @@ import { SearchIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ButtonGroup } from "@/components/ui/button-group"
 import { Input } from "@/components/ui/input"
+import { Skeleton } from "@/components/ui/skeleton";
 import {
     Select,
     SelectContent,
@@ -20,6 +21,7 @@ import { getCourses, getPublicCourses } from "@/lib/api/courses";
 export default function Cursos() {
     const { user } = useUser();
     const [courses, setCourses] = useState([]);
+    const [loadingCourses, setLoadingCourses] = useState(true);
 
     const fetchCourses = async () => {
         try {
@@ -29,6 +31,8 @@ export default function Cursos() {
         }
         catch (error) {
             toast.error("Error al cargar los cursos.");
+        } finally {
+            setLoadingCourses(false);
         }
     };
 
@@ -80,15 +84,30 @@ export default function Cursos() {
                 </Button>
             </div>
             <div className="flex flex-wrap gap-3">
-                {courses.map((course, index) => (
-                    <CustomCard2
-                        key={index}
-                        cardHref={`/Cursos/${course.id}`}
-                        cardTitle={course.title}
-                        cardDescription={course.description}
-                        cardImage={course.photo}
-                    />
-                ))}
+                {loadingCourses ? (
+                    <>
+                        {[...Array(6)].map((_, index) => (
+                            <div key={index} className="flex-1 min-w-[250px] basis-[calc(50%-8px)]">
+                                <div className="p-3 rounded-lg bg-gray-100">
+                                    <Skeleton className="h-40 w-full rounded-lg mb-3" />
+                                    <Skeleton className="h-6 w-3/4 mb-2" />
+                                    <Skeleton className="h-4 w-full mb-2" />
+                                    <Skeleton className="h-4 w-5/6" />
+                                </div>
+                            </div>
+                        ))}
+                    </>
+                ) : (
+                    courses.map((course, index) => (
+                        <CustomCard2
+                            key={index}
+                            cardHref={`/Cursos/${course.id}`}
+                            cardTitle={course.title}
+                            cardDescription={course.description}
+                            cardImage={course.photo}
+                        />
+                    ))
+                )}
             </div>
         </main>
     );

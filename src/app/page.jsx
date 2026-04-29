@@ -11,6 +11,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import CustomCard from "./components/CustomCard";
+import { Skeleton } from "@/components/ui/skeleton";
 import { getResearch } from "@/lib/api/research";
 import { getCourses } from "@/lib/api/courses";
 import { getResearchers } from "@/lib/api/forums";
@@ -131,7 +132,27 @@ export default function Home() {
         <div className="mt-10 px-10">
           <h2 className="text-xl font-bold mt-10 mb-5">Foros Destacados</h2>
           {loadingForums ? (
-            <p className="text-center text-gray-300">Cargando foros...</p>
+            <Carousel
+              opts={{
+                align: "start",
+              }}
+              className="w-full"
+            >
+              <CarouselContent>
+                {[...Array(4)].map((_, index) => (
+                  <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/4">
+                    <div className="p-4">
+                      <Skeleton className="h-48 w-full rounded-lg mb-3" />
+                      <Skeleton className="h-6 w-3/4 mb-2" />
+                      <Skeleton className="h-4 w-full mb-2" />
+                      <Skeleton className="h-4 w-5/6" />
+                    </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious className="hover:cursor-pointer border-[#F0F0F0] bg-[#831d16] text-[#F0F0F0] shadow-md hover:bg-[#6f1913]"/>
+              <CarouselNext className="hover:cursor-pointer border-[#F0F0F0] bg-[#831d16] text-[#F0F0F0] shadow-md hover:bg-[#6f1913]"/>
+            </Carousel>
           ) : forumCards.length > 0 ? (
             <Carousel
               opts={{
@@ -204,7 +225,15 @@ export default function Home() {
         <div className="flex min-w-[280px] flex-1 basis-[320px] flex-col gap-2">
           <h2 className="text-xl font-bold mb-2">Cursos Populares</h2>
           {loadingCourses ? (
-            <p className="text-center text-gray-200">Cargando cursos...</p>
+            <>
+              {[...Array(5)].map((_, index) => (
+                <div key={index} className="p-3 rounded">
+                  <Skeleton className="h-6 w-3/4 mb-2" />
+                  <Skeleton className="h-4 w-full mb-2" />
+                  <Skeleton className="h-4 w-5/6" />
+                </div>
+              ))}
+            </>
           ) : courseCards.length > 0 ? (
             courseCards.map((course) => (
               <CustomCard
@@ -244,7 +273,27 @@ export default function Home() {
       <section className="px-20 py-10 toolsSection">
         <h2 className="text-xl font-bold mb-5">Investigaciones Recientes</h2>
         {loadingResearch ? (
-          <p className="text-center text-gray-500">Cargando investigaciones...</p>
+          <Carousel
+            opts={{
+              align: "start",
+            }}
+            className="w-full"
+          >
+            <CarouselContent>
+              {[...Array(2)].map((_, index) => (
+                <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/2">
+                  <div className="p-4">
+                    <Skeleton className="h-48 w-full rounded-lg mb-3" />
+                    <Skeleton className="h-6 w-3/4 mb-2" />
+                    <Skeleton className="h-4 w-full mb-2" />
+                    <Skeleton className="h-4 w-5/6" />
+                  </div>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselPrevious className="hover:cursor-pointer"/>
+            <CarouselNext className="hover:cursor-pointer"/>
+          </Carousel>
         ) : researchCards.length > 0 ? (
           <Carousel
             opts={{

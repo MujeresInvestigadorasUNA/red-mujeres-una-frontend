@@ -3,6 +3,7 @@ import { iconClockwise, iconSearch } from "@/app/assets/icons";
 import CustomCard from "@/app/components/CustomCard";
 import { useUser } from "@/app/contexts/UserContext";
 import { getResearchers } from "@/lib/api/forums";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -10,6 +11,7 @@ const FORUM_PLACEHOLDER_IMAGE = "/images/jinette.png";
 
 export default function Foros() {
     const [forums, setForums] = useState([]);
+    const [loadingForums, setLoadingForums] = useState(true);
 
     const fetchForums = async () => {
         try {
@@ -22,6 +24,8 @@ export default function Foros() {
         } catch (error) {
             console.error("Error fetching forums:", error);
             toast.error("Error al cargar los foros");
+        } finally {
+            setLoadingForums(false);
         }
     };
 
@@ -64,19 +68,34 @@ export default function Foros() {
                 </button>
             </div>
             <div className="flex gap-5 flex-wrap mt-5">
-                {forums.map((forum, index) => (
-                    <div key={index} className="flex-fill flex-grow flex-shrink basis-[30%] min-w-[250px]">
-                        <CustomCard
-                            cardImage={forum?.photo || FORUM_PLACEHOLDER_IMAGE}
-                            cardTitle={forum.first_name + " " + forum.last_name}
-                            cardDescription={forum.user_description}
-                            cardURL={`/Foros/${forum.id}`}
-                            cardBgColor="#E7473C"
-                            cardTitleTextColor="#F0F0F0"
-                            cardTextColor="#F0F0F0"
-                        />
-                    </div>
-                ))}
+                {loadingForums ? (
+                    <>
+                        {[...Array(6)].map((_, index) => (
+                            <div key={index} className="flex-fill flex-grow flex-shrink basis-[30%] min-w-[250px]">
+                                <div className="p-4 rounded-lg bg-gray-100">
+                                    <Skeleton className="h-40 w-full rounded-lg mb-3" />
+                                    <Skeleton className="h-6 w-3/4 mb-2" />
+                                    <Skeleton className="h-4 w-full mb-2" />
+                                    <Skeleton className="h-4 w-5/6" />
+                                </div>
+                            </div>
+                        ))}
+                    </>
+                ) : (
+                    forums.map((forum, index) => (
+                        <div key={index} className="flex-fill flex-grow flex-shrink basis-[30%] min-w-[250px]">
+                            <CustomCard
+                                cardImage={forum?.photo || FORUM_PLACEHOLDER_IMAGE}
+                                cardTitle={forum.first_name + " " + forum.last_name}
+                                cardDescription={forum.user_description}
+                                cardURL={`/Foros/${forum.id}`}
+                                cardBgColor="#E7473C"
+                                cardTitleTextColor="#F0F0F0"
+                                cardTextColor="#F0F0F0"
+                            />
+                        </div>
+                    ))
+                )}
             </div>
         </main>
     );
