@@ -36,6 +36,8 @@ export default function Investigaciones() {
     const [loading, setLoading] = useState(true);
     const [loadingMore, setLoadingMore] = useState(false);
     const [displayCount, setDisplayCount] = useState(6);
+    const [filterType, setFilterType] = useState("");
+    const [searchQuery, setSearchQuery] = useState("");
     const ITEMS_PER_PAGE = 6;
 
     useEffect(() => {
@@ -59,6 +61,40 @@ export default function Investigaciones() {
         }, 300);
     };
 
+    const applyFilter = (research, query) => {
+        if (!query.trim()) {
+            return research;
+        }
+        
+        const lowerQuery = query.toLowerCase();
+        
+        return research.filter((item) => {
+            switch (filterType) {
+                case "investigador":
+                    return item.author?.toLowerCase().includes(lowerQuery) || 
+                           item.user_name?.toLowerCase().includes(lowerQuery) || 
+                           false;
+                case "titulo":
+                    return item.title?.toLowerCase().includes(lowerQuery) || false;
+                default:
+                    return true;
+            }
+        });
+    };
+
+    const handleSearch = () => {
+        const filtered = applyFilter(allResearch, searchQuery);
+        setDisplayedResearch(filtered.slice(0, ITEMS_PER_PAGE));
+        setDisplayCount(ITEMS_PER_PAGE);
+    };
+
+    const handleFilterChange = (value) => {
+        setFilterType(value);
+        setSearchQuery("");
+        setDisplayedResearch(allResearch.slice(0, ITEMS_PER_PAGE));
+        setDisplayCount(ITEMS_PER_PAGE);
+    };
+
     return (
         <main className="flex-grow px-20 py-10 h-[100%] toolsSection">
             <h1 className="text-2xl font-bold">Investigaciones</h1>
@@ -67,25 +103,27 @@ export default function Investigaciones() {
                 integrantes de la Red de Mujeres Académicas, con su información más relevante.
             </p>
             <div className="flex gap-3 mb-5">
-                <Select className="bg-[#fff] rounded">
+                <Select value={filterType} onValueChange={handleFilterChange}>
                     <SelectTrigger className="w-[180px] bg-[#fff] rounded">
-                        <SelectValue placeholder="Seleccionar Filtro" />
+                        <SelectValue placeholder="Filtrar Por" />
                     </SelectTrigger>
                     <SelectContent>
                         <SelectGroup>
-                            <SelectItem value="title">Titulo</SelectItem>
-                            <SelectItem value="content">Contenido</SelectItem>
-                            <SelectItem value="topics">Temas</SelectItem>
-                            <SelectItem value="isPublic">Estado</SelectItem>
+                            <SelectItem value="investigador">Investigador</SelectItem>
+                            <SelectItem value="titulo">Titulo</SelectItem>
                         </SelectGroup>
                     </SelectContent>
                 </Select>
                 <ButtonGroup className="rounded bg-[#fff] w-full">
                     <Input
                         className="rounded"
-                        placeholder="Search..."
+                        placeholder="Buscar..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                     />
                     <Button
+                        onClick={handleSearch}
                         className="bg-[#E7473C] hover:bg-[#831d16] rounded text-white
                         hover:text-white hover:cursor-pointer"
                         variant="outline"
@@ -94,8 +132,16 @@ export default function Investigaciones() {
                         <SearchIcon />
                     </Button>
                 </ButtonGroup>
-                <Button className="bg-[#fff] hover:bg-[#f0f0f0] rounded text-[#831d16]
-                hover:text-[#831d16] hover:cursor-pointer shadow">
+                <Button
+                    onClick={() => {
+                        setSearchQuery("");
+                        setFilterType("");
+                        setDisplayedResearch(allResearch.slice(0, ITEMS_PER_PAGE));
+                        setDisplayCount(ITEMS_PER_PAGE);
+                    }}
+                    className="bg-[#fff] hover:bg-[#f0f0f0] rounded text-[#831d16]
+                    hover:text-[#831d16] hover:cursor-pointer shadow"
+                >
                     {iconClockwise({})}
                 </Button>
             </div>

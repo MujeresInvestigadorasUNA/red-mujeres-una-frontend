@@ -17,6 +17,7 @@ import {
 import { useEffect, useState } from "react";
 import CustomCard2 from "@/app/components/CustomCard2";
 import { getCourses, getPublicCourses } from "@/lib/api/courses";
+import { toast } from "sonner";
 
 export default function Cursos() {
     const { user } = useUser();
@@ -25,6 +26,8 @@ export default function Cursos() {
     const [loadingCourses, setLoadingCourses] = useState(true);
     const [loadingMore, setLoadingMore] = useState(false);
     const [displayCount, setDisplayCount] = useState(6);
+    const [filterType, setFilterType] = useState("");
+    const [searchQuery, setSearchQuery] = useState("");
     const ITEMS_PER_PAGE = 6;
 
     const fetchCourses = async () => {
@@ -51,6 +54,42 @@ export default function Cursos() {
         }, 300);
     };
 
+    const applyFilter = (courses, query) => {
+        if (!query.trim()) {
+            return courses;
+        }
+        
+        const lowerQuery = query.toLowerCase();
+        
+        return courses.filter((course) => {
+            switch (filterType) {
+                case "instructor":
+                    return course.instructor?.toLowerCase().includes(lowerQuery) || 
+                           course.user_name?.toLowerCase().includes(lowerQuery) || 
+                           false;
+                case "titulo":
+                    return course.title?.toLowerCase().includes(lowerQuery) || false;
+                case "fechaInicio":
+                    return course.startDate?.toLowerCase().includes(lowerQuery) || false;
+                default:
+                    return true;
+            }
+        });
+    };
+
+    const handleSearch = () => {
+        const filtered = applyFilter(allCourses, searchQuery);
+        setDisplayedCourses(filtered.slice(0, ITEMS_PER_PAGE));
+        setDisplayCount(ITEMS_PER_PAGE);
+    };
+
+    const handleFilterChange = (value) => {
+        setFilterType(value);
+        setSearchQuery("");
+        setDisplayedCourses(allCourses.slice(0, ITEMS_PER_PAGE));
+        setDisplayCount(ITEMS_PER_PAGE);
+    };
+
     useEffect(() => {
         fetchCourses();
     }, []);
@@ -63,28 +102,28 @@ export default function Cursos() {
                 Red de Mujeres Académicas, con su información relevante.
             </p>
             <div className="flex gap-3 mb-5">
-                <Select className="bg-[#fff] rounded">
+                <Select value={filterType} onValueChange={handleFilterChange}>
                     <SelectTrigger className="w-[180px] bg-[#fff] rounded">
-                        <SelectValue placeholder="Seleccionar Filtro" />
+                        <SelectValue placeholder="Filtrar Por" />
                     </SelectTrigger>
                     <SelectContent>
                         <SelectGroup>
-                            <SelectItem value="title">Nombre</SelectItem>
-                            <SelectItem value="description">Descripcion</SelectItem>
-                            <SelectItem value="startDate">Fecha Inicio</SelectItem>
-                            <SelectItem value="endDate">Fecha Final</SelectItem>
-                            <SelectItem value="registrationEndDate">Fecha Final Inscripción</SelectItem>
-                            <SelectItem value="spots">Cupos</SelectItem>
-                            <SelectItem value="status">Estado</SelectItem>
+                            <SelectItem value="instructor">Instructor</SelectItem>
+                            <SelectItem value="titulo">Titulo</SelectItem>
+                            <SelectItem value="fechaInicio">Fecha de Inicio</SelectItem>
                         </SelectGroup>
                     </SelectContent>
                 </Select>
                 <ButtonGroup className="rounded bg-[#fff] w-full">
                     <Input
                         className="rounded"
-                        placeholder="Search..."
+                        placeholder="Buscar..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                     />
                     <Button
+                        onClick={handleSearch}
                         className="bg-[#E7473C] hover:bg-[#831d16] rounded text-white
                         hover:text-white hover:cursor-pointer"
                         variant="outline"
@@ -93,8 +132,16 @@ export default function Cursos() {
                         <SearchIcon />
                     </Button>
                 </ButtonGroup>
-                <Button className="bg-[#fff] hover:bg-[#f0f0f0] rounded text-[#831d16]
-                hover:text-[#831d16] hover:cursor-pointer shadow">
+                <Button
+                    onClick={() => {
+                        setSearchQuery("");
+                        setFilterType("");
+                        setDisplayedCourses(allCourses.slice(0, ITEMS_PER_PAGE));
+                        setDisplayCount(ITEMS_PER_PAGE);
+                    }}
+                    className="bg-[#fff] hover:bg-[#f0f0f0] rounded text-[#831d16]
+                    hover:text-[#831d16] hover:cursor-pointer shadow"
+                >
                     {iconClockwise({})}
                 </Button>
             </div>
@@ -115,7 +162,7 @@ export default function Cursos() {
                             </div>
                         ))}
                     </>
-                ) : (
+                ) : displayedCourses.length > 0 ? (
                     displayedCourses.map((course, index) => (
                         <CustomCard2
                             key={course.id || index}
@@ -125,6 +172,10 @@ export default function Cursos() {
                             cardImage={course.photo}
                         />
                     ))
+                ) : (
+                    <div className="w-full text-center py-10">
+                        <p className="text-gray-500 text-lg">No se encontraron cursos.</p>
+                    </div>
                 )}
             </div>
             {displayCount < allCourses.length && !loadingCourses && (
