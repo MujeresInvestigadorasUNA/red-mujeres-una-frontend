@@ -33,8 +33,12 @@ export async function getCourses(limit = 5) {
   }
 }
 
-export async function getPublicCourses() {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/public`, {
+export async function getPublicCourses(limit = 100) {
+  const url = limit
+    ? `${process.env.NEXT_PUBLIC_API_URL}/courses/public?limit=${limit}`
+    : `${process.env.NEXT_PUBLIC_API_URL}/courses/public`;
+  
+  const response = await fetch(url, {
     method: "GET",
     headers: { "Content-Type": "application/json" },
   });

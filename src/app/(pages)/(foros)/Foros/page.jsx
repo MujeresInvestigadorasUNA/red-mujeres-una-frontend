@@ -4,20 +4,26 @@ import CustomCard from "@/app/components/CustomCard";
 import { useUser } from "@/app/contexts/UserContext";
 import { getResearchers } from "@/lib/api/forums";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 const FORUM_PLACEHOLDER_IMAGE = "/images/jinette.png";
 
 export default function Foros() {
-    const [forums, setForums] = useState([]);
+    const [allForums, setAllForums] = useState([]);
+    const [displayedForums, setDisplayedForums] = useState([]);
     const [loadingForums, setLoadingForums] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
+    const [displayCount, setDisplayCount] = useState(6);
+    const ITEMS_PER_PAGE = 6;
 
     const fetchForums = async () => {
         try {
-            const data = await getResearchers(0);
+            const data = await getResearchers(100);
             if (data && data.length > 0) {
-                setForums(data);
+                setAllForums(data);
+                setDisplayedForums(data.slice(0, ITEMS_PER_PAGE));
             } else {
                 toast.error("No hay foros disponibles");
             }
@@ -27,6 +33,16 @@ export default function Foros() {
         } finally {
             setLoadingForums(false);
         }
+    };
+
+    const handleLoadMore = async () => {
+        setLoadingMore(true);
+        setTimeout(() => {
+            const newDisplayCount = displayCount + ITEMS_PER_PAGE;
+            setDisplayedForums(allForums.slice(0, newDisplayCount));
+            setDisplayCount(newDisplayCount);
+            setLoadingMore(false);
+        }, 300);
     };
 
     useEffect(() => {
@@ -82,8 +98,8 @@ export default function Foros() {
                         ))}
                     </>
                 ) : (
-                    forums.map((forum, index) => (
-                        <div key={index} className="flex-fill flex-grow flex-shrink basis-[30%] min-w-[250px]">
+                    displayedForums.map((forum, index) => (
+                        <div key={forum.id || index} className="flex-fill flex-grow flex-shrink basis-[30%] min-w-[250px]">
                             <CustomCard
                                 cardImage={forum?.photo || FORUM_PLACEHOLDER_IMAGE}
                                 cardTitle={forum.first_name + " " + forum.last_name}
@@ -97,6 +113,18 @@ export default function Foros() {
                     ))
                 )}
             </div>
+            {displayCount < allForums.length && !loadingForums && (
+                <div className="flex justify-center mt-8">
+                    <Button
+                        onClick={handleLoadMore}
+                        disabled={loadingMore}
+                        className="bg-[#E7473C] hover:bg-[#831d16] rounded text-white
+                        hover:text-white hover:cursor-pointer w-full"
+                    >
+                        {loadingMore ? "Cargando..." : "Cargar más"}
+                    </Button>
+                </div>
+            )}
         </main>
     );
 }

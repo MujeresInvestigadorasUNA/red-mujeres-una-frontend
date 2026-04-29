@@ -33,9 +33,9 @@ export default function CustomCard({
                             {cardTitle}
                         </span>
                         <p className={`text-sm text-[${cardTextColor}]`}>
-                            {cardDescription.length > 400
+                            {cardDescription && cardDescription.length > 400
                                 ? cardDescription.slice(0, 400) + '…'
-                                : cardDescription
+                                : cardDescription || ''
                             }
                         </p>
                     </div>

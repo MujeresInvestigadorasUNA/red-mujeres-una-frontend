@@ -31,18 +31,33 @@ import { getResearch } from "@/lib/api/research";
 
 export default function Investigaciones() {
     const { user } = useUser();
-    const [research, setResearch] = useState([]);
+    const [allResearch, setAllResearch] = useState([]);
+    const [displayedResearch, setDisplayedResearch] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
+    const [displayCount, setDisplayCount] = useState(6);
+    const ITEMS_PER_PAGE = 6;
 
     useEffect(() => {
         const fetchResearch = async () => {
             setLoading(true);
-            const data = await getResearch(0);
-            setResearch(data);
+            const data = await getResearch(100);
+            setAllResearch(data);
+            setDisplayedResearch(data.slice(0, ITEMS_PER_PAGE));
             setLoading(false);
         };
         fetchResearch();
     }, []);
+
+    const handleLoadMore = async () => {
+        setLoadingMore(true);
+        setTimeout(() => {
+            const newDisplayCount = displayCount + ITEMS_PER_PAGE;
+            setDisplayedResearch(allResearch.slice(0, newDisplayCount));
+            setDisplayCount(newDisplayCount);
+            setLoadingMore(false);
+        }, 300);
+    };
 
     return (
         <main className="flex-grow px-20 py-10 h-[100%] toolsSection">
@@ -101,8 +116,8 @@ export default function Investigaciones() {
                             </div>
                         ))}
                     </>
-                ) : research.length > 0 ? (
-                    research.map((item) => (
+                ) : displayedResearch.length > 0 ? (
+                    displayedResearch.map((item) => (
                         <Link key={item.id} href={`/Investigaciones/${item.id}`} className="grow">
                             <Card
                                 className="p-0 overflow-hidden rounded-lg
@@ -138,7 +153,7 @@ export default function Investigaciones() {
                                         {item.description || "Sin descripción"}
                                     </CardDescription>
                                 </CardHeader>
-                                <CardContent className="relative p-0 rounded bg-[#000]">
+                                <CardContent className="relative p-0 rounded">
                                     <Image
                                         src={item.vector_link || "/images/curso1.png"}
                                         alt={item.title}
@@ -167,6 +182,18 @@ export default function Investigaciones() {
                     <p>No hay investigaciones disponibles</p>
                 )}
             </div>
+            {displayCount < allResearch.length && !loading && (
+                <div className="flex justify-center mt-8">
+                    <Button
+                        onClick={handleLoadMore}
+                        disabled={loadingMore}
+                        className="bg-[#E7473C] hover:bg-[#831d16] rounded text-white
+                        hover:text-white hover:cursor-pointer w-full"
+                    >
+                        {loadingMore ? "Cargando..." : "Cargar más"}
+                    </Button>
+                </div>
+            )}
         </main>
     );
 }

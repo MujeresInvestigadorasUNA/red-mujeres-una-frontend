@@ -20,20 +20,35 @@ import { getCourses, getPublicCourses } from "@/lib/api/courses";
 
 export default function Cursos() {
     const { user } = useUser();
-    const [courses, setCourses] = useState([]);
+    const [allCourses, setAllCourses] = useState([]);
+    const [displayedCourses, setDisplayedCourses] = useState([]);
     const [loadingCourses, setLoadingCourses] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
+    const [displayCount, setDisplayCount] = useState(6);
+    const ITEMS_PER_PAGE = 6;
 
     const fetchCourses = async () => {
         try {
-            const response = await getPublicCourses();
+            const response = await getPublicCourses(100);
             const data = await response.json();
-            setCourses(data);
+            setAllCourses(data);
+            setDisplayedCourses(data.slice(0, ITEMS_PER_PAGE));
         }
         catch (error) {
             toast.error("Error al cargar los cursos.");
         } finally {
             setLoadingCourses(false);
         }
+    };
+
+    const handleLoadMore = async () => {
+        setLoadingMore(true);
+        setTimeout(() => {
+            const newDisplayCount = displayCount + ITEMS_PER_PAGE;
+            setDisplayedCourses(allCourses.slice(0, newDisplayCount));
+            setDisplayCount(newDisplayCount);
+            setLoadingMore(false);
+        }, 300);
     };
 
     useEffect(() => {
@@ -101,9 +116,9 @@ export default function Cursos() {
                         ))}
                     </>
                 ) : (
-                    courses.map((course, index) => (
+                    displayedCourses.map((course, index) => (
                         <CustomCard2
-                            key={index}
+                            key={course.id || index}
                             cardHref={`/Cursos/${course.id}`}
                             cardTitle={course.title}
                             cardDescription={course.description}
@@ -112,6 +127,18 @@ export default function Cursos() {
                     ))
                 )}
             </div>
+            {displayCount < allCourses.length && !loadingCourses && (
+                <div className="flex justify-center mt-8">
+                    <Button
+                        onClick={handleLoadMore}
+                        disabled={loadingMore}
+                        className="bg-[#E7473C] hover:bg-[#831d16] rounded text-white
+                        hover:text-white hover:cursor-pointer w-full"
+                    >
+                        {loadingMore ? "Cargando..." : "Cargar más"}
+                    </Button>
+                </div>
+            )}
         </main>
     );
 }

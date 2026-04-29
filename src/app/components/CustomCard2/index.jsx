@@ -56,7 +56,7 @@ export default function CustomCard2({
                         }
                     </CardDescription>
                 </CardHeader>
-                <CardContent className="relative p-0 rounded bg-[#000]">
+                <CardContent className="relative p-0 rounded">
                     <Image
                         src={IMAGE}
                         alt="Investigación"
