@@ -128,6 +128,11 @@ export default function LoginForm() {
                         </InputGroupButton>
                     </InputGroupAddon>
                 </InputGroup>
+                <p className="text-gray-200 text-sm text-center">
+                    <Link href="/OlvideMiClave" className="underline hover:text-gray-300">
+                        ¿Olvidaste tu contraseña? <br /> Haz clic aquí para recuperarla
+                    </Link>
+                </p>
                 <Button 
                     type="submit" 
                     className="bg-[#B62116] text-white w-full mt-3 rounded

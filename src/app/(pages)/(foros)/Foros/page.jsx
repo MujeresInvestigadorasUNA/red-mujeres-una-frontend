@@ -18,7 +18,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { SearchIcon } from "lucide-react";
 
-const FORUM_PLACEHOLDER_IMAGE = "/images/jinette.png";
+const FORUM_PLACEHOLDER_IMAGE = "/images/curso1.png";
 
 export default function Foros() {
     const [allForums, setAllForums] = useState([]);

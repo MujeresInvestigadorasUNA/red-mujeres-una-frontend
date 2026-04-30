@@ -238,7 +238,7 @@ export default function MisInvestigaciones() {
     };
 
     return (
-        <main className="flex-grow px-20 py-10 h-[100%] toolsSection">
+        <div className="px-20 py-10 toolsSection">
             <div className="flex gap-3 mb-5">
                 <Button
                     className="bg-[#E7473C] hover:bg-[#831d16] text-white
@@ -474,6 +474,6 @@ export default function MisInvestigaciones() {
                     </form>
                 </DialogContent>
             </Dialog>
-        </main>
+        </div>
     );
 }

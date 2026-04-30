@@ -2,12 +2,12 @@ import Link from "next/link";
 
 export default function Footer() {
     return (
-        <footer className="flex flex-wrap justify-between gap-8 border-t
+        <footer className="flex flex-col items-center justify-center gap-8 border-t
             border-gray-200 px-6 py-10 shadow toolsSection text-[#666] md:px-10 lg:px-20"
         >
-            <div className="min-w-[220px] flex-1 basis-[260px]">
-                Red de Mujeres Académicas UNA
-                <div className="flex gap-3 mt-3">
+            <div className="text-center">
+                <div className="font-bold mb-4">Red de Mujeres Académicas UNA</div>
+                <div className="flex gap-3 justify-center">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-facebook" viewBox="0 0 16 16">
                         <path d="M16 8.049c0-4.446-3.582-8.05-8-8.05C3.58 0-.002 3.603-.002 8.05c0 4.017 2.926 7.347 6.75 7.951v-5.625h-2.03V8.05H6.75V6.275c0-2.017 1.195-3.131 3.022-3.131.876 0 1.791.157 1.791.157v1.98h-1.009c-.993 0-1.303.621-1.303 1.258v1.51h2.218l-.354 2.326H9.25V16c3.824-.604 6.75-3.934 6.75-7.951" />
                     </svg>
@@ -16,23 +16,10 @@ export default function Footer() {
                     </svg>
                 </div>
             </div>
-            <div className="mt-3 flex min-w-[160px] flex-1 basis-[180px] flex-col gap-3">
-                <h3 className="font-bold"> Foros </h3>
-                <Link href="/"> General </Link>
-                <Link href="/"> Específico </Link>
-                <Link href="/"> Otro </Link>
-            </div>
-            <div className="mt-3 flex min-w-[160px] flex-1 basis-[180px] flex-col gap-3">
-                <h3 className="font-bold"> Cursos </h3>
-                <Link href="/"> General </Link>
-                <Link href="/"> Específico </Link>
-                <Link href="/"> Otro </Link>
-            </div>
-            <div className="mt-3 flex min-w-[160px] flex-1 basis-[180px] flex-col gap-3">
-                <h3 className="font-bold"> Investigaciones </h3>
-                <Link href="/"> General </Link>
-                <Link href="/"> Específico </Link>
-                <Link href="/"> Otro </Link>
+            <div className="flex gap-8 justify-center flex-wrap">
+                <Link href="/Foros" className="font-bold hover:text-gray-900">Foros</Link>
+                <Link href="/Investigaciones" className="font-bold hover:text-gray-900">Investigaciones</Link>
+                <Link href="/Cursos" className="font-bold hover:text-gray-900">Cursos</Link>
             </div>
         </footer>
     )

@@ -8,7 +8,7 @@ import { CustomNavigationMenu } from "./components/NavigationMenu";
 
 export default function RootLayout({ children }) {
   const pathname = usePathname();
-  const hideLayout = pathname.startsWith("/IniciarSesion") || pathname.startsWith("/Registrarse");
+  const hideLayout = pathname.startsWith("/IniciarSesion") || pathname.startsWith("/Registrarse") || pathname.startsWith("/OlvideMiClave");
 
   return (
     <html lang="en">

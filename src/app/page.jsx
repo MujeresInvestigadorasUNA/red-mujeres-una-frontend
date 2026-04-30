@@ -23,7 +23,7 @@ const RESEARCH_PLACEHOLDER_IMAGES = [
 ];
 
 const COURSE_PLACEHOLDER_IMAGE = "/images/curso1.png";
-const FORUM_PLACEHOLDER_IMAGE = "/images/jinette.png";
+const FORUM_PLACEHOLDER_IMAGE = "/images/curso1.png";
 
 const RESEARCH_PLACEHOLDER_DESCRIPTION = "Explora esta investigación destacada y accede a recursos académicos de calidad.";
 
@@ -130,7 +130,7 @@ export default function Home() {
           en foros y accede a información clave con tecnología avanzada e inteligencia artificial.
         </p>
         <div className="mt-10 px-10">
-          <h2 className="text-xl font-bold mt-10 mb-5">Foros Destacados</h2>
+          <h2 className="text-xl font-bold mt-10 mb-5">Foros Recomendados</h2>
           {loadingForums ? (
             <Carousel
               opts={{
@@ -223,7 +223,7 @@ export default function Home() {
       </section>
       <section className="flex flex-wrap items-stretch gap-10 px-20 py-10 bg-[#b62116] text-[#F0F0F0] cursesSection">
         <div className="flex min-w-[280px] flex-1 basis-[320px] flex-col gap-2">
-          <h2 className="text-xl font-bold mb-2">Cursos Populares</h2>
+          <h2 className="text-xl font-bold mb-2">Cursos Recomendados</h2>
           {loadingCourses ? (
             <>
               {[...Array(5)].map((_, index) => (
@@ -271,7 +271,7 @@ export default function Home() {
         </div>
       </section>
       <section className="px-20 py-10 toolsSection">
-        <h2 className="text-xl font-bold mb-5">Investigaciones Recientes</h2>
+        <h2 className="text-xl font-bold mb-5">Investigaciones Recomendadas</h2>
         {loadingResearch ? (
           <Carousel
             opts={{

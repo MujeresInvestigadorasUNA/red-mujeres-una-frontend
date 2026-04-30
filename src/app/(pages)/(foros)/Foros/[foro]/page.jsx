@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/select";
 import { iconClockwise } from "@/app/assets/icons";
 
-const FORUM_PLACEHOLDER_IMAGE = "/images/jinette.png";
+const FORUM_PLACEHOLDER_IMAGE = "/images/curso1.png";
 
 export default function forum({ params }) {
     const [forum, setForum] = useState({
