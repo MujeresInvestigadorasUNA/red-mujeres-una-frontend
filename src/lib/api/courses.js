@@ -107,3 +107,71 @@ export async function deleteCourse({ course_id }) {
   });
   return response;
 }
+
+export async function likeCourse(user_id, course_id) {
+  const tokenFromStorage = typeof window !== "undefined"
+    ? localStorage.getItem("access_token")
+    : null;
+
+  const headers = {
+    Accept: "application/json",
+  };
+
+  if (tokenFromStorage) {
+    headers.Authorization = `Bearer ${tokenFromStorage}`;
+  }
+
+  try {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/courses/user/${user_id}/likes/${course_id}`,
+      {
+        method: "POST",
+        headers,
+      }
+    );
+
+    if (!response.ok) {
+      console.error("Error liking course:", response.statusText);
+      return null;
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error liking course:", error);
+    return null;
+  }
+}
+
+export async function unlikeCourse(user_id, course_id) {
+  const tokenFromStorage = typeof window !== "undefined"
+    ? localStorage.getItem("access_token")
+    : null;
+
+  const headers = {
+    Accept: "application/json",
+  };
+
+  if (tokenFromStorage) {
+    headers.Authorization = `Bearer ${tokenFromStorage}`;
+  }
+
+  try {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/courses/user/${user_id}/likes/${course_id}`,
+      {
+        method: "DELETE",
+        headers,
+      }
+    );
+
+    if (!response.ok) {
+      console.error("Error unliking course:", response.statusText);
+      return null;
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error unliking course:", error);
+    return null;
+  }
+}

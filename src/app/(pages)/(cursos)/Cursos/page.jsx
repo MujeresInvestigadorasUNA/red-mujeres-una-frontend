@@ -1,7 +1,8 @@
 "use client";
 import { useUser } from "@/app/contexts/UserContext";
 import { iconClockwise } from "@/app/assets/icons";
-import { SearchIcon } from "lucide-react"
+import { SearchIcon, Heart, Share2 } from "lucide-react"
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button"
 import { ButtonGroup } from "@/components/ui/button-group"
 import { Input } from "@/components/ui/input"
@@ -16,8 +17,7 @@ import {
 } from "@/components/ui/select";
 import { useEffect, useState } from "react";
 import CustomCard2 from "@/app/components/CustomCard2";
-import { getCourses, getPublicCourses } from "@/lib/api/courses";
-import { toast } from "sonner";
+import { getCourses, getPublicCourses, likeCourse, unlikeCourse } from "@/lib/api/courses";
 
 export default function Cursos() {
     const { user } = useUser();
@@ -28,6 +28,7 @@ export default function Cursos() {
     const [displayCount, setDisplayCount] = useState(6);
     const [filterType, setFilterType] = useState("");
     const [searchQuery, setSearchQuery] = useState("");
+    const [likedCourses, setLikedCourses] = useState(new Set());
     const ITEMS_PER_PAGE = 6;
 
     const fetchCourses = async () => {
@@ -88,6 +89,48 @@ export default function Cursos() {
         setSearchQuery("");
         setDisplayedCourses(allCourses.slice(0, ITEMS_PER_PAGE));
         setDisplayCount(ITEMS_PER_PAGE);
+    };
+
+    const handleShareCourse = (courseId) => {
+        const shareUrl = `${process.env.NEXT_PUBLIC_FRONTEND_URL}/Cursos/${courseId}`;
+        navigator.clipboard.writeText(shareUrl).then(() => {
+            toast.success("URL copiada al portapapeles");
+        }).catch(() => {
+            toast.error("Error al copiar la URL");
+        });
+    };
+
+    const handleLikeCourse = async (courseId) => {
+        if (!user) {
+            toast.error("Debes iniciar sesión para dar like");
+            return;
+        }
+
+        try {
+            const isLiked = likedCourses.has(courseId);
+            let response;
+
+            if (isLiked) {
+                response = await unlikeCourse(user.id, courseId);
+                if (response?.success) {
+                    setLikedCourses((prev) => {
+                        const newSet = new Set(prev);
+                        newSet.delete(courseId);
+                        return newSet;
+                    });
+                    toast.success("Dislike registrado");
+                }
+            } else {
+                response = await likeCourse(user.id, courseId);
+                if (response?.success) {
+                    setLikedCourses((prev) => new Set(prev).add(courseId));
+                    toast.success("Like registrado");
+                }
+            }
+        } catch (error) {
+            toast.error("Error al procesar el like");
+            console.error(error);
+        }
     };
 
     useEffect(() => {
@@ -170,6 +213,11 @@ export default function Cursos() {
                             cardTitle={course.title}
                             cardDescription={course.description}
                             cardImage={course.photo}
+                            cardId={course.id}
+                            user={user}
+                            isLiked={likedCourses.has(course.id)}
+                            onLike={handleLikeCourse}
+                            onShare={handleShareCourse}
                         />
                     ))
                 ) : (

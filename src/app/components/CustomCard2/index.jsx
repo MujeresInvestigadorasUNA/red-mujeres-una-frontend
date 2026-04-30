@@ -2,6 +2,14 @@ import Image from "next/image";
 import { iconEye, iconHeart, iconUsers } from "@/app/assets/icons";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Heart, Share2, EyeOff } from "lucide-react";
 import {
     Card,
     CardContent,
@@ -15,6 +23,11 @@ export default function CustomCard2({
     cardTitle,
     cardDescription,
     cardImage,
+    cardId,
+    user,
+    isLiked,
+    onLike,
+    onShare,
 }) {
     const HREF = cardHref ?? "/";
     const TITLE = cardTitle ?? "Card Title";
@@ -31,23 +44,51 @@ export default function CustomCard2({
                         <CardTitle className="text-nowrap">
                             {TITLE}
                         </CardTitle>
-                        <div
-                            className="flex gap-5 text-sm text-gray-600 text-nowrap"
-                            style={{ fontSize: "0.8rem" }}
-                        >
-                            <span className="flex items-center gap-1">
-                                {iconHeart({ size: 12 })}
-                                100
-                            </span>
-                            <span className="flex items-center gap-1">
-                                {iconEye({ size: 12 })}
-                                100
-                            </span>
-                            <span className="flex items-center gap-1">
-                                {iconUsers({ size: 12 })}
-                                20 / 50
-                            </span>
-                        </div>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8"
+                                    onClick={(e) => e.stopPropagation()}
+                                >
+                                    {/* More options icon (three dots) */}
+                                    <svg
+                                        className="w-4 h-4"
+                                        fill="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path d="M12 8c1.1 0 2-0.9 2-2s-0.9-2-2-2-2 0.9-2 2 0.9 2 2 2zm0 2c-1.1 0-2 0.9-2 2s0.9 2 2 2 2-0.9 2-2-0.9-2-2-2zm0 6c-1.1 0-2 0.9-2 2s0.9 2 2 2 2-0.9 2-2-0.9-2-2-2z" />
+                                    </svg>
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                {user && (
+                                    <DropdownMenuItem onClick={(e) => {
+                                        e.stopPropagation();
+                                        onLike?.(cardId);
+                                    }}>
+                                        <Heart 
+                                            className={`w-4 h-4 mr-2 ${isLiked ? "fill-current text-red-500" : ""}`}
+                                        />
+                                        {isLiked ? "Quitar Like" : "Me Gusta"}
+                                    </DropdownMenuItem>
+                                )}
+                                <DropdownMenuItem onClick={(e) => {
+                                    e.stopPropagation();
+                                    onShare?.(cardId);
+                                }}>
+                                    <Share2 className="w-4 h-4 mr-2" />
+                                    Compartir
+                                </DropdownMenuItem>
+                                {user && user.user_type_id === 3 && (
+                                    <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
+                                        <EyeOff className="w-4 h-4 mr-2" />
+                                        Esconder
+                                    </DropdownMenuItem>
+                                )}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                     </div>
                     <CardDescription>
                         {DESCRIPTION.length > 400
@@ -64,12 +105,28 @@ export default function CustomCard2({
                         height={3000}
                         className="object-cover brightness-80 max-h-60 w-full"
                     />
-                    {/* Overlay badges */}
-                    <div className="absolute bottom-5 left-4 flex gap-1">
-                        <Badge variant="secondary">Badge</Badge>
-                        <Badge variant="secondary">Badge</Badge>
-                        <Badge variant="secondary">Badge</Badge>
-                        <Badge variant="secondary">Badge</Badge>
+                    {/* Overlay with likes, visualizaciones and badges */}
+                    <div className="absolute bottom-5 left-4 right-4 flex gap-3 items-center justify-between">
+                        <div className="flex gap-3">
+                            <span
+                                className="flex items-center gap-1 text-white text-sm font-medium bg-black/40 px-2 py-1 rounded"
+                            >
+                                {iconHeart({ size: 14 })}
+                                0
+                            </span>
+                            <span
+                                className="flex items-center gap-1 text-white text-sm font-medium bg-black/40 px-2 py-1 rounded"
+                            >
+                                {iconEye({ size: 14 })}
+                                0
+                            </span>
+                            <span
+                                className="flex items-center gap-1 text-white text-sm font-medium bg-black/40 px-2 py-1 rounded"
+                            >
+                                {iconUsers({ size: 14 })}
+                                0 / 50
+                            </span>
+                        </div>
                     </div>
                 </CardContent>
             </Card>

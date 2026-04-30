@@ -129,7 +129,7 @@ export default function LoginForm() {
                     </InputGroupAddon>
                 </InputGroup>
                 <p className="text-gray-200 text-sm text-center">
-                    <Link href="/OlvideMiClave" className="underline hover:text-gray-300">
+                    <Link href="/OlvideMiClave" className="hover:underline">
                         ¿Olvidaste tu contraseña? <br /> Haz clic aquí para recuperarla
                     </Link>
                 </p>

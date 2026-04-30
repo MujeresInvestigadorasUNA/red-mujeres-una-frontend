@@ -91,3 +91,71 @@ export async function createResearch({ user_id, title, document, access_token })
 
   return response;
 }
+
+export async function likeResearch(user_id, research_id) {
+  const tokenFromStorage = typeof window !== "undefined"
+    ? localStorage.getItem("access_token")
+    : null;
+
+  const headers = {
+    Accept: "application/json",
+  };
+
+  if (tokenFromStorage) {
+    headers.Authorization = `Bearer ${tokenFromStorage}`;
+  }
+
+  try {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/research/user/${user_id}/likes/${research_id}`,
+      {
+        method: "POST",
+        headers,
+      }
+    );
+
+    if (!response.ok) {
+      console.error("Error liking research:", response.statusText);
+      return null;
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error liking research:", error);
+    return null;
+  }
+}
+
+export async function unlikeResearch(user_id, research_id) {
+  const tokenFromStorage = typeof window !== "undefined"
+    ? localStorage.getItem("access_token")
+    : null;
+
+  const headers = {
+    Accept: "application/json",
+  };
+
+  if (tokenFromStorage) {
+    headers.Authorization = `Bearer ${tokenFromStorage}`;
+  }
+
+  try {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/research/user/${user_id}/likes/${research_id}`,
+      {
+        method: "DELETE",
+        headers,
+      }
+    );
+
+    if (!response.ok) {
+      console.error("Error unliking research:", response.statusText);
+      return null;
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error unliking research:", error);
+    return null;
+  }
+}

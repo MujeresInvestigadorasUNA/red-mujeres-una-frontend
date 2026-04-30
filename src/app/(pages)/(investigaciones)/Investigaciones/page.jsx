@@ -1,10 +1,17 @@
 "use client";
 import { useUser } from "@/app/contexts/UserContext";
-import { SearchIcon } from "lucide-react"
+import { SearchIcon, Heart, Share2, EyeOff } from "lucide-react"
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button"
 import { ButtonGroup } from "@/components/ui/button-group"
 import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
     Select,
     SelectContent,
@@ -26,7 +33,7 @@ import { iconClockwise, iconEye, iconHeart } from "@/app/assets/icons";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { getResearch } from "@/lib/api/research";
+import { getResearch, likeResearch, unlikeResearch } from "@/lib/api/research";
 
 
 export default function Investigaciones() {
@@ -38,6 +45,7 @@ export default function Investigaciones() {
     const [displayCount, setDisplayCount] = useState(6);
     const [filterType, setFilterType] = useState("");
     const [searchQuery, setSearchQuery] = useState("");
+    const [likedResearch, setLikedResearch] = useState(new Set());
     const ITEMS_PER_PAGE = 6;
 
     useEffect(() => {
@@ -93,6 +101,48 @@ export default function Investigaciones() {
         setSearchQuery("");
         setDisplayedResearch(allResearch.slice(0, ITEMS_PER_PAGE));
         setDisplayCount(ITEMS_PER_PAGE);
+    };
+
+    const handleShareResearch = (researchId) => {
+        const shareUrl = `${process.env.NEXT_PUBLIC_FRONTEND_URL}/Investigaciones/${researchId}`;
+        navigator.clipboard.writeText(shareUrl).then(() => {
+            toast.success("URL copiada al portapapeles");
+        }).catch(() => {
+            toast.error("Error al copiar la URL");
+        });
+    };
+
+    const handleLikeResearch = async (researchId) => {
+        if (!user) {
+            toast.error("Debes iniciar sesión para dar like");
+            return;
+        }
+
+        try {
+            const isLiked = likedResearch.has(researchId);
+            let response;
+
+            if (isLiked) {
+                response = await unlikeResearch(user.id, researchId);
+                if (response?.success) {
+                    setLikedResearch((prev) => {
+                        const newSet = new Set(prev);
+                        newSet.delete(researchId);
+                        return newSet;
+                    });
+                    toast.success("Dislike registrado");
+                }
+            } else {
+                response = await likeResearch(user.id, researchId);
+                if (response?.success) {
+                    setLikedResearch((prev) => new Set(prev).add(researchId));
+                    toast.success("Like registrado");
+                }
+            }
+        } catch (error) {
+            toast.error("Error al procesar el like");
+            console.error(error);
+        }
     };
 
     return (
@@ -176,24 +226,51 @@ export default function Investigaciones() {
                                         <CardTitle className="text-nowrap">
                                             {item.title}
                                         </CardTitle>
-                                        <div
-                                            className="flex gap-5 text-sm text-gray-600
-                                            text-nowrap"
-                                            style={{ fontSize: "0.8rem" }}
-                                        >
-                                            <span
-                                                className="flex items-center gap-1"
-                                            >
-                                                {iconHeart({ size: 12 })}
-                                                0
-                                            </span>
-                                            <span
-                                                className="flex items-center gap-1"
-                                            >
-                                                {iconEye({ size: 12 })}
-                                                0
-                                            </span>
-                                        </div>
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-8 w-8"
+                                                    onClick={(e) => e.stopPropagation()}
+                                                >
+                                                    {/* More options icon (three dots) */}
+                                                    <svg
+                                                        className="w-4 h-4"
+                                                        fill="currentColor"
+                                                        viewBox="0 0 24 24"
+                                                    >
+                                                        <path d="M12 8c1.1 0 2-0.9 2-2s-0.9-2-2-2-2 0.9-2 2 0.9 2 2 2zm0 2c-1.1 0-2 0.9-2 2s0.9 2 2 2 2-0.9 2-2-0.9-2-2-2zm0 6c-1.1 0-2 0.9-2 2s0.9 2 2 2 2-0.9 2-2-0.9-2-2-2z" />
+                                                    </svg>
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end">
+                                                {user && (
+                                                    <DropdownMenuItem onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleLikeResearch(item.id);
+                                                    }}>
+                                                        <Heart 
+                                                            className={`w-4 h-4 mr-2 ${likedResearch.has(item.id) ? "fill-current text-red-500" : ""}`}
+                                                        />
+                                                        {likedResearch.has(item.id) ? "Quitar Like" : "Me Gusta"}
+                                                    </DropdownMenuItem>
+                                                )}
+                                                <DropdownMenuItem onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleShareResearch(item.id);
+                                                }}>
+                                                    <Share2 className="w-4 h-4 mr-2" />
+                                                    Compartir
+                                                </DropdownMenuItem>
+                                                {user && user.user_type_id === 3 && (
+                                                    <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
+                                                        <EyeOff className="w-4 h-4 mr-2" />
+                                                        Esconder
+                                                    </DropdownMenuItem>
+                                                )}
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
                                     </div>
                                     <CardDescription>
                                         {item.description || "Sin descripción"}
@@ -211,14 +288,22 @@ export default function Investigaciones() {
                                             e.target.src = "/images/curso1.png";
                                         }}
                                     />
-                                    {/* Overlay badges */}
-                                    <div className="absolute bottom-5 left-4 flex gap-1">
-                                        <Badge variant="secondary">
-                                            Badge
-                                        </Badge>
-                                        <Badge variant="secondary">Badge</Badge>
-                                        <Badge variant="secondary">Badge</Badge>
-                                        <Badge variant="secondary">Badge</Badge>
+                                    {/* Overlay with likes, visualizaciones and badges */}
+                                    <div className="absolute bottom-5 left-4 right-4 flex gap-3 items-center justify-between">
+                                        <div className="flex gap-3">
+                                            <span
+                                                className="flex items-center gap-1 text-white text-sm font-medium bg-black/40 px-2 py-1 rounded"
+                                            >
+                                                {iconHeart({ size: 14 })}
+                                                0
+                                            </span>
+                                            <span
+                                                className="flex items-center gap-1 text-white text-sm font-medium bg-black/40 px-2 py-1 rounded"
+                                            >
+                                                {iconEye({ size: 14 })}
+                                                0
+                                            </span>
+                                        </div>
                                     </div>
                                 </CardContent>
                             </Card>
