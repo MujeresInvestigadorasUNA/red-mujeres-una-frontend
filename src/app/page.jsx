@@ -176,7 +176,27 @@ export default function Home() {
               <CarouselNext className="hover:cursor-pointer border-[#F0F0F0] bg-[#831d16] text-[#F0F0F0] shadow-md hover:bg-[#6f1913]"/>
             </Carousel>
           ) : (
-            <p className="text-center text-gray-300">No hay foros disponibles.</p>
+            <div className="w-full flex items-center justify-center py-12">
+              <div className="text-center max-w-md">
+                <div className="flex justify-center mb-4">
+                  <div className="p-3 bg-[#831d16] rounded-full">
+                    <svg
+                      className="w-10 h-10 text-[#F0F0F0]"
+                      fill="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+                    </svg>
+                  </div>
+                </div>
+                <h3 className="text-lg font-semibold text-[#F0F0F0] mb-2">
+                  No hay foros disponibles
+                </h3>
+                <p className="text-gray-200 text-sm">
+                  Los foros serán mostrados aquí cuando estén disponibles.
+                </p>
+              </div>
+            </div>
           )}
         </div>
       </section>
@@ -248,7 +268,27 @@ export default function Home() {
               />
             ))
           ) : (
-            <p className="text-center text-gray-200">No hay cursos disponibles.</p>
+            <div className="w-full flex items-center justify-center py-12">
+              <div className="text-center max-w-md">
+                <div className="flex justify-center mb-4">
+                  <div className="p-3 bg-[#831d16] rounded-full">
+                    <svg
+                      className="w-10 h-10 text-[#F0F0F0]"
+                      fill="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path d="M6 4a2 2 0 012-2h8a2 2 0 012 2v16a1 1 0 01-1.55.894L12 17.69l-4.45 3.104A1 1 0 016 20V4z" />
+                    </svg>
+                  </div>
+                </div>
+                <h3 className="text-lg font-semibold text-[#F0F0F0] mb-2">
+                  No hay cursos disponibles
+                </h3>
+                <p className="text-gray-200 text-sm">
+                  Los cursos serán mostrados aquí cuando estén disponibles.
+                </p>
+              </div>
+            </div>
           )}
           <Link
             href="/Cursos"
@@ -320,7 +360,33 @@ export default function Home() {
             <CarouselNext className="hover:cursor-pointer"/>
           </Carousel>
         ) : (
-          <p className="text-center text-gray-500">No hay investigaciones disponibles.</p>
+          <div className="w-full flex items-center justify-center py-12">
+            <div className="text-center max-w-md">
+              <div className="flex justify-center mb-4">
+                <div className="p-4 bg-gray-100 rounded-full">
+                  <svg
+                    className="w-12 h-12 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    />
+                  </svg>
+                </div>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-700 mb-2">
+                No hay investigaciones disponibles
+              </h3>
+              <p className="text-gray-500 text-sm">
+                Las investigaciones serán mostradas aquí cuando estén disponibles.
+              </p>
+            </div>
+          </div>
         )}
       </section>
     </main>

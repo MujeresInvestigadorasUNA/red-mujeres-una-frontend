@@ -19,6 +19,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { iconClockwise } from "@/app/assets/icons";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const PLACEHOLDER_IMAGES = [
     "/images/curso1.png",
@@ -83,6 +84,10 @@ export default function Curso({ params }) {
                 const related = allCourses.filter(c => c.id !== parseInt(courseId));
                 setRelatedCourses(related);
                 setDisplayedCourses(related);
+
+                setRelatedCourses([]);
+                setDisplayedCourses([]);
+
             } catch (error) {
                 console.error("Error fetching related courses:", error);
                 toast.error("Error al cargar cursos relacionados.");
@@ -217,7 +222,7 @@ export default function Curso({ params }) {
                     </div>
                 </section>
             </div>
-            <section className="px-20 py-10">
+            <section className="px-20 pb-10">
                 <h2 className="text-2xl font-bold mb-5">Cursos Relacionados</h2>
                 <div className="flex gap-3 mb-5 mt-5">
                     <Select value={filterType} onValueChange={handleFilterChange}>
@@ -264,7 +269,21 @@ export default function Curso({ params }) {
                 </div>
                 <div className="flex gap-5 flex-wrap mt-5">
                     {loadingRelated ? (
-                        <p className="text-gray-600 w-full text-center py-5">Cargando cursos relacionados...</p>
+                        <>
+                            {[...Array(6)].map((_, index) => (
+                                <div key={index} className="grow min-w-[300px]">
+                                    <div className="p-0 overflow-hidden rounded-lg border-none shadow">
+                                        <div className="px-6 pt-7 pb-4">
+                                            <Skeleton className="h-6 w-3/4 mb-2" />
+                                            <Skeleton className="h-4 w-full mb-3" />
+                                        </div>
+                                        <div className="relative p-0 rounded bg-gray-100">
+                                            <Skeleton className="h-60 w-full rounded-none" />
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </>
                     ) : displayedCourses.length > 0 ? (
                         displayedCourses.map((course, index) => (
                             <div key={course.id} className="flex-grow">
@@ -288,7 +307,27 @@ export default function Curso({ params }) {
                             </div>
                         ))
                     ) : (
-                        <p className="text-gray-600 w-full text-center py-5">No hay cursos relacionados disponibles.</p>
+                        <div className="w-full flex items-center justify-center py-12">
+                            <div className="text-center max-w-md">
+                                <div className="flex justify-center mb-4">
+                                    <div className="p-4 bg-gray-100 rounded-full">
+                                        <svg
+                                            className="w-12 h-12 text-gray-400"
+                                            fill="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path d="M6 4a2 2 0 012-2h8a2 2 0 012 2v16a1 1 0 01-1.55.894L12 17.69l-4.45 3.104A1 1 0 016 20V4z" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <h3 className="text-lg font-semibold text-gray-700 mb-2">
+                                    No hay cursos relacionados
+                                </h3>
+                                <p className="text-gray-500 text-sm">
+                                    No encontramos otros cursos relacionados en este momento.
+                                </p>
+                            </div>
+                        </div>
                     )}
                 </div>
             </section>

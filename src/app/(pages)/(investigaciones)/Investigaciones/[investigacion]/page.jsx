@@ -17,6 +17,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { iconClockwise } from "@/app/assets/icons";
+import { Skeleton } from "@/components/ui/skeleton";
 import { getResearch } from "@/lib/api/research";
 
 const PLACEHOLDER_IMAGES = [
@@ -98,8 +99,17 @@ export default function Investigacion() {
     return (
         <main className="flex-grow px-20 py-10 h-[100%]">
             {loading ? (
-                <div className="text-center py-10">
-                    <p>Cargando investigación...</p>
+                <div className="space-y-6">
+                    <Skeleton className="h-10 w-3/4" />
+                    <Skeleton className="h-6 w-full" />
+                    <Skeleton className="h-6 w-5/6" />
+                    <Skeleton className="h-96 w-full rounded-lg" />
+                    <Skeleton className="h-6 w-full mt-8" />
+                    <Skeleton className="h-6 w-full" />
+                    <div className="flex gap-3">
+                        <Skeleton className="h-96 w-full rounded-lg" />
+                        <Skeleton className="h-96 w-full rounded-lg" />
+                    </div>
                 </div>
             ) : currentResearch ? (
                 <>
@@ -184,7 +194,23 @@ export default function Investigacion() {
                             </Button>
                         </div>
                         <div className="flex gap-5 flex-wrap mt-5">
-                            {displayedResearch.length > 0 ? (
+                            {relatedResearch.length === 0 ? (
+                                <>
+                                    {[...Array(6)].map((_, index) => (
+                                        <div key={index} className="grow min-w-[300px]">
+                                            <div className="p-0 overflow-hidden rounded-lg border-none shadow">
+                                                <div className="px-6 pt-7 pb-4">
+                                                    <Skeleton className="h-6 w-3/4 mb-2" />
+                                                    <Skeleton className="h-4 w-full mb-3" />
+                                                </div>
+                                                <div className="relative p-0 rounded bg-gray-100">
+                                                    <Skeleton className="h-60 w-full rounded-none" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </>
+                            ) : displayedResearch.length > 0 ? (
                                 displayedResearch.map((research, index) => (
                                     <div key={research.id} className="flex-grow">
                                         <Link href={`/Investigaciones/${research.id}`}>
@@ -204,7 +230,31 @@ export default function Investigacion() {
                                     </div>
                                 ))
                             ) : (
-                                <p className="text-gray-600 w-full text-center py-5">No hay investigaciones relacionadas disponibles.</p>
+                                    <div className="text-center max-w-md">
+                                        <div className="flex justify-center mb-4">
+                                            <div className="p-4 bg-gray-100 rounded-full">
+                                                <svg
+                                                    className="w-12 h-12 text-gray-400"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth={1.5}
+                                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                                    />
+                                                </svg>
+                                            </div>
+                                        </div>
+                                        <h3 className="text-lg font-semibold text-gray-700 mb-2">
+                                            No hay investigaciones relacionadas
+                                        </h3>
+                                        <p className="text-gray-500 text-sm">
+                                            No encontramos otras investigaciones relacionadas en este momento.
+                                        </p>
+                                    </div>
                             )}
                         </div>
                     </section>

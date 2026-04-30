@@ -11,6 +11,7 @@ import { SearchIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
     Select,
     SelectContent,
@@ -261,7 +262,21 @@ export default function forum({ params }) {
                 </div>
                 <div className="flex gap-5 flex-wrap mt-5">
                     {loadingResearch ? (
-                        <p className="text-gray-600">Cargando investigaciones...</p>
+                        <>
+                            {[...Array(6)].map((_, index) => (
+                                <div key={index} className="grow min-w-[300px]">
+                                    <div className="p-0 overflow-hidden rounded-lg border-none shadow">
+                                        <div className="px-6 pt-7 pb-4">
+                                            <Skeleton className="h-6 w-3/4 mb-2" />
+                                            <Skeleton className="h-4 w-full mb-3" />
+                                        </div>
+                                        <div className="relative p-0 rounded bg-gray-100">
+                                            <Skeleton className="h-60 w-full rounded-none" />
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </>
                     ) : displayedResearch.length > 0 ? (
                         displayedResearch.map((item) => (
                             <div key={item.id} className="flex-grow max-w-xs">
@@ -281,7 +296,33 @@ export default function forum({ params }) {
                             </div>
                         ))
                     ) : (
-                        <p className="text-gray-600">No hay investigaciones disponibles.</p>
+                        <div className="w-full flex items-center justify-center py-12">
+                            <div className="text-center max-w-md">
+                                <div className="flex justify-center mb-4">
+                                    <div className="p-4 bg-gray-100 rounded-full">
+                                        <svg
+                                            className="w-12 h-12 text-gray-400"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={1.5}
+                                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                            />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <h3 className="text-lg font-semibold text-gray-700 mb-2">
+                                    No hay investigaciones disponibles
+                                </h3>
+                                <p className="text-gray-500 text-sm">
+                                    Esta investigadora aún no ha publicado investigaciones.
+                                </p>
+                            </div>
+                        </div>
                     )}
                 </div>
             </section>
@@ -332,7 +373,21 @@ export default function forum({ params }) {
                 </div>
                 <div className="flex gap-5 flex-wrap mt-5">
                     {loadingCourses ? (
-                        <p className="text-gray-600">Cargando cursos...</p>
+                        <>
+                            {[...Array(6)].map((_, index) => (
+                                <div key={index} className="grow min-w-[300px]">
+                                    <div className="p-0 overflow-hidden rounded-lg border-none shadow">
+                                        <div className="px-6 pt-7 pb-4">
+                                            <Skeleton className="h-6 w-3/4 mb-2" />
+                                            <Skeleton className="h-4 w-full mb-3" />
+                                        </div>
+                                        <div className="relative p-0 rounded bg-gray-100">
+                                            <Skeleton className="h-60 w-full rounded-none" />
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </>
                     ) : displayedCourses.length > 0 ? (
                         displayedCourses.map((course) => (
                             <div key={course.id} className="flex-grow max-w-xs">
@@ -351,7 +406,27 @@ export default function forum({ params }) {
                             </div>
                         ))
                     ) : (
-                        <p className="text-gray-600">No hay cursos disponibles.</p>
+                        <div className="w-full flex items-center justify-center py-12">
+                            <div className="text-center max-w-md">
+                                <div className="flex justify-center mb-4">
+                                    <div className="p-4 bg-gray-100 rounded-full">
+                                        <svg
+                                            className="w-12 h-12 text-gray-400"
+                                            fill="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path d="M6 4a2 2 0 012-2h8a2 2 0 012 2v16a1 1 0 01-1.55.894L12 17.69l-4.45 3.104A1 1 0 016 20V4z" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <h3 className="text-lg font-semibold text-gray-700 mb-2">
+                                    No hay cursos disponibles
+                                </h3>
+                                <p className="text-gray-500 text-sm">
+                                    Esta investigadora aún no ha creado cursos.
+                                </p>
+                            </div>
+                        </div>
                     )}
                 </div>
             </section>

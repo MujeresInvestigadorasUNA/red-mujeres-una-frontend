@@ -200,8 +200,33 @@ export default function MisCursos() {
                         />
                     ))
                 ) : (
-                    <div className="w-full text-center py-10">
-                        <p className="text-gray-500 text-lg">No hay cursos disponibles.</p>
+                    <div className="w-full flex items-center justify-center py-20">
+                        <div className="text-center max-w-md">
+                            <div className="flex justify-center mb-4">
+                                <div className="p-4 bg-gray-100 rounded-full">
+                                    <svg
+                                        className="w-12 h-12 text-gray-400"
+                                        fill="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path d="M6 4a2 2 0 012-2h8a2 2 0 012 2v16a1 1 0 01-1.55.894L12 17.69l-4.45 3.104A1 1 0 016 20V4z" />
+                                    </svg>
+                                </div>
+                            </div>
+                            <h3 className="text-lg font-semibold text-gray-700 mb-2">
+                                No hay cursos disponibles
+                            </h3>
+                            <p className="text-gray-500 text-sm mb-6">
+                                Aún no has creado ningún curso. ¡Comienza a compartir tu conocimiento!
+                            </p>
+                            <Button
+                                className="bg-[#E7473C] hover:bg-[#831d16] text-white
+                                hover:text-white hover:cursor-pointer rounded"
+                                onClick={handleOnAddCourse}
+                            >
+                                + Crear tu primer curso
+                            </Button>
+                        </div>
                     </div>
                 )}
             </div>
