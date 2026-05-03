@@ -74,6 +74,37 @@ export async function getResearchByUserId(user_id) {
   }
 }
 
+export async function getResearchById(research_id) {
+  const tokenFromStorage = typeof window !== "undefined"
+    ? localStorage.getItem("access_token")
+    : null;
+
+  const headers = {
+    Accept: "application/json",
+  };
+
+  if (tokenFromStorage) {
+    headers.Authorization = `Bearer ${tokenFromStorage}`;
+  }
+
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/research/${research_id}`, {
+      method: "GET",
+      headers,
+    });
+
+    if (!response.ok) {
+      console.error("Error fetching research by id:", response.statusText);
+      return null;
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching research by id:", error);
+    return null;
+  }
+}
+
 export async function createResearch({ user_id, title, description, document, access_token }) {
   const tokenFromStorage = typeof window !== "undefined"
     ? localStorage.getItem("access_token")

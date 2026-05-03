@@ -22,11 +22,113 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu"
+import { getResearchById } from "@/lib/api/research"
+import {
+    getNotifications,
+    getUnreadNotificationsCount,
+    markAllNotificationsRead,
+    markNotificationRead,
+    notificationsUpdateEventName,
+    updateNotificationStatus
+} from "@/lib/notifications"
 
 export function CustomNavigationMenu() {
     const { user, logout } = useUser();
     const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
     const [notificationsOpen, setNotificationsOpen] = React.useState(false);
+    const [notifications, setNotifications] = React.useState([]);
+    const [unreadCount, setUnreadCount] = React.useState(0);
+
+    const refreshNotifications = React.useCallback(() => {
+        setNotifications(getNotifications());
+        setUnreadCount(getUnreadNotificationsCount());
+    }, []);
+
+    const statusConfig = React.useMemo(
+        () => ({
+            processing: {
+                label: "Procesando",
+                badgeClass: "bg-amber-100 text-amber-800 border border-amber-200"
+            },
+            ready: {
+                label: "Lista",
+                badgeClass: "bg-emerald-100 text-emerald-800 border border-emerald-200"
+            },
+            failed: {
+                label: "Error",
+                badgeClass: "bg-red-100 text-red-700 border border-red-200"
+            }
+        }),
+        []
+    );
+
+    const formatRelativeTime = (timestamp) => {
+        if (!timestamp) return "";
+        const minutes = Math.max(1, Math.floor((Date.now() - timestamp) / 60000));
+        if (minutes < 60) return `Hace ${minutes} min`;
+        const hours = Math.floor(minutes / 60);
+        if (hours < 24) return `Hace ${hours} h`;
+        const days = Math.floor(hours / 24);
+        return `Hace ${days} d`;
+    };
+
+    const getResearchStatus = (researchData) => {
+        if (!researchData) return "processing";
+        const status = String(researchData.status || "").toLowerCase();
+        if (status === "ready") return "ready";
+        if (status === "failed" || status === "error") return "failed";
+        if (status === "processing") return "processing";
+        return "processing";
+    };
+
+    const getStatusMessage = (status, title) => {
+        if (status === "ready") return `La investigación \"${title}\" ya está lista.`;
+        if (status === "failed") return `Hubo un problema procesando \"${title}\".`;
+        return `La investigación \"${title}\" se está procesando.`;
+    };
+
+    React.useEffect(() => {
+        refreshNotifications();
+    }, [refreshNotifications]);
+
+    React.useEffect(() => {
+        const eventName = notificationsUpdateEventName();
+        const onUpdate = () => refreshNotifications();
+        window.addEventListener(eventName, onUpdate);
+        window.addEventListener("storage", onUpdate);
+        return () => {
+            window.removeEventListener(eventName, onUpdate);
+            window.removeEventListener("storage", onUpdate);
+        };
+    }, [refreshNotifications]);
+
+    React.useEffect(() => {
+        const processingNotifications = notifications.filter(
+            (item) => item.type === "research" && item.status === "processing" && item.researchId
+        );
+
+        if (!processingNotifications.length) return;
+
+        const pollStatus = async () => {
+            for (const item of processingNotifications) {
+                const researchData = await getResearchById(item.researchId);
+                if (!researchData) continue;
+
+                const nextStatus = getResearchStatus(researchData);
+                if (nextStatus !== item.status) {
+                    updateNotificationStatus(
+                        item.id,
+                        nextStatus,
+                        getStatusMessage(nextStatus, item.title)
+                    );
+                }
+            }
+        };
+
+        pollStatus();
+        const intervalId = window.setInterval(pollStatus, 5000);
+        return () => window.clearInterval(intervalId);
+    }, [notifications]);
 
     React.useEffect(() => {
         if (!notificationsOpen) return;
@@ -176,7 +278,10 @@ export function CustomNavigationMenu() {
                         <>
                             <button
                                 type="button"
-                                onClick={() => setNotificationsOpen(true)}
+                                onClick={() => {
+                                    setNotificationsOpen(true);
+                                    markAllNotificationsRead();
+                                }}
                                 aria-label="Abrir notificaciones"
                                 className="hidden md:inline-flex relative items-center justify-center rounded-full w-10 h-10 p-0 bg-white/10 text-white hover:bg-white/20 transition transform hover:scale-105 mr-3 shadow-sm"
                             >
@@ -184,7 +289,11 @@ export function CustomNavigationMenu() {
                                     <path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
                                     <path d="M13.73 21a2 2 0 01-3.46 0" />
                                 </svg>
-                                <span className="absolute top-1 right-1 inline-block w-2 h-2 rounded-full bg-red-500 ring-2 ring-white" />
+                                {unreadCount > 0 && (
+                                    <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full bg-red-500 text-white text-[10px] leading-5 font-semibold text-center ring-2 ring-white">
+                                        {unreadCount > 9 ? "9+" : unreadCount}
+                                    </span>
+                                )}
                             </button>
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
@@ -263,19 +372,60 @@ export function CustomNavigationMenu() {
                         onClick={() => setNotificationsOpen(false)}
                         aria-hidden
                     />
-                    <aside className="fixed right-0 top-0 z-50 h-full w-80 max-w-full bg-white dark:bg-gray-800 shadow-lg p-4">
-                        <div className="flex items-center justify-between pb-2 text-black">
-                            <h3 className="text-lg font-medium">Notificaciones</h3>
+                    <aside className="fixed right-0 top-0 z-50 h-full w-96 max-w-full bg-white shadow-lg p-4 text-black">
+                        <div className="flex items-center justify-between pb-3 border-b border-gray-200">
+                            <div>
+                                <h3 className="text-lg font-medium">Notificaciones</h3>
+                                <p className="text-xs text-gray-500">
+                                    {notifications.length} {notifications.length === 1 ? "elemento" : "elementos"}
+                                </p>
+                            </div>
                             <button
                                 aria-label="Cerrar notificaciones"
                                 onClick={() => setNotificationsOpen(false)}
-                                className="text-gray-600 hover:text-gray-900 dark:text-gray-300"
+                                className="text-gray-600 hover:text-gray-900"
                             >
                                 ×
                             </button>
                         </div>
-                        <div className="mt-2 text-sm text-gray-600 dark:text-gray-300">
-                            <div className="py-6 text-center text-gray-500">No hay notificaciones</div>
+                        <div className="mt-3 flex justify-end">
+                            <button
+                                type="button"
+                                onClick={markAllNotificationsRead}
+                                className="text-xs text-[#831d16] hover:underline"
+                            >
+                                Marcar todo como leído
+                            </button>
+                        </div>
+                        <div className="mt-3 text-sm text-gray-700 max-h-[calc(100vh-10rem)] overflow-y-auto pr-1">
+                            {notifications.length === 0 ? (
+                                <div className="py-10 text-center text-gray-500">No hay notificaciones</div>
+                            ) : (
+                                <div className="space-y-2">
+                                    {notifications.map((item) => {
+                                        const config = statusConfig[item.status] || statusConfig.processing;
+                                        return (
+                                            <button
+                                                key={item.id}
+                                                type="button"
+                                                onClick={() => markNotificationRead(item.id)}
+                                                className="w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition"
+                                            >
+                                                <div className="flex items-start justify-between gap-2">
+                                                    <p className="font-medium text-sm">{item.title || "Investigación"}</p>
+                                                    <span className={`text-[11px] px-2 py-0.5 rounded-full ${config.badgeClass}`}>
+                                                        {config.label}
+                                                    </span>
+                                                </div>
+                                                <p className="text-xs text-gray-600 mt-1">{item.message}</p>
+                                                <p className="text-[11px] text-gray-400 mt-1">
+                                                    {formatRelativeTime(item.updatedAt || item.createdAt)}
+                                                </p>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            )}
                         </div>
                     </aside>
                 </>

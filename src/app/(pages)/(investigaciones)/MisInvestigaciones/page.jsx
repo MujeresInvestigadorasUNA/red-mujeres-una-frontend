@@ -38,6 +38,7 @@ import Link from "next/link";
 import { useMemo, useRef, useState, useEffect } from "react";
 import { UploadCloudIcon } from "lucide-react";
 import { createResearch, getResearchByUserId } from "@/lib/api/research";
+import { upsertNotification } from "@/lib/notifications";
 import { toast } from "sonner";
 
 const FORUM_PLACEHOLDER_IMAGE = "/images/curso1.png";
@@ -66,6 +67,8 @@ export default function MisInvestigaciones() {
     const [displayCount, setDisplayCount] = useState(6);
     const [filterType, setFilterType] = useState("");
     const [searchQuery, setSearchQuery] = useState("");
+    const [isProcessingMessageOpen, setIsProcessingMessageOpen] = useState(false);
+    const [processingMessage, setProcessingMessage] = useState("");
     const ITEMS_PER_PAGE = 6;
 
     const userId = useMemo(() => user?.id ?? user?.user_id ?? null, [user]);
@@ -221,21 +224,45 @@ export default function MisInvestigaciones() {
                 access_token: accessToken,
             });
 
+            let responseData = null;
+            try {
+                responseData = await response.json();
+            } catch {
+                responseData = null;
+            }
+
             if (!response.ok) {
                 let errorMessage = "No se pudo crear la investigación.";
 
-                try {
-                    const data = await response.json();
-                    errorMessage = data?.detail?.[0]?.msg || data?.detail || errorMessage;
-                } catch {
-                    // Ignore JSON parsing errors and keep default message.
-                }
+                errorMessage = responseData?.detail?.[0]?.msg || responseData?.detail || errorMessage;
 
                 toast.warning(errorMessage);
                 return;
             }
 
-            toast.success("Investigación creada correctamente.");
+            const normalizedStatus = String(responseData?.status || "").toLowerCase();
+            const researchId = responseData?.id || responseData?.research_id || responseData?.research?.id || Date.now();
+
+            if (normalizedStatus === "processing") {
+                upsertNotification({
+                    id: `research-${researchId}`,
+                    type: "research",
+                    researchId,
+                    title: title.trim(),
+                    status: "processing",
+                    message: `La investigación \"${title.trim()}\" se está procesando.`,
+                    read: false,
+                });
+
+                setProcessingMessage(
+                    "Tu investigación se está subiendo y procesando en segundo plano. Puedes revisar su estado desde el ícono de notificaciones."
+                );
+                setIsProcessingMessageOpen(true);
+                toast.success("Investigación enviada para procesamiento.");
+            } else {
+                toast.success("Investigación creada correctamente.");
+            }
+
             setIsModalOpen(false);
             resetResearchForm();
 
@@ -533,6 +560,29 @@ export default function MisInvestigaciones() {
                             </Button>
                         </DialogFooter>
                     </form>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog
+                open={isProcessingMessageOpen}
+                onOpenChange={setIsProcessingMessageOpen}
+            >
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Investigación en procesamiento</DialogTitle>
+                        <DialogDescription>
+                            {processingMessage}
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                        <Button
+                            type="button"
+                            onClick={() => setIsProcessingMessageOpen(false)}
+                            className="bg-[#E7473C] text-white hover:bg-[#831d16]"
+                        >
+                            Entendido
+                        </Button>
+                    </DialogFooter>
                 </DialogContent>
             </Dialog>
         </div>
