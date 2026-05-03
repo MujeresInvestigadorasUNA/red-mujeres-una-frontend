@@ -28,6 +28,13 @@ const PLACEHOLDER_IMAGES = [
 
 const PLACEHOLDER_DESCRIPTION = "Exploración detallada de esta investigación académica de la Red de Mujeres Académicas.";
 
+const isValidImageUrl = (url) => {
+    if (!url) return false;
+    const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg'];
+    const urlLower = url.toLowerCase();
+    return imageExtensions.some(ext => urlLower.includes(ext));
+};
+
 export default function Investigacion() {
     const params = useParams();
     const researchId = params.investigacion;
@@ -118,7 +125,7 @@ export default function Investigacion() {
                         {currentResearch.description || PLACEHOLDER_DESCRIPTION}
                     </p>
                     <Image
-                        src={currentResearch.vector_link || PLACEHOLDER_IMAGES[0]}
+                        src={isValidImageUrl(currentResearch.vector_link) ? currentResearch.vector_link : PLACEHOLDER_IMAGES[0]}
                         alt={currentResearch.title}
                         width={600}
                         height={400}
@@ -215,7 +222,7 @@ export default function Investigacion() {
                                     <div key={research.id} className="flex-grow">
                                         <Link href={`/Investigaciones/${research.id}`}>
                                             <Image
-                                                src={research.vector_link || PLACEHOLDER_IMAGES[index % PLACEHOLDER_IMAGES.length]}
+                                                src={isValidImageUrl(research.vector_link) ? research.vector_link : PLACEHOLDER_IMAGES[index % PLACEHOLDER_IMAGES.length]}
                                                 alt={research.title}
                                                 width={300}
                                                 height={200}

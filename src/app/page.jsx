@@ -45,7 +45,7 @@ export default function Home() {
           id: research.id,
           image: RESEARCH_PLACEHOLDER_IMAGES[index % RESEARCH_PLACEHOLDER_IMAGES.length],
           title: research.title,
-          description: RESEARCH_PLACEHOLDER_DESCRIPTION,
+          description: research.description || RESEARCH_PLACEHOLDER_DESCRIPTION,
           url: research.research_link || "/Investigaciones",
           bgColor: "#E7473C",
           titleTextColor: "#F0F0F0",

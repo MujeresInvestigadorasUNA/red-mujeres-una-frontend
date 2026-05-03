@@ -29,6 +29,7 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card"
+import { Textarea } from "@/components/ui/textarea";
 import Image from "next/image";
 import { iconClockwise, iconEye, iconHeart } from "@/app/assets/icons";
 
@@ -39,6 +40,15 @@ import { UploadCloudIcon } from "lucide-react";
 import { createResearch, getResearchByUserId } from "@/lib/api/research";
 import { toast } from "sonner";
 
+const FORUM_PLACEHOLDER_IMAGE = "/images/curso1.png";
+
+const isValidImageUrl = (url) => {
+    if (!url) return false;
+    const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg'];
+    const urlLower = url.toLowerCase();
+    return imageExtensions.some(ext => urlLower.includes(ext));
+};
+
 export default function MisInvestigaciones() {
     const { user, accessToken } = useUser();
     const fileInputRef = useRef(null);
@@ -47,6 +57,7 @@ export default function MisInvestigaciones() {
     const [isDraggingFile, setIsDraggingFile] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [title, setTitle] = useState("");
+    const [description, setDescription] = useState("");
     const [document, setDocument] = useState(null);
     const [allResearch, setAllResearch] = useState([]);
     const [displayedResearch, setDisplayedResearch] = useState([]);
@@ -97,6 +108,8 @@ export default function MisInvestigaciones() {
                     return item.title?.toLowerCase().includes(lowerQuery) || false;
                 case "contenido":
                     return item.description?.toLowerCase().includes(lowerQuery) || false;
+                case "descripcion":
+                    return item.description?.toLowerCase().includes(lowerQuery) || false;
                 default:
                     return true;
             }
@@ -125,6 +138,7 @@ export default function MisInvestigaciones() {
 
     const resetResearchForm = () => {
         setTitle("");
+        setDescription("");
         setDocument(null);
         setIsDraggingFile(false);
     };
@@ -202,6 +216,7 @@ export default function MisInvestigaciones() {
             const response = await createResearch({
                 user_id: userId,
                 title: title.trim(),
+                description: description.trim(),
                 document,
                 access_token: accessToken,
             });
@@ -255,6 +270,7 @@ export default function MisInvestigaciones() {
                         <SelectGroup>
                             <SelectItem value="titulo">Titulo</SelectItem>
                             <SelectItem value="contenido">Contenido</SelectItem>
+                            <SelectItem value="descripcion">Descripción</SelectItem>
                         </SelectGroup>
                     </SelectContent>
                 </Select>
@@ -339,14 +355,14 @@ export default function MisInvestigaciones() {
                                 </CardHeader>
                                 <CardContent className="relative p-0 rounded">
                                     <Image
-                                        src={item.vector_link || "/images/curso1.png"}
+                                        src={isValidImageUrl(item.vector_link) ? item.vector_link : FORUM_PLACEHOLDER_IMAGE}
                                         alt={item.title}
                                         width={3000}
                                         height={3000}
                                         className="object-cover brightness-80 max-h-60
                                         w-full"
                                         onError={(e) => {
-                                            e.target.src = "/images/curso1.png";
+                                            e.target.src = FORUM_PLACEHOLDER_IMAGE;
                                         }}
                                     />
                                     {/* Overlay badges */}
@@ -425,7 +441,7 @@ export default function MisInvestigaciones() {
                     <DialogHeader>
                         <DialogTitle>Nueva investigación</DialogTitle>
                         <DialogDescription>
-                            Completa el título y sube un documento PDF para crear la investigación.
+                            Completa el título, agrega una descripción y sube un documento PDF para crear la investigación.
                         </DialogDescription>
                     </DialogHeader>
 
@@ -438,6 +454,18 @@ export default function MisInvestigaciones() {
                                 onChange={(event) => setTitle(event.target.value)}
                                 placeholder="Escribe el título de la investigación"
                                 maxLength={255}
+                            />
+                        </div>
+
+                        <div className="flex flex-col gap-2">
+                            <Label htmlFor="researchDescription">Descripción</Label>
+                            <Textarea
+                                id="researchDescription"
+                                value={description}
+                                onChange={(event) => setDescription(event.target.value)}
+                                placeholder="Describe brevemente la investigación"
+                                maxLength={2000}
+                                className="min-h-[140px] resize-y"
                             />
                         </div>
 

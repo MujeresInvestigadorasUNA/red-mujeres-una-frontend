@@ -35,6 +35,14 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { getResearch, likeResearch, unlikeResearch } from "@/lib/api/research";
 
+const FORUM_PLACEHOLDER_IMAGE = "/images/curso1.png";
+
+const isValidImageUrl = (url) => {
+    if (!url) return false;
+    const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg'];
+    const urlLower = url.toLowerCase();
+    return imageExtensions.some(ext => urlLower.includes(ext));
+};
 
 export default function Investigaciones() {
     const { user } = useUser();
@@ -84,6 +92,8 @@ export default function Investigaciones() {
                            false;
                 case "titulo":
                     return item.title?.toLowerCase().includes(lowerQuery) || false;
+                case "descripcion":
+                    return item.description?.toLowerCase().includes(lowerQuery) || false;
                 default:
                     return true;
             }
@@ -161,6 +171,7 @@ export default function Investigaciones() {
                         <SelectGroup>
                             <SelectItem value="investigador">Investigador</SelectItem>
                             <SelectItem value="titulo">Titulo</SelectItem>
+                            <SelectItem value="descripcion">Descripción</SelectItem>
                         </SelectGroup>
                     </SelectContent>
                 </Select>
@@ -278,14 +289,14 @@ export default function Investigaciones() {
                                 </CardHeader>
                                 <CardContent className="relative p-0 rounded">
                                     <Image
-                                        src={item.vector_link || "/images/curso1.png"}
+                                        src={isValidImageUrl(item.vector_link) ? item.vector_link : FORUM_PLACEHOLDER_IMAGE}
                                         alt={item.title}
                                         width={3000}
                                         height={3000}
                                         className="object-cover brightness-80 max-h-60
                                         w-full"
                                         onError={(e) => {
-                                            e.target.src = "/images/curso1.png";
+                                            e.target.src = FORUM_PLACEHOLDER_IMAGE;
                                         }}
                                     />
                                     {/* Overlay with likes, visualizaciones and badges */}

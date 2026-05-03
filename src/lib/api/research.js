@@ -26,7 +26,12 @@ export async function getResearch(limit = 5) {
       return [];
     }
 
-    return await response.json();
+    const data = await response.json();
+
+    return data.map((item) => ({
+      ...item,
+      description: item.description || "",
+    }));
   } catch (error) {
     console.error("Error fetching research:", error);
     return [];
@@ -57,14 +62,19 @@ export async function getResearchByUserId(user_id) {
       return [];
     }
 
-    return await response.json();
+    const data = await response.json();
+
+    return data.map((item) => ({
+      ...item,
+      description: item.description || "",
+    }));
   } catch (error) {
     console.error("Error fetching research by user:", error);
     return [];
   }
 }
 
-export async function createResearch({ user_id, title, document, access_token }) {
+export async function createResearch({ user_id, title, description, document, access_token }) {
   const tokenFromStorage = typeof window !== "undefined"
     ? localStorage.getItem("access_token")
     : null;
@@ -81,6 +91,9 @@ export async function createResearch({ user_id, title, document, access_token })
   const formData = new FormData();
   formData.append("user_id", String(user_id));
   formData.append("title", title);
+  if (description?.trim()) {
+    formData.append("description", description.trim());
+  }
   formData.append("document", document);
 
   const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/research/`, {
