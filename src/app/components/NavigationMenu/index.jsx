@@ -26,6 +26,16 @@ import {
 export function CustomNavigationMenu() {
     const { user, logout } = useUser();
     const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+    const [notificationsOpen, setNotificationsOpen] = React.useState(false);
+
+    React.useEffect(() => {
+        if (!notificationsOpen) return;
+        const onKey = (e) => {
+            if (e.key === "Escape") setNotificationsOpen(false);
+        };
+        document.addEventListener("keydown", onKey);
+        return () => document.removeEventListener("keydown", onKey);
+    }, [notificationsOpen]);
 
     const logoutButtonHandler = () => {
         logout("/IniciarSesion");
@@ -163,26 +173,40 @@ export function CustomNavigationMenu() {
                         Menú
                     </button>
                     {user ? (
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button className="hidden bg-[#b62116] text-white hover:bg-red-700
+                        <>
+                            <button
+                                type="button"
+                                onClick={() => setNotificationsOpen(true)}
+                                aria-label="Abrir notificaciones"
+                                className="hidden md:inline-flex relative items-center justify-center rounded-full w-10 h-10 p-0 bg-white/10 text-white hover:bg-white/20 transition transform hover:scale-105 mr-3 shadow-sm"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="none" className="feather feather-bell">
+                                    <path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
+                                    <path d="M13.73 21a2 2 0 01-3.46 0" />
+                                </svg>
+                                <span className="absolute top-1 right-1 inline-block w-2 h-2 rounded-full bg-red-500 ring-2 ring-white" />
+                            </button>
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button className="hidden bg-[#b62116] text-white hover:bg-red-700
                                 transition hover:cursor-pointer rounded-full w-10 h-10 p-0 md:flex">
-                                    {user.first_name ? user.first_name[0].toUpperCase() : "U"}
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent className="w-56 max-w-[calc(100vw-2rem)] mr-5" align="start" variant="dark">
-                                <DropdownMenuLabel className="font-normal text-sm text-gray-500 text-center whitespace-normal break-all leading-tight px-1">
-                                    {user.email}
-                                </DropdownMenuLabel>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem>
-                                    <Link href="/MiPerfil">Mi Perfil</Link>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem>
-                                    <button onClick={logoutButtonHandler}>Cerrar sesión</button>
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
+                                        {user.first_name ? user.first_name[0].toUpperCase() : "U"}
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent className="w-56 max-w-[calc(100vw-2rem)] mr-5" align="start" variant="dark">
+                                    <DropdownMenuLabel className="font-normal text-sm text-gray-500 text-center whitespace-normal break-all leading-tight px-1">
+                                        {user.email}
+                                    </DropdownMenuLabel>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem>
+                                        <Link href="/MiPerfil">Mi Perfil</Link>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem>
+                                        <button onClick={logoutButtonHandler}>Cerrar sesión</button>
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </>
                     ) : (
                         <Link
                             href="/IniciarSesion"
@@ -231,6 +255,30 @@ export function CustomNavigationMenu() {
                         )}
                     </div>
                 </div>
+            )}
+            {notificationsOpen && (
+                <>
+                    <div
+                        className="fixed inset-0 z-40 bg-black/40"
+                        onClick={() => setNotificationsOpen(false)}
+                        aria-hidden
+                    />
+                    <aside className="fixed right-0 top-0 z-50 h-full w-80 max-w-full bg-white dark:bg-gray-800 shadow-lg p-4">
+                        <div className="flex items-center justify-between pb-2 text-black">
+                            <h3 className="text-lg font-medium">Notificaciones</h3>
+                            <button
+                                aria-label="Cerrar notificaciones"
+                                onClick={() => setNotificationsOpen(false)}
+                                className="text-gray-600 hover:text-gray-900 dark:text-gray-300"
+                            >
+                                ×
+                            </button>
+                        </div>
+                        <div className="mt-2 text-sm text-gray-600 dark:text-gray-300">
+                            <div className="py-6 text-center text-gray-500">No hay notificaciones</div>
+                        </div>
+                    </aside>
+                </>
             )}
         </nav>
     )

@@ -201,7 +201,7 @@ export default function Investigacion() {
                             </Button>
                         </div>
                         <div className="flex gap-5 flex-wrap mt-5">
-                            {relatedResearch.length === 0 ? (
+                            {loading ? (
                                 <>
                                     {[...Array(6)].map((_, index) => (
                                         <div key={index} className="grow min-w-[300px]">
@@ -237,7 +237,8 @@ export default function Investigacion() {
                                     </div>
                                 ))
                             ) : (
-                                <div className="text-center max-w-md">
+                                <div className="w-full flex items-center justify-center py-20">
+                                    <div className="text-center max-w-md">
                                     <div className="flex justify-center mb-4">
                                         <div className="p-4 bg-gray-100 rounded-full">
                                             <svg
@@ -261,6 +262,7 @@ export default function Investigacion() {
                                     <p className="text-gray-500 text-sm">
                                         No encontramos otras investigaciones relacionadas en este momento.
                                     </p>
+                                    </div>
                                 </div>
                             )}
                         </div>
