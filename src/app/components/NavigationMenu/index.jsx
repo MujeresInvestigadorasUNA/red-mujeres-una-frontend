@@ -1,6 +1,7 @@
 "use client"
 import * as React from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 
 import {
@@ -34,7 +35,9 @@ import {
 
 export function CustomNavigationMenu() {
     const { user, logout } = useUser();
+    const router = useRouter();
     const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+    const [desktopMenuValue, setDesktopMenuValue] = React.useState("");
     const [notificationsOpen, setNotificationsOpen] = React.useState(false);
     const [notifications, setNotifications] = React.useState([]);
     const [unreadCount, setUnreadCount] = React.useState(0);
@@ -144,6 +147,10 @@ export function CustomNavigationMenu() {
         setMobileMenuOpen(false);
     }
 
+    const closeDesktopMenu = React.useCallback(() => {
+        setDesktopMenuValue("");
+    }, []);
+
     return (
         <nav className="sticky top-0 z-10 px-4 py-2 text-white mainSection md:px-5">
             <div className="flex items-center justify-between gap-3">
@@ -157,11 +164,16 @@ export function CustomNavigationMenu() {
                     />
                 </Link>
                 {user ? (
-                    <NavigationMenu className="hidden md:flex">
+                    <NavigationMenu
+                        className="hidden md:flex"
+                        value={desktopMenuValue}
+                        onValueChange={setDesktopMenuValue}
+                    >
                         <NavigationMenuList>
                             <NavigationMenuItem>
                                 <NavigationMenuTrigger
                                     className="bg-transparent text-white"
+                                    onClick={(e) => e.preventDefault()}
                                 >
                                     Foros
                                 </NavigationMenuTrigger>
@@ -169,7 +181,7 @@ export function CustomNavigationMenu() {
                                     <ul className="grid w-[300px] gap-4">
                                         <li>
                                             <NavigationMenuLink asChild>
-                                                <Link href="/Foros">
+                                                <Link href="/Foros" onClick={closeDesktopMenu}>
                                                     <div className="font-medium">Explorar Foros</div>
                                                     <div className="text-muted-foreground">
                                                         Explora todos los foros publicados por la comunidad.
@@ -177,7 +189,7 @@ export function CustomNavigationMenu() {
                                                 </Link>
                                             </NavigationMenuLink>
                                             <NavigationMenuLink asChild>
-                                                <Link href="/MiForo">
+                                                <Link href="/MiForo" onClick={closeDesktopMenu}>
                                                     <div className="font-medium">Mi Foro</div>
                                                     <div className="text-muted-foreground">
                                                         Accede a tu foro personal y gestiona tus publicaciones.
@@ -192,6 +204,7 @@ export function CustomNavigationMenu() {
                                 <NavigationMenuTrigger
                                     className="bg-transparent hover:bg-transparent
                                 focus:bg-transparent active:bg-transparent text-white"
+                                    onClick={(e) => e.preventDefault()}
                                 >
                                     Investigaciones
                                 </NavigationMenuTrigger>
@@ -199,7 +212,7 @@ export function CustomNavigationMenu() {
                                     <ul className="grid w-[300px] gap-4">
                                         <li>
                                             <NavigationMenuLink asChild>
-                                                <Link href="/Investigaciones">
+                                                <Link href="/Investigaciones" onClick={closeDesktopMenu}>
                                                     <div className="font-medium">Explorar Investigaciones</div>
                                                     <div className="text-muted-foreground">
                                                         Explora todas las investigaciones publicadas por la comunidad.
@@ -207,7 +220,7 @@ export function CustomNavigationMenu() {
                                                 </Link>
                                             </NavigationMenuLink>
                                             <NavigationMenuLink asChild>
-                                                <Link href="/MisInvestigaciones">
+                                                <Link href="/MisInvestigaciones" onClick={closeDesktopMenu}>
                                                     <div className="font-medium">Mis Investigaciones</div>
                                                     <div className="text-muted-foreground">
                                                         Accede a tus investigaciones personales y gestiona tus publicaciones.
@@ -222,6 +235,7 @@ export function CustomNavigationMenu() {
                                 <NavigationMenuTrigger
                                     className="bg-transparent hover:bg-transparent
                                 focus:bg-transparent active:bg-transparent text-white"
+                                    onClick={(e) => e.preventDefault()}
                                 >
                                     Cursos
                                 </NavigationMenuTrigger>
@@ -229,7 +243,7 @@ export function CustomNavigationMenu() {
                                     <ul className="grid w-[300px] gap-4">
                                         <li>
                                             <NavigationMenuLink asChild>
-                                                <Link href="/Cursos">
+                                                <Link href="/Cursos" onClick={closeDesktopMenu}>
                                                     <div className="font-medium">Explorar Cursos</div>
                                                     <div className="text-muted-foreground">
                                                         Explora todos los cursos disponibles en la plataforma.
@@ -237,7 +251,7 @@ export function CustomNavigationMenu() {
                                                 </Link>
                                             </NavigationMenuLink>
                                             <NavigationMenuLink asChild>
-                                                <Link href="/MisCursos">
+                                                <Link href="/MisCursos" onClick={closeDesktopMenu}>
                                                     <div className="font-medium">Mis Cursos</div>
                                                     <div className="text-muted-foreground">
                                                         Accede a tus cursos personales y gestiona tus inscripciones.
@@ -404,11 +418,18 @@ export function CustomNavigationMenu() {
                                 <div className="space-y-2">
                                     {notifications.map((item) => {
                                         const config = statusConfig[item.status] || statusConfig.processing;
+                                        const canNavigate = item.type === "research" && item.researchId && item.status === "ready";
                                         return (
                                             <button
                                                 key={item.id}
                                                 type="button"
-                                                onClick={() => markNotificationRead(item.id)}
+                                                onClick={() => {
+                                                    markNotificationRead(item.id);
+                                                    if (canNavigate) {
+                                                        setNotificationsOpen(false);
+                                                        router.push(`/MisInvestigaciones/${item.researchId}`);
+                                                    }
+                                                }}
                                                 className="w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition"
                                             >
                                                 <div className="flex items-start justify-between gap-2">
@@ -421,6 +442,9 @@ export function CustomNavigationMenu() {
                                                 <p className="text-[11px] text-gray-400 mt-1">
                                                     {formatRelativeTime(item.updatedAt || item.createdAt)}
                                                 </p>
+                                                {canNavigate && (
+                                                    <p className="text-[11px] text-[#831d16] mt-1">Abrir investigación</p>
+                                                )}
                                             </button>
                                         );
                                     })}

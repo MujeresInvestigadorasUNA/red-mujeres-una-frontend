@@ -3,7 +3,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
-import { toast } from "sonner";
 import { SearchIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
@@ -18,7 +17,7 @@ import {
 } from "@/components/ui/select";
 import { iconClockwise } from "@/app/assets/icons";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getResearch } from "@/lib/api/research";
+import { getResearch, getResearchById } from "@/lib/api/research";
 
 const PLACEHOLDER_IMAGES = [
     "/images/curso1.png",
@@ -28,11 +27,45 @@ const PLACEHOLDER_IMAGES = [
 
 const PLACEHOLDER_DESCRIPTION = "Exploración detallada de esta investigación académica de la Red de Mujeres Académicas.";
 
+const hasValidSasToken = () => {
+    return !!process.env.NEXT_PUBLIC_BLOB_CONTAINER_PDF_SAS_TOKEN;
+};
+
+const appendSasTokenIfNeeded = (url) => {
+    if (!url) return null;
+
+    const lowerUrl = url.toLowerCase();
+    const isAzureBlob = lowerUrl.includes("blob.core.windows.net") || lowerUrl.includes("dfs.core.windows.net");
+    const hasSasToken = lowerUrl.includes("sig=") || lowerUrl.includes("se=") || lowerUrl.includes("sp=");
+
+    if (isAzureBlob && !hasSasToken && hasValidSasToken()) {
+        const token = process.env.NEXT_PUBLIC_BLOB_CONTAINER_PDF_SAS_TOKEN;
+        const separator = url.includes("?") ? "&" : "?";
+        return `${url}${separator}${token}`;
+    }
+
+    return url;
+};
+
+const canDisplayPdfInline = (url) => {
+    if (!url) return false;
+
+    const lowerUrl = url.toLowerCase();
+    const isAzureBlob = lowerUrl.includes("blob.core.windows.net") || lowerUrl.includes("dfs.core.windows.net");
+    const hasSasToken = lowerUrl.includes("sig=") || lowerUrl.includes("se=") || lowerUrl.includes("sp=");
+
+    if (isAzureBlob && !hasSasToken) {
+        return hasValidSasToken();
+    }
+
+    return true;
+};
+
 const isValidImageUrl = (url) => {
     if (!url) return false;
-    const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg'];
+    const imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg"];
     const urlLower = url.toLowerCase();
-    return imageExtensions.some(ext => urlLower.includes(ext));
+    return imageExtensions.some((ext) => urlLower.includes(ext));
 };
 
 export default function Investigacion() {
@@ -50,15 +83,15 @@ export default function Investigacion() {
         const fetchResearchData = async () => {
             try {
                 setLoading(true);
-                // Fetch all research without limit to ensure we find the target research
-                const allResearch = await getResearch(null);
-                
-                // Find the current research by ID (convert both to string for comparison)
-                const current = allResearch.find(r => String(r.id) === String(researchId));
+                const [current, allResearch] = await Promise.all([
+                    getResearchById(researchId),
+                    getResearch(null),
+                ]);
+
+                const currentId = current?.id != null ? String(current.id) : String(researchId);
+
+                const related = allResearch.filter((item) => String(item.id) !== currentId);
                 setCurrentResearch(current);
-                
-                // Get related research (all except current)
-                const related = allResearch.filter(r => String(r.id) !== String(researchId));
                 setRelatedResearch(related);
                 setDisplayedResearch(related);
             } catch (error) {
@@ -77,17 +110,21 @@ export default function Investigacion() {
         if (!query.trim()) {
             return research;
         }
-        
+
         const lowerQuery = query.toLowerCase();
-        
+
         return research.filter((item) => {
             switch (filterType) {
-                case "investigador":
-                    return item.user_id?.toString().includes(lowerQuery) || false;
                 case "titulo":
                     return item.title?.toLowerCase().includes(lowerQuery) || false;
+                case "descripcion":
+                    return item.description?.toLowerCase().includes(lowerQuery) || false;
                 default:
-                    return true;
+                    return (
+                        item.title?.toLowerCase().includes(lowerQuery) ||
+                        item.description?.toLowerCase().includes(lowerQuery) ||
+                        false
+                    );
             }
         });
     };
@@ -109,53 +146,50 @@ export default function Investigacion() {
                 <div className="space-y-6">
                     <Skeleton className="h-10 w-3/4" />
                     <Skeleton className="h-6 w-full" />
-                    <Skeleton className="h-6 w-5/6" />
-                    <Skeleton className="h-96 w-full rounded-lg" />
-                    <Skeleton className="h-6 w-full mt-8" />
+                    <Skeleton className="h-80 w-full rounded-lg" />
+                    <Skeleton className="h-[600px] w-full rounded-lg" />
+                    <Skeleton className="h-8 w-1/2 mt-8" />
                     <Skeleton className="h-6 w-full" />
-                    <div className="flex gap-3">
-                        <Skeleton className="h-96 w-full rounded-lg" />
-                        <Skeleton className="h-96 w-full rounded-lg" />
-                    </div>
                 </div>
             ) : currentResearch ? (
                 <>
                     <h1 className="text-2xl font-bold">{currentResearch.title}</h1>
-                    <p className="mt-3">
+                    <p className="mt-3 text-gray-700">
                         {currentResearch.description || PLACEHOLDER_DESCRIPTION}
                     </p>
-                    <Image
-                        src={isValidImageUrl(currentResearch.vector_link) ? currentResearch.vector_link : PLACEHOLDER_IMAGES[0]}
-                        alt={currentResearch.title}
-                        width={600}
-                        height={400}
-                        className="object-cover rounded mt-5 w-full max-h-[400px]"
-                        onError={(e) => {
-                            e.target.src = PLACEHOLDER_IMAGES[0];
-                        }}
-                    />
-                    <p className="px-20 my-8">
-                        {currentResearch.description || PLACEHOLDER_DESCRIPTION}
-                    </p>
-                    <div className="flex gap-3">
-                        <Image
-                            src={PLACEHOLDER_IMAGES[1]}
-                            alt="Research"
-                            width={600}
-                            height={400}
-                            className="object-cover rounded mt-5 w-full max-h-[400px]"
-                        />
-                        <Image
-                            src={PLACEHOLDER_IMAGES[2]}
-                            alt="Research"
-                            width={600}
-                            height={400}
-                            className="object-cover rounded mt-5 w-full max-h-[400px]"
-                        />
-                    </div>
-                    <p className="px-20 my-8">
-                        Accede al archivo de investigación completo a través del enlace proporcionado para obtener información detallada.
-                    </p>
+                    <section className="mt-8 space-y-4">
+                        <div className="flex items-center justify-between gap-3 flex-wrap">
+                            {currentResearch.research_link && (
+                                <Button asChild className="bg-[#E7473C] hover:bg-[#831d16] text-white">
+                                    <a href={appendSasTokenIfNeeded(currentResearch.research_link)} target="_blank" rel="noreferrer">
+                                        Abrir PDF
+                                    </a>
+                                </Button>
+                            )}
+                        </div>
+                        {currentResearch.research_link && canDisplayPdfInline(currentResearch.research_link) ? (
+                            <embed
+                                src={appendSasTokenIfNeeded(currentResearch.research_link)}
+                                type="application/pdf"
+                                title={`${currentResearch.title} - PDF de investigación`}
+                                className="w-full h-[90vh] rounded-lg border border-gray-200 bg-white"
+                            />
+                        ) : currentResearch.research_link ? (
+                            <div className="rounded-lg border border-dashed border-gray-300 bg-gray-50 px-6 py-10 text-center text-gray-600 space-y-3">
+                                <p className="font-medium text-gray-700">
+                                    El archivo no puede mostrarse embebido porque el almacenamiento no permite acceso público.
+                                </p>
+                                <p className="text-sm">
+                                    Abre el documento en una nueva pestaña o solicita una URL firmada para la vista previa.
+                                </p>
+                            </div>
+                        ) : (
+                            <div className="rounded-lg border border-dashed border-gray-300 bg-gray-50 px-6 py-10 text-center text-gray-500">
+                                No hay un PDF disponible para esta investigación.
+                            </div>
+                        )}
+                    </section>
+
                     <section>
                         <h2 className="text-2xl font-bold mt-10 mb-5">Investigaciones Relacionadas</h2>
                         <div className="flex gap-3 mb-5 mt-5">
@@ -165,8 +199,8 @@ export default function Investigacion() {
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectGroup>
-                                        <SelectItem value="investigador">Investigador ID</SelectItem>
                                         <SelectItem value="titulo">Titulo</SelectItem>
+                                        <SelectItem value="descripcion">Descripción</SelectItem>
                                     </SelectGroup>
                                 </SelectContent>
                             </Select>
@@ -201,23 +235,7 @@ export default function Investigacion() {
                             </Button>
                         </div>
                         <div className="flex gap-5 flex-wrap mt-5">
-                            {loading ? (
-                                <>
-                                    {[...Array(6)].map((_, index) => (
-                                        <div key={index} className="grow min-w-[300px]">
-                                            <div className="p-0 overflow-hidden rounded-lg border-none shadow">
-                                                <div className="px-6 pt-7 pb-4">
-                                                    <Skeleton className="h-6 w-3/4 mb-2" />
-                                                    <Skeleton className="h-4 w-full mb-3" />
-                                                </div>
-                                                <div className="relative p-0 rounded bg-gray-100">
-                                                    <Skeleton className="h-60 w-full rounded-none" />
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </>
-                            ) : displayedResearch.length > 0 ? (
+                            {displayedResearch.length > 0 ? (
                                 displayedResearch.map((research, index) => (
                                     <div key={research.id} className="flex-grow">
                                         <Link href={`/Investigaciones/${research.id}`}>
@@ -227,13 +245,10 @@ export default function Investigacion() {
                                                 width={300}
                                                 height={200}
                                                 className="object-cover rounded w-full h-100 mt-5 min-w-full max-h-[200px] min-h-[200px] mb-3 hover:brightness-80 transition cursor-pointer"
-                                                onError={(e) => {
-                                                    e.target.src = PLACEHOLDER_IMAGES[index % PLACEHOLDER_IMAGES.length];
-                                                }}
                                             />
                                             <p className="text-md font-bold hover:text-[#E7473C] transition">{research.title}</p>
                                         </Link>
-                                        <p className="text-gray-600 text-sm">Investigador: {research.user_id}</p>
+                                        <p className="text-gray-600 text-sm">{research.description || PLACEHOLDER_DESCRIPTION}</p>
                                     </div>
                                 ))
                             ) : (

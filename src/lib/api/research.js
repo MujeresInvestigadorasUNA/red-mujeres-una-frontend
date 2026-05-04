@@ -105,6 +105,33 @@ export async function getResearchById(research_id) {
   }
 }
 
+export async function updateResearch({ research_id, title, description, access_token }) {
+  const tokenFromStorage = typeof window !== "undefined"
+    ? localStorage.getItem("access_token")
+    : null;
+  const token = access_token || tokenFromStorage;
+
+  const headers = {
+    Accept: "application/json",
+    "Content-Type": "application/json",
+  };
+
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/research/${research_id}`, {
+    method: "PUT",
+    headers,
+    body: JSON.stringify({
+      title,
+      description,
+    }),
+  });
+
+  return response;
+}
+
 export async function createResearch({ user_id, title, description, document, access_token }) {
   const tokenFromStorage = typeof window !== "undefined"
     ? localStorage.getItem("access_token")
