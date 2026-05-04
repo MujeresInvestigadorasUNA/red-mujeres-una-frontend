@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { Skeleton } from "@/components/ui/skeleton";
 import { use, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import Image from "next/image";
@@ -26,6 +27,7 @@ import Link from "next/link";
 export default function MisCursos({ params }) {
     const photoInputRef = useRef(null);
     const { curso: cursoId } = use(params);
+    const [isLoading, setIsLoading] = useState(true);
 
     const [date, setDate] = useState(
         new Date(2025, 5, 12)
@@ -124,10 +126,13 @@ export default function MisCursos({ params }) {
         console.log("Fetching course data for ID:", cursoId);
         if (!cursoId) return;
         try {
+            setIsLoading(true);
             const response = await getCourseById({ course_id: cursoId });
             const data = await response.json();
             if (!response.ok) {
-                return toast.warning(data.detail?.[0]?.msg || "Error al obtener los datos del curso.");
+                toast.warning(data.detail?.[0]?.msg || "Error al obtener los datos del curso.");
+                setIsLoading(false);
+                return;
             }
             setCourse({
                 title: data.title || "Título del Curso",
@@ -141,8 +146,10 @@ export default function MisCursos({ params }) {
                 maxQuotas: data.max_quotas || 0,
                 isPublic: data.is_public || false
             });
+            setIsLoading(false);
         } catch (error) {
             toast.error("Error al obtener los datos del curso. Intente nuevamente.");
+            setIsLoading(false);
         }
     }
 
@@ -169,7 +176,34 @@ export default function MisCursos({ params }) {
 
     return (
         <main className="flex-grow h-[100%]">
-            <form className="flex flex-col" onSubmit={handleOnSubmit}>
+            {isLoading ? (
+                <div className="flex flex-col">
+                    <section className="relative w-full h-[400px]">
+                        <Skeleton className="w-full h-full" />
+                    </section>
+                    <section className="flex-grow px-20 py-10 h-[100%]">
+                        <div className="flex flex-col gap-4 mb-5">
+                            <Skeleton className="h-10 w-64" />
+                            <Skeleton className="h-6 w-96 mt-3" />
+                            <div className="flex flex-wrap gap-5">
+                                <Skeleton className="h-6 w-48" />
+                                <Skeleton className="h-6 w-48" />
+                                <Skeleton className="h-6 w-48" />
+                                <Skeleton className="h-6 w-48" />
+                            </div>
+                        </div>
+                        <div className="flex gap-10 mt-8 bg-gray-100 p-5 rounded-lg">
+                            <div className="flex-1 min-w-0">
+                                <Skeleton className="h-6 w-32 mb-3" />
+                                <Skeleton className="h-80 w-full rounded" />
+                            </div>
+                            <Skeleton className="h-96 w-80 rounded-lg flex-shrink-0" />
+                        </div>
+                        <Skeleton className="h-12 w-full rounded mt-5" />
+                    </section>
+                </div>
+            ) : (
+                <form className="flex flex-col" onSubmit={handleOnSubmit}>
                 <section className="relative w-full h-[400px]">
                     <div className="relative w-full h-full">
                         <Image
@@ -367,7 +401,8 @@ export default function MisCursos({ params }) {
                         Guardar Cambios
                     </Button>
                 </section>
-            </form>
+                </form>
+            )}
         </main>
     );
 }

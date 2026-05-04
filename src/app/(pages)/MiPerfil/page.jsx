@@ -2,6 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect, useRef, useState } from "react";
 import { getUserInfo, updateUser, uploadProfilePicture } from "@/lib/api/auth";
 import { useUser } from "@/app/contexts/UserContext";
@@ -30,6 +31,7 @@ export default function MiPerfil() {
         userDescription: "",
     });
     const [photoFile, setPhotoFile] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
 
     const withBlobSasToken = (imageUrl) => {
         if (!imageUrl || !blobContainerSasToken) return imageUrl;
@@ -186,10 +188,12 @@ export default function MiPerfil() {
 
     const fetchUserInfo = async () => {
         try {
+            setIsLoading(true);
             const response = await getUserInfo({ user_id: user.id, access_token: accessToken });
             const data = await response.json();
             if (!response.ok) {
                 toast.warning(data.detail?.[0]?.msg || "Error al obtener la información del usuario");
+                setIsLoading(false);
                 return null;
             }
             setPhotoFile(null);
@@ -202,9 +206,11 @@ export default function MiPerfil() {
                 isPublic: data.is_public || false,
                 userDescription: data.user_description || "",
             });
+            setIsLoading(false);
             return data;
         } catch (err) {
             toast.warning("Error de conexión");
+            setIsLoading(false);
             return null;
         }
     };
@@ -229,7 +235,46 @@ export default function MiPerfil() {
 
     return (
         <main className="flex mainSection pb-20 pt-10 px-5 md:px-10">
-            <form className="flex flex-col gap-6 w-full max-w-5xl m-auto" onSubmit={handleSubmit}>
+            {isLoading ? (
+                <div className="flex flex-col gap-6 w-full max-w-5xl m-auto">
+                    <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-6 items-start">
+                        <div className="flex flex-col gap-4">
+                            <div className="flex gap-4">
+                                <div className="grid w-full gap-3">
+                                    <Skeleton className="h-6 w-20" />
+                                    <Skeleton className="h-12 w-full rounded" />
+                                </div>
+                                <div className="grid w-full gap-3">
+                                    <Skeleton className="h-6 w-20" />
+                                    <Skeleton className="h-12 w-full rounded" />
+                                </div>
+                            </div>
+
+                            <div className="grid w-full gap-3">
+                                <Skeleton className="h-6 w-24" />
+                                <Skeleton className="h-12 w-full rounded" />
+                            </div>
+
+                            <div className="grid w-full gap-3">
+                                <Skeleton className="h-6 w-32" />
+                                <Skeleton className="h-12 w-full rounded" />
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                                <Skeleton className="h-6 w-12" />
+                                <Skeleton className="h-6 w-32" />
+                            </div>
+                        </div>
+
+                        <div className="w-full">
+                            <Skeleton className="h-[320px] w-full rounded" />
+                        </div>
+                    </div>
+
+                    <Skeleton className="h-8 w-full rounded" />
+                </div>
+            ) : (
+                <form className="flex flex-col gap-6 w-full max-w-5xl m-auto" onSubmit={handleSubmit}>
                 <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-6 items-start">
                     <div className="flex flex-col gap-4">
                         <div className="flex gap-4">
@@ -368,7 +413,6 @@ export default function MiPerfil() {
                 <Button type="submit" className="bg-[#b62116] text-white hover:bg-red-700 transition hover:cursor-pointer">
                     Guardar Cambios
                 </Button>
-            </form>
-        </main>
+            </form>            )}        </main>
     );
 }

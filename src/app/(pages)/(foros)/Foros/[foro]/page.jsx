@@ -38,6 +38,7 @@ export default function forum({ params }) {
     const [displayedCourses, setDisplayedCourses] = useState([]);
     const [loadingResearch, setLoadingResearch] = useState(false);
     const [loadingCourses, setLoadingCourses] = useState(false);
+    const [loadingForum, setLoadingForum] = useState(true);
     const [researchFilterType, setResearchFilterType] = useState("");
     const [researchSearchQuery, setResearchSearchQuery] = useState("");
     const [coursesFilterType, setCoursesFilterType] = useState("");
@@ -46,10 +47,13 @@ export default function forum({ params }) {
 
     const fetchForoData = async () => {
         try {
+            setLoadingForum(true);
             const userData = await getUser({ user_id: foroId });
 
             if (!userData) {
-                return toast.warning("Error al obtener el forum");
+                toast.warning("Error al obtener el forum");
+                setLoadingForum(false);
+                return;
             }
 
             setForum({
@@ -59,10 +63,12 @@ export default function forum({ params }) {
                 description: userData.user_description,
                 photo: userData.photo,
             });
+            setLoadingForum(false);
         }
         catch (error) {
             console.error("Error fetching forum:", error);
             toast.error("Error al cargar el forum");
+            setLoadingForum(false);
         }
     }
 
@@ -179,42 +185,55 @@ export default function forum({ params }) {
     return (
         <main className="flex-grow px-20 py-10 h-[100%]">
             <section className="flex flex-col gap-5 justify-between">
-                <div className="flex gap-10">
-                    <div className="w-full">
-                        <h2
-                            className="text-2xl font-bold mb-3 flex gap-3 items-center group"
-                            style={{ fontSize: '2rem' }}
-                        >
-                            {capitalizeWords(forum?.first_name + " " + forum?.last_name) || "Nombre Completo"}
-                        </h2>
-                        <h3
-                            className="text-gray-600 font-semibold mb-1 flex gap-3 items-center group"
-                            style={{ fontSize: '1rem' }}
-                        >
-                            {capitalizeWords(forum?.profession) || "Profesión u Ocupación"}
-                        </h3>
-                        <p
-                            id="description"
-                            name="description"
-                            className="text-gray-600 mt-3 w-full h-80 border 
-                            rounded border-0 p-0 shadow-none resize-none pr-3
-                            text-sm"
-                        >
-                            {forum?.description || "Biografía o descripción del forum..."}
-                        </p>
+                {loadingForum ? (
+                    <div className="flex gap-10">
+                        <div className="w-full">
+                            <Skeleton className="h-10 w-96 mb-3" />
+                            <Skeleton className="h-6 w-64 mb-4 mt-3" />
+                            <Skeleton className="h-80 w-full rounded" />
+                        </div>
+                        <div className="relative inline-block w-64 h-64 group">
+                            <Skeleton className="w-full h-full rounded" />
+                        </div>
                     </div>
-                    <div className="relative inline-block w-64 h-64 group">
-                        <Image
-                            src={forum?.photo || FORUM_PLACEHOLDER_IMAGE}
-                            alt="Foto de perfil"
-                            width={3000}
-                            height={3000}
-                            className="w-full h-full rounded object-cover
-                            hover:cursor-pointer hover:brightness-95
-                            transition-all duration-200"
-                        />
+                ) : (
+                    <div className="flex gap-10">
+                        <div className="w-full">
+                            <h2
+                                className="text-2xl font-bold mb-3 flex gap-3 items-center group"
+                                style={{ fontSize: '2rem' }}
+                            >
+                                {capitalizeWords(forum?.first_name + " " + forum?.last_name) || "Nombre Completo"}
+                            </h2>
+                            <h3
+                                className="text-gray-600 font-semibold mb-1 flex gap-3 items-center group"
+                                style={{ fontSize: '1rem' }}
+                            >
+                                {capitalizeWords(forum?.profession) || "Profesión u Ocupación"}
+                            </h3>
+                            <p
+                                id="description"
+                                name="description"
+                                className="text-gray-600 mt-3 w-full h-80 border 
+                                rounded border-0 p-0 shadow-none resize-none pr-3
+                                text-sm"
+                            >
+                                {forum?.description || "Biografía o descripción del forum..."}
+                            </p>
+                        </div>
+                        <div className="relative inline-block w-64 h-64 group">
+                            <Image
+                                src={forum?.photo || FORUM_PLACEHOLDER_IMAGE}
+                                alt="Foto de perfil"
+                                width={3000}
+                                height={3000}
+                                className="w-full h-full rounded object-cover
+                                hover:cursor-pointer hover:brightness-95
+                                transition-all duration-200"
+                            />
+                        </div>
                     </div>
-                </div>
+                )}
             </section>
             <section>
                 <h2 className="text-2xl font-bold mt-10 mb-5">Investigaciones Relacionadas</h2>

@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { getUserInfo, updateUser } from "@/lib/api/auth";
 import { useUser } from "@/app/contexts/UserContext";
@@ -23,6 +24,7 @@ export default function MiForo() {
         description: "",
         photo: null,
     });
+    const [isLoading, setIsLoading] = useState(true);
 
     const [userProfile, setUserProfile] = useState({
         firstName: "",
@@ -87,10 +89,13 @@ export default function MiForo() {
 
     const fetchUserForum = async () => {
         try {
+            setIsLoading(true);
             const response = await getUserInfo({ user_id: user.id, access_token: accessToken });
             const data = await response.json();
             if (!response.ok) {
-                return toast.warning(data.detail?.[0]?.msg || "Error al obtener el foro");
+                toast.warning(data.detail?.[0]?.msg || "Error al obtener el foro");
+                setIsLoading(false);
+                return;
             }
 
             const firstName = data.first_name || "";
@@ -113,8 +118,10 @@ export default function MiForo() {
                 photo: data.photo || null,
                 isPublic: data.is_public || false,
             });
+            setIsLoading(false);
         } catch (err) {
             toast.warning("Error de conexión");
+            setIsLoading(false);
         }
     };
 
@@ -126,7 +133,26 @@ export default function MiForo() {
 
     return (
         <main className="flex-grow px-20 py-10 h-[100%]">
-            <form onSubmit={handleSubmit} className="flex flex-col gap-5 justify-between">
+            {isLoading ? (
+                <div className="flex flex-col gap-5 justify-between">
+                    <div className="flex gap-10">
+                        <div className="w-full">
+                            <div className="flex justify-between">
+                                <div className="flex gap-3 items-center">
+                                    <Skeleton className="h-10 w-64" />
+                                </div>
+                            </div>
+                            <Skeleton className="h-6 w-48 mb-4 mt-3" />
+                            <Skeleton className="h-80 w-full rounded" />
+                        </div>
+                        <div className="w-full max-w-[320px]">
+                            <Skeleton className="w-full h-[320px] rounded" />
+                        </div>
+                    </div>
+                    <Skeleton className="h-9 w-full rounded" />
+                </div>
+            ) : (
+                <form onSubmit={handleSubmit} className="flex flex-col gap-5 justify-between">
                 <div className="flex gap-10">
                     <div className="w-full">
                         <div className="flex justify-between">
@@ -185,7 +211,6 @@ export default function MiForo() {
                 hover:bg-[#b0352c] hover:cursor-pointer rounded">
                     Guardar Cambios
                 </Button>
-            </form>
-        </main>
+            </form>            )}        </main>
     );
 }

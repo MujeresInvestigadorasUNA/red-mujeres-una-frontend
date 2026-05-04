@@ -49,9 +49,11 @@ export default function Curso({ params }) {
     const [filterType, setFilterType] = useState("");
     const [searchQuery, setSearchQuery] = useState("");
     const [loadingRelated, setLoadingRelated] = useState(true);
+    const [loadingCourse, setLoadingCourse] = useState(true);
 
     const fetchCourseInfo = async () => {
         try {
+            setLoadingCourse(true);
             const response = await getCourseById({ course_id: courseId });
             const data = await response.json();
             setCourse({
@@ -64,9 +66,11 @@ export default function Curso({ params }) {
                 maxRegistrationDate: data.max_registration_date || "no disponible",
                 maxQuotas: data.max_quotas || 0
             });
+            setLoadingCourse(false);
         }
         catch (error) {
             toast.error("Error al cargar la información del curso.");
+            setLoadingCourse(false);
         }
     }
 
@@ -139,7 +143,33 @@ export default function Curso({ params }) {
 
     return (
         <main className="flex-grow h-[100%]">
-            <div className="flex flex-col ">
+            {loadingCourse ? (
+                <div className="flex flex-col">
+                    <section className="relative w-full h-[400px]">
+                        <Skeleton className="w-full h-full" />
+                    </section>
+                    <section className="flex-grow h-[100%] px-20 py-10">
+                        <div className="flex flex-col gap-4 mb-5">
+                            <Skeleton className="h-10 w-64" />
+                            <Skeleton className="h-6 w-96 mt-3" />
+                            <div className="flex flex-wrap gap-5">
+                                <Skeleton className="h-6 w-48" />
+                                <Skeleton className="h-6 w-48" />
+                                <Skeleton className="h-6 w-48" />
+                                <Skeleton className="h-6 w-48" />
+                            </div>
+                        </div>
+                        <div className="flex gap-10 mt-8 bg-gray-100 p-5 rounded-lg">
+                            <div className="flex-1 min-w-0">
+                                <Skeleton className="h-6 w-32 mb-3" />
+                                <Skeleton className="h-80 w-full rounded" />
+                            </div>
+                            <Skeleton className="h-96 w-80 rounded-lg flex-shrink-0" />
+                        </div>
+                    </section>
+                </div>
+            ) : (
+                <div className="flex flex-col ">
                 <section className="relative w-full h-[400px]">
                     <div className="relative w-full h-full">
                         <Image
@@ -221,7 +251,8 @@ export default function Curso({ params }) {
                         />
                     </div>
                 </section>
-            </div>
+                </div>
+            )}
             <section className="px-20 pb-10">
                 <h2 className="text-2xl font-bold mb-5">Cursos Relacionados</h2>
                 <div className="flex gap-3 mb-5 mt-5">
