@@ -1,7 +1,7 @@
 "use client";
 import { useUser } from "@/app/contexts/UserContext";
 import { iconClockwise } from "@/app/assets/icons";
-import { SearchIcon } from "lucide-react"
+import { SearchIcon, Heart, Share2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ButtonGroup } from "@/components/ui/button-group"
 import { Input } from "@/components/ui/input"
@@ -15,7 +15,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { useEffect, useState, useMemo } from "react";
-import { createCourse, getCoursesByUserId } from "@/lib/api/courses";
+import { createCourse, getCoursesByUserId, likeCourse, unlikeCourse } from "@/lib/api/courses";
 import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
 import Link from "next/link";
@@ -35,6 +35,7 @@ export default function MisCursos() {
     const [displayCount, setDisplayCount] = useState(6);
     const [filterType, setFilterType] = useState("");
     const [searchQuery, setSearchQuery] = useState("");
+    const [likedCourses, setLikedCourses] = useState(new Set());
     const ITEMS_PER_PAGE = 6;
 
     const userId = useMemo(() => user?.id ?? user?.user_id ?? null, [user]);
@@ -115,6 +116,48 @@ export default function MisCursos() {
         fetchCourses();
     }, [userId]);
 
+    const handleShareCourse = (courseId) => {
+        const shareUrl = `${process.env.NEXT_PUBLIC_FRONTEND_URL}/MisCursos/${courseId}`;
+        navigator.clipboard.writeText(shareUrl).then(() => {
+            toast.success("URL copiada al portapapeles");
+        }).catch(() => {
+            toast.error("Error al copiar la URL");
+        });
+    };
+
+    const handleLikeCourse = async (courseId) => {
+        if (!user) {
+            toast.error("Debes iniciar sesión para dar like");
+            return;
+        }
+
+        try {
+            const isLiked = likedCourses.has(courseId);
+            let response;
+
+            if (isLiked) {
+                response = await unlikeCourse(user.id, courseId);
+                if (response?.success) {
+                    setLikedCourses((prev) => {
+                        const newSet = new Set(prev);
+                        newSet.delete(courseId);
+                        return newSet;
+                    });
+                    toast.success("Dislike registrado");
+                }
+            } else {
+                response = await likeCourse(user.id, courseId);
+                if (response?.success) {
+                    setLikedCourses((prev) => new Set(prev).add(courseId));
+                    toast.success("Like registrado");
+                }
+            }
+        } catch (error) {
+            toast.error("Error al procesar el like");
+            console.error(error);
+        }
+    };
+
     const handleOnAddCourse = async () => {
         try {
             const response = await createCourse({ user_id: userId });
@@ -132,7 +175,7 @@ export default function MisCursos() {
     };
 
     return (
-        <main className="flex-grow px-20 py-10 h-[100%] toolsSection">
+        <main className="flex-grow px-20 py-10 h-screen toolsSection">
             <div className="flex gap-3 mb-5">
                 <Button
                     onClick={handleOnAddCourse}
@@ -200,7 +243,15 @@ export default function MisCursos() {
                                         <div className="flex-1 p-5 flex flex-col">
                                             <Skeleton className="h-4 w-full mb-2" />
                                             <Skeleton className="h-4 w-5/6 mb-2" />
-                                            <Skeleton className="h-4 w-4/5" />
+                                            <Skeleton className="h-4 w-4/5 mb-4" />
+
+                                            {/* Stats Footer Skeleton */}
+                                            <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+                                                <div className="flex gap-4">
+                                                    <Skeleton className="h-5 w-8" />
+                                                    <Skeleton className="h-5 w-8" />
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -243,9 +294,36 @@ export default function MisCursos() {
 
                                     {/* Content */}
                                     <div className="flex-1 p-5 flex flex-col">
-                                        <p className="text-sm text-gray-600 line-clamp-3">
+                                        <p className="text-sm text-gray-600 line-clamp-3 mb-4 flex-1">
                                             {truncateDescription(course.description)}
                                         </p>
+
+                                        {/* Stats Footer */}
+                                        <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+                                            <div className="flex gap-4 text-sm">
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        handleLikeCourse(course.id);
+                                                    }}
+                                                    className="flex items-center gap-1 text-gray-600 hover:text-red-500 transition-colors"
+                                                >
+                                                    <Heart 
+                                                        className={`w-4 h-4 ${likedCourses.has(course.id) ? "fill-current text-red-500" : ""}`}
+                                                    />
+                                                    <span className="text-xs">0</span>
+                                                </button>
+                                            </div>
+                                            <button
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    handleShareCourse(course.id);
+                                                }}
+                                                className="flex items-center gap-1 text-gray-600 hover:text-blue-500 transition-colors"
+                                            >
+                                                <Share2 className="w-4 h-4" />
+                                            </button>
+                                        </div>
                                     </div>
                                 </Card>
                             </Link>

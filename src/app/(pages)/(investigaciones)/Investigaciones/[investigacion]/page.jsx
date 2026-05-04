@@ -1,5 +1,4 @@
 "use client";
-import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
@@ -7,6 +6,7 @@ import { SearchIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
 import { Input } from "@/components/ui/input";
+import { Card } from "@/components/ui/card";
 import {
     Select,
     SelectContent,
@@ -15,15 +15,22 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { iconClockwise } from "@/app/assets/icons";
+import { iconClockwise, iconEye, iconHeart } from "@/app/assets/icons";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getResearch, getResearchById } from "@/lib/api/research";
 
-const PLACEHOLDER_IMAGES = [
-    "/images/curso1.png",
-    "/images/curso2.png",
-    "/images/curso3.png",
+const GRADIENTS = [
+    "bg-gradient-to-br from-[#831d16] to-[#c2372d]",
+    "bg-gradient-to-br from-[#c2372d] to-[#E7473C]",
+    "bg-gradient-to-br from-[#E7473C] to-[#FF6B55]",
+    "bg-gradient-to-br from-[#831d16] to-[#E7473C]",
+    "bg-gradient-to-br from-[#c2372d] to-[#FF6B55]",
+    "bg-gradient-to-br from-[#E7473C] to-[#831d16]",
 ];
+
+const truncateDescription = (text, limit = 100) => {
+    return text?.length > limit ? text.substring(0, limit) + "..." : text || "Sin descripción disponible";
+};
 
 const PLACEHOLDER_DESCRIPTION = "Exploración detallada de esta investigación académica de la Red de Mujeres Académicas.";
 
@@ -78,11 +85,13 @@ export default function Investigacion() {
     const [filterType, setFilterType] = useState("");
     const [searchQuery, setSearchQuery] = useState("");
     const [loading, setLoading] = useState(true);
+    const [loadingRelated, setLoadingRelated] = useState(true);
 
     useEffect(() => {
         const fetchResearchData = async () => {
             try {
                 setLoading(true);
+                setLoadingRelated(true);
                 const [current, allResearch] = await Promise.all([
                     getResearchById(researchId),
                     getResearch(null),
@@ -98,6 +107,7 @@ export default function Investigacion() {
                 console.error("Error fetching research data:", error);
             } finally {
                 setLoading(false);
+                setLoadingRelated(false);
             }
         };
         
@@ -234,49 +244,96 @@ export default function Investigacion() {
                                 {iconClockwise({})}
                             </Button>
                         </div>
-                        <div className="flex gap-5 flex-wrap mt-5">
-                            {displayedResearch.length > 0 ? (
-                                displayedResearch.map((research, index) => (
-                                    <div key={research.id} className="flex-grow">
-                                        <Link href={`/Investigaciones/${research.id}`}>
-                                            <Image
-                                                src={isValidImageUrl(research.vector_link) ? research.vector_link : PLACEHOLDER_IMAGES[index % PLACEHOLDER_IMAGES.length]}
-                                                alt={research.title}
-                                                width={300}
-                                                height={200}
-                                                className="object-cover rounded w-full h-100 mt-5 min-w-full max-h-[200px] min-h-[200px] mb-3 hover:brightness-80 transition cursor-pointer"
-                                            />
-                                            <p className="text-md font-bold hover:text-[#E7473C] transition">{research.title}</p>
+                        <div className="flex flex-col gap-5 mt-5">
+                            {loadingRelated ? (
+                                <>
+                                    {[...Array(6)].map((_, index) => (
+                                        <div key={index} className="w-full">
+                                            <Card className="overflow-hidden border-none shadow h-full flex flex-col p-0">
+                                                <div className="bg-gray-200 p-6 text-white flex-shrink-0">
+                                                    <Skeleton className="h-6 w-3/4 mb-2" />
+                                                    <Skeleton className="h-4 w-full" />
+                                                </div>
+                                                <div className="flex-1 px-6 py-3 flex flex-col gap-3">
+                                                    <Skeleton className="h-4 w-full" />
+                                                    <Skeleton className="h-4 w-3/4" />
+                                                </div>
+                                                <div className="px-6 py-4 flex items-center justify-between border-t bg-gray-50">
+                                                    <Skeleton className="h-4 w-20" />
+                                                    <Skeleton className="h-4 w-20" />
+                                                </div>
+                                            </Card>
+                                        </div>
+                                    ))}
+                                </>
+                            ) : displayedResearch.length > 0 ? (
+                                displayedResearch.map((research) => {
+                                    const gradient = GRADIENTS[(String(research.id || '').charCodeAt(0) || 0) % GRADIENTS.length];
+                                    return (
+                                        <Link key={research.id} href={`/Investigaciones/${research.id}`} className="w-full">
+                                            <Card className="overflow-hidden border-none shadow h-full flex flex-col hover:shadow-lg transition p-0">
+                                                {/* Gradient Header */}
+                                                <div className={`${gradient} p-6 text-white flex-shrink-0`}>
+                                                    <div className="flex items-start justify-between gap-3">
+                                                        <div className="flex-1">
+                                                            <h3 className="text-lg font-bold line-clamp-2 mb-2">
+                                                                {research.title || "Sin título"}
+                                                            </h3>
+                                                            <p className="text-white/80 text-sm">
+                                                                {research.author || "Autor desconocido"}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {/* Content Area */}
+                                                <div className="flex-1 px-6 py-3 flex flex-col gap-3">
+                                                    <p className="text-gray-700 text-sm line-clamp-3">
+                                                        {truncateDescription(research.description, 100)}
+                                                    </p>
+                                                </div>
+
+                                                {/* Stats Footer */}
+                                                <div className="px-6 py-4 flex items-center justify-between border-t bg-gray-50">
+                                                    <div className="flex items-center gap-1 text-sm text-gray-600">
+                                                        {iconHeart({ size: 16 })}
+                                                        <span>{research.likes_count || 0}</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-1 text-sm text-gray-600">
+                                                        {iconEye({ size: 16 })}
+                                                        <span>{research.views_count || 0}</span>
+                                                    </div>
+                                                </div>
+                                            </Card>
                                         </Link>
-                                        <p className="text-gray-600 text-sm">{research.description || PLACEHOLDER_DESCRIPTION}</p>
-                                    </div>
-                                ))
+                                    );
+                                })
                             ) : (
                                 <div className="w-full flex items-center justify-center py-20">
                                     <div className="text-center max-w-md">
-                                    <div className="flex justify-center mb-4">
-                                        <div className="p-4 bg-gray-100 rounded-full">
-                                            <svg
-                                                className="w-12 h-12 text-gray-400"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
-                                            >
-                                                <path
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    strokeWidth={1.5}
-                                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                                                />
-                                            </svg>
+                                        <div className="flex justify-center mb-4">
+                                            <div className="p-4 bg-gray-100 rounded-full">
+                                                <svg
+                                                    className="w-12 h-12 text-gray-400"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth={1.5}
+                                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                                    />
+                                                </svg>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <h3 className="text-lg font-semibold text-gray-700 mb-2">
-                                        No hay investigaciones relacionadas
-                                    </h3>
-                                    <p className="text-gray-500 text-sm">
-                                        No encontramos otras investigaciones relacionadas en este momento.
-                                    </p>
+                                        <h3 className="text-lg font-semibold text-gray-700 mb-2">
+                                            No hay investigaciones relacionadas
+                                        </h3>
+                                        <p className="text-gray-500 text-sm">
+                                            No encontramos otras investigaciones relacionadas en este momento.
+                                        </p>
                                     </div>
                                 </div>
                             )}

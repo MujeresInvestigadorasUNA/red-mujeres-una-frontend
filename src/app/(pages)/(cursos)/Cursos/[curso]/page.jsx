@@ -1,12 +1,10 @@
 "use client";
 import { iconCalendar, iconPenSquare, iconSearch } from "@/app/assets/icons";
-import { Calendar } from "@/components/ui/calendar";
 import { getCourseById, getCourses } from "@/lib/api/courses";
-import Image from "next/image";
 import Link from "next/link";
 import { use, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { SearchIcon } from "lucide-react";
+import { SearchIcon, Heart, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
 import { Input } from "@/components/ui/input";
@@ -18,20 +16,23 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { iconClockwise } from "@/app/assets/icons";
+import { iconClockwise, iconHeart, iconEye } from "@/app/assets/icons";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Card } from "@/components/ui/card";
 
-const PLACEHOLDER_IMAGES = [
-    "/images/curso1.png",
-    "/images/curso2.png",
-    "/images/curso3.png",
+const gradients = [
+    "bg-gradient-to-br from-[#831d16] to-[#c2372d]",
+    "bg-gradient-to-br from-[#c2372d] to-[#E7473C]",
+    "bg-gradient-to-br from-[#E7473C] to-[#FF6B55]",
+    "bg-gradient-to-br from-[#831d16] to-[#E7473C]",
+    "bg-gradient-to-br from-[#c2372d] to-[#FF6B55]",
+    "bg-gradient-to-br from-[#E7473C] to-[#c2372d]",
 ];
 
 export default function Curso({ params }) {
     const { curso: courseId } = use(params);
     const [course, setCourse] = useState({
         title: "",
-        photo: "/images/curso1.png",
         description: "",
         taughtBy: "",
         startDate: "",
@@ -39,10 +40,6 @@ export default function Curso({ params }) {
         maxRegistrationDate: "",
         maxQuotas: 0,
     });
-
-    const [date, setDate] = useState(
-        new Date(2025, 5, 12)
-    );
 
     const [relatedCourses, setRelatedCourses] = useState([]);
     const [displayedCourses, setDisplayedCourses] = useState([]);
@@ -58,7 +55,6 @@ export default function Curso({ params }) {
             const data = await response.json();
             setCourse({
                 title: data.title || "Título del Curso",
-                photo: data.photo || "/images/defaultCourse.webp",
                 description: data.description || "Descripción del curso no disponible.",   
                 taughtBy: data.user.first_name + " " + data.user.last_name || "Nombre del Instructor",
                 startDate: data.initial_date || "no disponible",
@@ -145,110 +141,82 @@ export default function Curso({ params }) {
         <main className="flex-grow h-[100%]">
             {loadingCourse ? (
                 <div className="flex flex-col">
-                    <section className="relative w-full h-[400px]">
-                        <Skeleton className="w-full h-full" />
-                    </section>
-                    <section className="flex-grow h-[100%] px-20 py-10">
-                        <div className="flex flex-col gap-4 mb-5">
-                            <Skeleton className="h-10 w-64" />
-                            <Skeleton className="h-6 w-96 mt-3" />
-                            <div className="flex flex-wrap gap-5">
-                                <Skeleton className="h-6 w-48" />
-                                <Skeleton className="h-6 w-48" />
-                                <Skeleton className="h-6 w-48" />
-                                <Skeleton className="h-6 w-48" />
-                            </div>
+                    {/* Gradient Header Skeleton */}
+                    <section className="bg-gray-200 p-8 md:p-12">
+                        <Skeleton className="h-12 w-3/4 mb-4" />
+                        <Skeleton className="h-6 w-1/2 mb-4" />
+                        <div className="flex flex-wrap gap-4 mt-6">
+                            <Skeleton className="h-5 w-48" />
+                            <Skeleton className="h-5 w-48" />
+                            <Skeleton className="h-5 w-48" />
+                            <Skeleton className="h-5 w-48" />
                         </div>
-                        <div className="flex gap-10 mt-8 bg-gray-100 p-5 rounded-lg">
-                            <div className="flex-1 min-w-0">
-                                <Skeleton className="h-6 w-32 mb-3" />
-                                <Skeleton className="h-80 w-full rounded" />
+                    </section>
+                    <section className="flex-grow px-6 md:px-20 py-10">
+                        <Skeleton className="h-80 w-full rounded-lg mb-8" />
+                        <div className="flex gap-10">
+                            <div className="flex-1">
+                                <Skeleton className="h-6 w-32 mb-4" />
+                                <Skeleton className="h-40 w-full rounded" />
                             </div>
-                            <Skeleton className="h-96 w-80 rounded-lg flex-shrink-0" />
                         </div>
                     </section>
                 </div>
             ) : (
-                <div className="flex flex-col ">
-                <section className="relative w-full h-[400px]">
-                    <div className="relative w-full h-full">
-                        <Image
-                            src={course.photo}
-                            alt="Curso 1"
-                            fill
-                            className="object-cover brightness-50"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                    </div>
-                    {/* Centered Input */}
-                    <div className="absolute inset-0 flex flex-col gap-5 items-center justify-center">
-                        <h2
-                            id="title"
-                            name="title"
-                            className="h-20 w-full text-white font-bold text-center border-0 shadow-none 
-                            focus:outline-none focus:ring-0 focus:border-transparent"
-                            style={{
-                                fontSize: '3rem',
-                                lineHeight: '1',
-                                textShadow: '2px 2px 4px rgba(0, 0, 0, 0.7)',
-                            }}
-                        >
-                            {course.title}
-                        </h2>
+                <div className="flex flex-col">
+                <section className="relative w-full">
+                    {/* Gradient Header */}
+                    <div className={`${gradients[(String(course.id || '').charCodeAt(0) || 0) % gradients.length]} p-8 md:p-12 text-white`}>
+                        <div className="max-w-4xl">
+                            <h1 className="text-4xl md:text-5xl font-bold mb-4 line-clamp-3">
+                                {course.title || "Sin título"}
+                            </h1>
+                            <p className="text-lg opacity-90 mb-6">
+                                Impartido por: <span className="font-semibold">{course.taughtBy}</span>
+                            </p>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+                                <div className="flex items-center gap-2">
+                                    {iconCalendar({ size: 16 })}
+                                    <div>
+                                        <p className="opacity-75 text-xs">Inicio</p>
+                                        <p className="font-semibold">{course.startDate}</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    {iconCalendar({ size: 16 })}
+                                    <div>
+                                        <p className="opacity-75 text-xs">Finalización</p>
+                                        <p className="font-semibold">{course.endDate}</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    {iconCalendar({ size: 16 })}
+                                    <div>
+                                        <p className="opacity-75 text-xs">Registro Máximo</p>
+                                        <p className="font-semibold">{course.maxRegistrationDate}</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    {iconSearch({ size: 16 })}
+                                    <div>
+                                        <p className="opacity-75 text-xs">Cupos</p>
+                                        <p className="font-semibold">{course.maxQuotas}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </section>
-                <section className="flex-grow h-[100%] px-20 py-10">
-                    <div className="flex flex-col gap-4 mb-5">
-                        <div className="flex flex-col gap-2">
-                            <h2 className="text-3xl font-bold text-wrap">
-                                Datos del Curso
-                            </h2>
-                            <h3 className="text-gray-600 text-semibold text-wrap
-                            text-sm">
-                                Impartido por: {course.taughtBy}
-                            </h3>
+                <section className="flex-grow px-6 md:px-20 py-12">
+                    {/* Description Section */}
+                    <div className="max-w-4xl mb-12">
+                        <div className="flex gap-3 items-center mb-4">
+                            {iconPenSquare({})}
+                            <h2 className="text-2xl font-bold">Descripción del Curso</h2>
                         </div>
-                        <div className="flex flex-wrap gap-5">
-                            <span className="flex items-center gap-2 text-sm text-gray-600">
-                                {iconCalendar({ size: 12 })} Fecha Inicial:
-                                {" " + course.startDate}
-                            </span>
-                            <span className="flex items-center gap-2 text-sm text-gray-600">
-                                {iconCalendar({ size: 12 })} Fecha Final:
-                                {" " + course.endDate}
-                            </span>
-                            <span className="flex items-center gap-2 text-sm text-gray-600">
-                                {iconCalendar({ size: 12 })} Fecha Máxima de Inscripción:
-                                {" " + course.maxRegistrationDate}
-                            </span>
-                            <span className="flex items-center gap-2 text-sm text-gray-600">
-                                {iconSearch({ size: 12 })} Cupos Disponibles:
-                                {" " + course.maxQuotas}
-                            </span>
-                        </div>
-                    </div>
-                    <div className="flex gap-10 mt-8 bg-gray-100 p-5 rounded-lg">
-                        <div className="flex-1 min-w-0">
-                            <span className="flex gap-2 justify-start items-center">
-                                {iconPenSquare({})}
-                                <h5 className="font-bold">Descripción</h5>
-                            </span>
-                            <p
-                                className="p-0 mt-3 border-0 shadow-none resize-none
-                                min-h-[10rem] h-[92%]"
-                                style={{ fontSize: '1rem' }}
-                            >
-                                {course.description}
-                            </p>
-                        </div>
-                        <Calendar
-                            mode="single"
-                            selected={date}
-                            onSelect={setDate}
-                            buttonVariant="ghost"
-                            className="rounded-lg border [--cell-size:--spacing(11)] 
-                            md:[--cell-size:--spacing(12)] flex-shrink-0"
-                        />
+                        <p className="text-gray-700 leading-relaxed text-justify">
+                            {course.description}
+                        </p>
                     </div>
                 </section>
                 </div>
@@ -302,41 +270,64 @@ export default function Curso({ params }) {
                     {loadingRelated ? (
                         <>
                             {[...Array(6)].map((_, index) => (
-                                <div key={index} className="grow min-w-[300px]">
-                                    <div className="p-0 overflow-hidden rounded-lg border-none shadow">
-                                        <div className="px-6 pt-7 pb-4">
-                                            <Skeleton className="h-6 w-3/4 mb-2" />
-                                            <Skeleton className="h-4 w-full mb-3" />
+                                <div key={index} className="flex-grow min-w-[300px]">
+                                    <Card className="h-full overflow-hidden border-none shadow-md">
+                                        <div className="bg-gray-200 h-24 flex-shrink-0"></div>
+                                        <div className="p-6 flex flex-col flex-grow">
+                                            <Skeleton className="h-6 w-3/4 mb-3" />
+                                            <Skeleton className="h-4 w-full mb-2" />
+                                            <Skeleton className="h-4 w-5/6 mb-4" />
+                                            <div className="flex gap-4 mt-auto pt-4 border-t">
+                                                <Skeleton className="h-4 w-12" />
+                                                <Skeleton className="h-4 w-12" />
+                                            </div>
                                         </div>
-                                        <div className="relative p-0 rounded bg-gray-100">
-                                            <Skeleton className="h-60 w-full rounded-none" />
-                                        </div>
-                                    </div>
+                                    </Card>
                                 </div>
                             ))}
                         </>
                     ) : displayedCourses.length > 0 ? (
-                        displayedCourses.map((course, index) => (
-                            <div key={course.id} className="flex-grow">
-                                <Link href={`/Cursos/${course.id}`}>
-                                    <Image
-                                        src={course.photo || PLACEHOLDER_IMAGES[index % PLACEHOLDER_IMAGES.length]}
-                                        alt={course.title}
-                                        width={300}
-                                        height={200}
-                                        className="object-cover rounded w-full h-100 mt-5 min-w-full max-h-[200px] min-h-[200px] mb-3 hover:brightness-80 transition cursor-pointer"
-                                        onError={(e) => {
-                                            e.target.src = PLACEHOLDER_IMAGES[index % PLACEHOLDER_IMAGES.length];
-                                        }}
-                                    />
-                                    <p className="text-md font-bold hover:text-[#E7473C] transition">{course.title}</p>
+                        displayedCourses.map((course, index) => {
+                            const gradient = gradients[(String(course.id || '').charCodeAt(0) || 0) % gradients.length];
+                            const truncatedDescription = course.description?.length > 60 
+                                ? course.description.substring(0, 60) + "..." 
+                                : course.description || "Sin descripción disponible";
+                            
+                            return (
+                                <Link key={course.id} href={`/Cursos/${course.id}`} className="flex-grow min-w-[300px]">
+                                    <Card className="h-full overflow-hidden border-none shadow-md hover:shadow-lg transition-shadow cursor-pointer">
+                                        {/* Gradient Header */}
+                                        <div className={`${gradient} p-6 text-white flex-shrink-0`}>
+                                            <div className="flex items-start justify-between gap-3">
+                                                <div className="flex-1">
+                                                    <h3 className="text-lg font-bold line-clamp-2 mb-2">
+                                                        {course.title || "Sin título"}
+                                                    </h3>
+                                                    <p className="text-sm opacity-90">
+                                                        {course.user 
+                                                            ? `${course.user.first_name} ${course.user.last_name}`
+                                                            : "Instructor"}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {/* Content */}
+                                        <div className="p-6 flex flex-col flex-grow">
+                                            <p className="text-gray-700 text-sm mb-4 flex-grow">
+                                                {truncatedDescription}
+                                            </p>
+                                            {/* Stats Footer */}
+                                            <div className="flex gap-4 pt-4 border-t text-xs text-gray-500">
+                                                <span className="flex items-center gap-1">
+                                                    {iconEye({ size: 12 })}
+                                                    Más info
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </Card>
                                 </Link>
-                                <p className="text-gray-600 text-sm">{course.description || "Sin descripción disponible"}</p>
-                                {course.user && (
-                                    <p className="text-gray-500 text-xs">Por: {course.user.first_name} {course.user.last_name}</p>
-                                )}
-                            </div>
-                        ))
+                            );
+                        })
                     ) : (
                         <div className="w-full flex items-center justify-center py-12">
                             <div className="text-center max-w-md">
