@@ -27,21 +27,16 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card"
-import Image from "next/image";
 import { iconClockwise, iconEye, iconHeart } from "@/app/assets/icons";
-
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { getResearch, likeResearch, unlikeResearch } from "@/lib/api/research";
 
-const FORUM_PLACEHOLDER_IMAGE = "/images/curso1.png";
-
-const isValidImageUrl = (url) => {
-    if (!url) return false;
-    const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg'];
-    const urlLower = url.toLowerCase();
-    return imageExtensions.some(ext => urlLower.includes(ext));
+const truncateDescription = (text, limit = 50) => {
+    if (!text) return "Sin descripción disponible";
+    if (text.length <= limit) return text;
+    return text.substring(0, limit) + "...";
 };
 
 export default function Investigaciones() {
@@ -209,117 +204,160 @@ export default function Investigaciones() {
             <div className="flex flex-wrap gap-3">
                 {loading ? (
                     <>
-                        {[...Array(6)].map((_, index) => (
-                            <div key={index} className="grow min-w-[300px]">
-                                <div className="p-0 overflow-hidden rounded-lg border-none shadow">
-                                    <div className="px-6 pt-7 pb-4">
-                                        <Skeleton className="h-6 w-3/4 mb-2" />
-                                        <Skeleton className="h-4 w-full mb-3" />
-                                    </div>
-                                    <div className="relative p-0 rounded bg-gray-100">
-                                        <Skeleton className="h-60 w-full rounded-none" />
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </>
-                ) : displayedResearch.length > 0 ? (
-                    displayedResearch.map((item) => (
-                        <Link key={item.id} href={`/Investigaciones/${item.id}`} className="grow">
-                            <Card
-                                className="p-0 overflow-hidden rounded-lg
-                                hover:brightness-80 hover:cursor-pointer shadow border-none
-                                min-w-[300px]"
-                            >
-                                <CardHeader className="px-6 pt-7">
-                                    <div className="flex items-center justify-between
-                                    flex-wrap gap-2">
-                                        <CardTitle className="text-nowrap">
-                                            {item.title}
-                                        </CardTitle>
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    className="h-8 w-8"
-                                                    onClick={(e) => e.stopPropagation()}
-                                                >
-                                                    {/* More options icon (three dots) */}
-                                                    <svg
-                                                        className="w-4 h-4"
-                                                        fill="currentColor"
-                                                        viewBox="0 0 24 24"
-                                                    >
-                                                        <path d="M12 8c1.1 0 2-0.9 2-2s-0.9-2-2-2-2 0.9-2 2 0.9 2 2 2zm0 2c-1.1 0-2 0.9-2 2s0.9 2 2 2 2-0.9 2-2-0.9-2-2-2zm0 6c-1.1 0-2 0.9-2 2s0.9 2 2 2 2-0.9 2-2-0.9-2-2-2z" />
-                                                    </svg>
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end">
-                                                {user && (
-                                                    <DropdownMenuItem onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        handleLikeResearch(item.id);
-                                                    }}>
-                                                        <Heart 
-                                                            className={`w-4 h-4 mr-2 ${likedResearch.has(item.id) ? "fill-current text-red-500" : ""}`}
-                                                        />
-                                                        {likedResearch.has(item.id) ? "Quitar Like" : "Me Gusta"}
-                                                    </DropdownMenuItem>
-                                                )}
-                                                <DropdownMenuItem onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleShareResearch(item.id);
-                                                }}>
-                                                    <Share2 className="w-4 h-4 mr-2" />
-                                                    Compartir
-                                                </DropdownMenuItem>
-                                                {user && user.user_type_id === 3 && (
-                                                    <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
-                                                        <EyeOff className="w-4 h-4 mr-2" />
-                                                        Esconder
-                                                    </DropdownMenuItem>
-                                                )}
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
-                                    </div>
-                                    <CardDescription>
-                                        {item.description || "Sin descripción"}
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent className="relative p-0 rounded">
-                                    <Image
-                                        src={isValidImageUrl(item.vector_link) ? item.vector_link : FORUM_PLACEHOLDER_IMAGE}
-                                        alt={item.title}
-                                        width={3000}
-                                        height={3000}
-                                        className="object-cover brightness-80 max-h-60
-                                        w-full"
-                                        onError={(e) => {
-                                            e.target.src = FORUM_PLACEHOLDER_IMAGE;
-                                        }}
-                                    />
-                                    {/* Overlay with likes, visualizaciones and badges */}
-                                    <div className="absolute bottom-5 left-4 right-4 flex gap-3 items-center justify-between">
-                                        <div className="flex gap-3">
-                                            <span
-                                                className="flex items-center gap-1 text-white text-sm font-medium bg-black/40 px-2 py-1 rounded"
-                                            >
-                                                {iconHeart({ size: 14 })}
-                                                0
-                                            </span>
-                                            <span
-                                                className="flex items-center gap-1 text-white text-sm font-medium bg-black/40 px-2 py-1 rounded"
-                                            >
-                                                {iconEye({ size: 14 })}
-                                                0
-                                            </span>
+                        {[...Array(6)].map((_, index) => {
+                            return (
+                                <div key={index} className="grow min-w-[300px]">
+                                    <div className="p-0 overflow-hidden rounded-lg border-none shadow flex flex-col h-full">
+                                        {/* Gray Header Skeleton */}
+                                        <div className="bg-gray-200 p-6 flex-shrink-0">
+                                            <div className="flex items-start justify-between gap-3">
+                                                <div className="flex-1">
+                                                    <Skeleton className="h-6 w-3/4 mb-2 bg-gray-300" />
+                                                    <Skeleton className="h-4 w-1/2 bg-gray-300" />
+                                                </div>
+                                                <Skeleton className="h-8 w-8 rounded bg-gray-300" />
+                                            </div>
+                                        </div>
+
+                                        {/* Content Skeleton */}
+                                        <div className="flex-1 p-5 flex flex-col">
+                                            <Skeleton className="h-4 w-full mb-2" />
+                                            <Skeleton className="h-4 w-5/6 mb-2" />
+                                            <Skeleton className="h-4 w-4/5 mb-4" />
+
+                                            {/* Stats Footer Skeleton */}
+                                            <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+                                                <div className="flex gap-4">
+                                                    <Skeleton className="h-5 w-8" />
+                                                    <Skeleton className="h-5 w-8" />
+                                                </div>
+                                                <Skeleton className="h-5 w-5" />
+                                            </div>
                                         </div>
                                     </div>
-                                </CardContent>
-                            </Card>
-                        </Link>
-                    ))
+                                </div>
+                            );
+                        })}
+                    </>
+                ) : displayedResearch.length > 0 ? (
+                    displayedResearch.map((item) => {
+                        const gradients = [
+                            "bg-gradient-to-br from-[#831d16] to-[#c2372d]",
+                            "bg-gradient-to-br from-[#E7473C] to-[#FF6B55]",
+                            "bg-gradient-to-br from-[#c2372d] to-[#FF6B55]",
+                            "bg-gradient-to-br from-[#831d16] to-[#E7473C]",
+                            "bg-gradient-to-r from-[#E7473C] to-[#c2372d]",
+                            "bg-gradient-to-r from-[#FF6B55] to-[#831d16]",
+                        ];
+                        const gradientIndex = (String(item.id || '').charCodeAt(0) || 0) % gradients.length;
+                        const gradient = gradients[gradientIndex];
+
+                        return (
+                            <Link key={item.id} href={`/Investigaciones/${item.id}`} className="grow">
+                                <Card
+                                    className="p-0 overflow-hidden rounded-lg border-none shadow
+                                    hover:shadow-lg hover:cursor-pointer transition-all duration-300
+                                    min-w-[300px] flex flex-col h-full gap-0"
+                                >
+                                    {/* Gradient Header */}
+                                    <div className={`${gradient} p-6 text-white flex-shrink-0`}>
+                                        <div className="flex items-start justify-between gap-3">
+                                            <div className="flex-1">
+                                                <h3 className="text-lg font-bold line-clamp-2 mb-2">
+                                                    {item.title}
+                                                </h3>
+                                                <p className="text-sm opacity-90 line-clamp-1">
+                                                    {item.author || item.user_name || "Investigador"}
+                                                </p>
+                                            </div>
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="h-8 w-8 text-white hover:bg-white/20"
+                                                        onClick={(e) => e.stopPropagation()}
+                                                    >
+                                                        <svg
+                                                            className="w-4 h-4"
+                                                            fill="currentColor"
+                                                            viewBox="0 0 24 24"
+                                                        >
+                                                            <path d="M12 8c1.1 0 2-0.9 2-2s-0.9-2-2-2-2 0.9-2 2 0.9 2 2 2zm0 2c-1.1 0-2 0.9-2 2s0.9 2 2 2 2-0.9 2-2-0.9-2-2-2zm0 6c-1.1 0-2 0.9-2 2s0.9 2 2 2 2-0.9 2-2-0.9-2-2-2z" />
+                                                        </svg>
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end">
+                                                    {user && (
+                                                        <DropdownMenuItem onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleLikeResearch(item.id);
+                                                        }}>
+                                                            <Heart 
+                                                                className={`w-4 h-4 mr-2 ${likedResearch.has(item.id) ? "fill-current text-red-500" : ""}`}
+                                                            />
+                                                            {likedResearch.has(item.id) ? "Quitar Like" : "Me Gusta"}
+                                                        </DropdownMenuItem>
+                                                    )}
+                                                    <DropdownMenuItem onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleShareResearch(item.id);
+                                                    }}>
+                                                        <Share2 className="w-4 h-4 mr-2" />
+                                                        Compartir
+                                                    </DropdownMenuItem>
+                                                    {user && user.user_type_id === 3 && (
+                                                        <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
+                                                            <EyeOff className="w-4 h-4 mr-2" />
+                                                            Esconder
+                                                        </DropdownMenuItem>
+                                                    )}
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        </div>
+                                    </div>
+
+                                    {/* Content */}
+                                    <div className="flex-1 p-5 flex flex-col">
+                                        <p className="text-sm text-gray-600 line-clamp-3 mb-4 flex-1">
+                                            {truncateDescription(item.description)}
+                                        </p>
+
+                                        {/* Stats Footer */}
+                                        <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+                                            <div className="flex gap-4 text-sm">
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        handleLikeResearch(item.id);
+                                                    }}
+                                                    className="flex items-center gap-1 text-gray-600 hover:text-red-500 transition-colors"
+                                                >
+                                                    <Heart 
+                                                        className={`w-4 h-4 ${likedResearch.has(item.id) ? "fill-current text-red-500" : ""}`}
+                                                    />
+                                                    <span className="text-xs">0</span>
+                                                </button>
+                                                <div className="flex items-center gap-1 text-gray-600">
+                                                    {iconEye({ size: 14 })}
+                                                    <span className="text-xs">0</span>
+                                                </div>
+                                            </div>
+                                            <button
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    handleShareResearch(item.id);
+                                                }}
+                                                className="flex items-center gap-1 text-gray-600 hover:text-blue-500 transition-colors"
+                                            >
+                                                <Share2 className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                </Card>
+                            </Link>
+                        );
+                    })
                 ) : (
                     <div className="w-full flex items-center justify-center py-20">
                         <div className="text-center max-w-md">

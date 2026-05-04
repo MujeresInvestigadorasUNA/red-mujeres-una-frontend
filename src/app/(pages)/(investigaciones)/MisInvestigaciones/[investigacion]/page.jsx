@@ -190,13 +190,6 @@ export default function Investigacion() {
 
                     <section className="space-y-4">
                         <h2 className="text-2xl font-bold">Vista previa de la investigación</h2>
-                        <Image
-                            src={imageSrc}
-                            alt={currentResearch.title || "Investigación"}
-                            width={600}
-                            height={400}
-                            className="object-cover rounded w-full max-h-[420px]"
-                        />
                         <p className="text-gray-700">
                             {currentResearch.description || PLACEHOLDER_DESCRIPTION}
                         </p>
@@ -214,12 +207,12 @@ export default function Investigacion() {
                             )}
                         </div>
                         {currentResearch.research_link && canDisplayPdfInline(currentResearch.research_link) ? (
-                                            <embed
-                                                src={appendSasTokenIfNeeded(currentResearch.research_link)}
-                                                type="application/pdf"
-                                                title={`${currentResearch.title} - PDF de investigación`}
-                                                className="w-full h-[90vh] rounded-lg border border-gray-200 bg-white"
-                                            />
+                            <embed
+                                src={appendSasTokenIfNeeded(currentResearch.research_link)}
+                                type="application/pdf"
+                                title={`${currentResearch.title} - PDF de investigación`}
+                                className="w-full h-[90vh] rounded-lg border border-gray-200 bg-white"
+                            />
                         ) : currentResearch.research_link ? (
                             <div className="rounded-lg border border-dashed border-gray-300 bg-gray-50 px-6 py-10 text-center text-gray-600 space-y-3">
                                 <p className="font-medium text-gray-700">
@@ -236,11 +229,11 @@ export default function Investigacion() {
                         )}
                     </section>
 
-                    <div className="flex gap-3 justify-end pt-2">
+                    <div className="flex gap-3 pt-2">
                         <Button
                             type="submit"
                             disabled={saving}
-                            className="bg-[#E7473C] text-white hover:bg-[#cf4035] hover:cursor-pointer"
+                            className="bg-[#E7473C] text-white hover:bg-[#cf4035] hover:cursor-pointer w-full"
                         >
                             {saving ? "Guardando..." : "Guardar Cambios"}
                         </Button>

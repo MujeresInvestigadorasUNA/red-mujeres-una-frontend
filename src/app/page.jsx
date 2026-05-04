@@ -15,6 +15,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { getResearch } from "@/lib/api/research";
 import { getCourses } from "@/lib/api/courses";
 import { getResearchers } from "@/lib/api/forums";
+import { Card } from "@/components/ui/card";
+import { iconEye, iconHeart } from "@/app/assets/icons";
+
+const truncateDescription = (text, limit = 60) => {
+    if (!text) return "Sin descripción disponible";
+    if (text.length <= limit) return text;
+    return text.substring(0, limit) + "...";
+};
 
 const RESEARCH_PLACEHOLDER_IMAGES = [
   "/images/curso1.png",
@@ -43,14 +51,10 @@ export default function Home() {
         // Transform API response to card format
         const transformedCards = data.map((research, index) => ({
           id: research.id,
-          image: RESEARCH_PLACEHOLDER_IMAGES[index % RESEARCH_PLACEHOLDER_IMAGES.length],
           title: research.title,
-          description: research.description || RESEARCH_PLACEHOLDER_DESCRIPTION,
-          url: research.research_link || "/Investigaciones",
-          bgColor: "#E7473C",
-          titleTextColor: "#F0F0F0",
-          textColor: "#F0F0F0",
-          withImage: true
+          author: research.author || research.user_name || "Investigador",
+          description: research.description || "Sin descripción disponible",
+          url: `/Investigaciones/${research.id}`,
         }));
         
         setResearchCards(transformedCards);
@@ -320,16 +324,27 @@ export default function Home() {
             className="w-full"
           >
             <CarouselContent>
-              {[...Array(2)].map((_, index) => (
-                <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/2">
-                  <div className="p-4">
-                    <Skeleton className="h-48 w-full rounded-lg mb-3" />
-                    <Skeleton className="h-6 w-3/4 mb-2" />
-                    <Skeleton className="h-4 w-full mb-2" />
-                    <Skeleton className="h-4 w-5/6" />
-                  </div>
-                </CarouselItem>
-              ))}
+              {[...Array(2)].map((_, index) => {
+                return (
+                  <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/2">
+                    <div className="p-4">
+                      <div className="bg-gray-200 p-6 rounded-lg flex-shrink-0">
+                        <Skeleton className="h-6 w-3/4 mb-2 bg-gray-300" />
+                        <Skeleton className="h-4 w-1/2 bg-gray-300" />
+                      </div>
+                      <div className="mt-4">
+                        <Skeleton className="h-4 w-full mb-2" />
+                        <Skeleton className="h-4 w-5/6 mb-2" />
+                        <Skeleton className="h-4 w-4/5 mb-2" />
+                        <div className="flex gap-4 pt-2">
+                          <Skeleton className="h-4 w-8" />
+                          <Skeleton className="h-4 w-8" />
+                        </div>
+                      </div>
+                    </div>
+                  </CarouselItem>
+                );
+              })}
             </CarouselContent>
             <CarouselPrevious className="hover:cursor-pointer"/>
             <CarouselNext className="hover:cursor-pointer"/>
@@ -342,19 +357,61 @@ export default function Home() {
             className="w-full"
           >
             <CarouselContent>
-              {researchCards.map((research, index) => (
-                <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/2">
-                  <CustomCard
-                    cardImage={research.image}
-                    cardTitle={research.title}
-                    cardDescription={research.description}
-                    cardURL={research.url}
-                    cardBgColor={research.bgColor}
-                    cardTitleTextColor={research.titleTextColor}
-                    cardTextColor={research.textColor}
-                  />
-                </CarouselItem>
-              ))}
+              {researchCards.map((research) => {
+                const gradients = [
+                  "bg-gradient-to-br from-[#831d16] to-[#c2372d]",
+                  "bg-gradient-to-br from-[#E7473C] to-[#FF6B55]",
+                  "bg-gradient-to-br from-[#c2372d] to-[#FF6B55]",
+                  "bg-gradient-to-br from-[#831d16] to-[#E7473C]",
+                  "bg-gradient-to-r from-[#E7473C] to-[#c2372d]",
+                  "bg-gradient-to-r from-[#FF6B55] to-[#831d16]",
+                ];
+                const gradientIndex = (String(research.id || '').charCodeAt(0) || 0) % gradients.length;
+                const gradient = gradients[gradientIndex];
+                
+                return (
+                  <CarouselItem key={research.id} className="md:basis-1/2 lg:basis-1/2">
+                    <Link href={research.url} className="block">
+                      <Card
+                        className="p-0 overflow-hidden rounded-lg border-none shadow
+                        hover:shadow-lg hover:cursor-pointer transition-all duration-300
+                        flex flex-col h-full gap-0"
+                      >
+                        {/* Gradient Header */}
+                        <div className={`${gradient} p-6 text-white flex-shrink-0`}>
+                          <h3 className="text-lg font-bold line-clamp-2 mb-2">
+                            {research.title}
+                          </h3>
+                          <p className="text-sm opacity-90 line-clamp-1">
+                            {research.author}
+                          </p>
+                        </div>
+
+                        {/* Content */}
+                        <div className="flex-1 p-5 flex flex-col">
+                          <p className="text-sm text-gray-600 line-clamp-3 mb-4 flex-1">
+                            {truncateDescription(research.description)}
+                          </p>
+
+                          {/* Stats Footer */}
+                          <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+                            <div className="flex gap-4 text-sm">
+                              <div className="flex items-center gap-1 text-gray-600">
+                                {iconHeart({ size: 14 })}
+                                <span className="text-xs">0</span>
+                              </div>
+                              <div className="flex items-center gap-1 text-gray-600">
+                                {iconEye({ size: 14 })}
+                                <span className="text-xs">0</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </Card>
+                    </Link>
+                  </CarouselItem>
+                );
+              })}
             </CarouselContent>
             <CarouselPrevious className="hover:cursor-pointer"/>
             <CarouselNext className="hover:cursor-pointer"/>

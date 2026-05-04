@@ -30,7 +30,6 @@ import {
     CardTitle,
 } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea";
-import Image from "next/image";
 import { iconClockwise, iconEye, iconHeart } from "@/app/assets/icons";
 
 import { Badge } from "@/components/ui/badge";
@@ -48,6 +47,12 @@ const isValidImageUrl = (url) => {
     const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg'];
     const urlLower = url.toLowerCase();
     return imageExtensions.some(ext => urlLower.includes(ext));
+};
+
+const truncateDescription = (text, limit = 60) => {
+    if (!text) return "Sin descripción disponible";
+    if (text.length <= limit) return text;
+    return text.substring(0, limit) + "...";
 };
 
 export default function MisInvestigaciones() {
@@ -329,82 +334,99 @@ export default function MisInvestigaciones() {
             <div className="flex flex-wrap gap-3">
                 {loading ? (
                     <>
-                        {[...Array(6)].map((_, index) => (
-                            <div key={index} className="grow min-w-[300px]">
-                                <div className="p-0 overflow-hidden rounded-lg border-none shadow">
-                                    <div className="px-6 pt-7 pb-4">
-                                        <Skeleton className="h-6 w-3/4 mb-2" />
-                                        <Skeleton className="h-4 w-full mb-3" />
-                                    </div>
-                                    <div className="relative p-0 rounded bg-gray-100">
-                                        <Skeleton className="h-60 w-full rounded-none" />
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </>
-                ) : displayedResearch.length > 0 ? (
-                    displayedResearch.map((item) => (
-                        <Link key={item.id} href={`/MisInvestigaciones/${item.id}`} className="grow">
-                            <Card
-                                className="p-0 overflow-hidden rounded-lg
-                                hover:brightness-80 hover:cursor-pointer shadow border-none
-                                min-w-[300px]"
-                            >
-                                <CardHeader className="px-6 pt-7">
-                                    <div className="flex items-center justify-between
-                                    flex-wrap gap-2">
-                                        <CardTitle className="text-nowrap">
-                                            {item.title}
-                                        </CardTitle>
-                                        <div
-                                            className="flex gap-5 text-sm text-gray-600
-                                            text-nowrap"
-                                            style={{ fontSize: "0.8rem" }}
-                                        >
-                                            <span
-                                                className="flex items-center gap-1"
-                                            >
-                                                {iconHeart({ size: 12 })}
-                                                0
-                                            </span>
-                                            <span
-                                                className="flex items-center gap-1"
-                                            >
-                                                {iconEye({ size: 12 })}
-                                                0
-                                            </span>
+                        {[...Array(6)].map((_, index) => {
+                            return (
+                                <div key={index} className="grow min-w-[300px]">
+                                    <div className="p-0 overflow-hidden rounded-lg border-none shadow flex flex-col h-full">
+                                        {/* Gray Header Skeleton */}
+                                        <div className="bg-gray-200 p-6 flex-shrink-0">
+                                            <div className="flex items-start justify-between gap-3">
+                                                <div className="flex-1">
+                                                    <Skeleton className="h-6 w-3/4 mb-2 bg-gray-300" />
+                                                    <Skeleton className="h-4 w-1/2 bg-gray-300" />
+                                                </div>
+                                                <Skeleton className="h-8 w-8 rounded bg-gray-300" />
+                                            </div>
+                                        </div>
+
+                                        {/* Content Skeleton */}
+                                        <div className="flex-1 p-5 flex flex-col">
+                                            <Skeleton className="h-4 w-full mb-2" />
+                                            <Skeleton className="h-4 w-5/6 mb-2" />
+                                            <Skeleton className="h-4 w-4/5 mb-4" />
+
+                                            {/* Stats Footer Skeleton */}
+                                            <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+                                                <div className="flex gap-4">
+                                                    <Skeleton className="h-5 w-8" />
+                                                    <Skeleton className="h-5 w-8" />
+                                                </div>
+                                                <Skeleton className="h-5 w-5" />
+                                            </div>
                                         </div>
                                     </div>
-                                    <CardDescription>
-                                        {item.description || "Sin descripción"}
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent className="relative p-0 rounded">
-                                    <Image
-                                        src={isValidImageUrl(item.vector_link) ? item.vector_link : FORUM_PLACEHOLDER_IMAGE}
-                                        alt={item.title}
-                                        width={3000}
-                                        height={3000}
-                                        className="object-cover brightness-80 max-h-60
-                                        w-full"
-                                        onError={(e) => {
-                                            e.target.src = FORUM_PLACEHOLDER_IMAGE;
-                                        }}
-                                    />
-                                    {/* Overlay badges */}
-                                    <div className="absolute bottom-5 left-4 flex gap-1">
-                                        <Badge variant="secondary">
-                                            Badge
-                                        </Badge>
-                                        <Badge variant="secondary">Badge</Badge>
-                                        <Badge variant="secondary">Badge</Badge>
-                                        <Badge variant="secondary">Badge</Badge>
+                                </div>
+                            );
+                        })}
+                    </>
+                ) : displayedResearch.length > 0 ? (
+                    displayedResearch.map((item) => {
+                        const gradients = [
+                            "bg-gradient-to-br from-[#831d16] to-[#c2372d]",
+                            "bg-gradient-to-br from-[#E7473C] to-[#FF6B55]",
+                            "bg-gradient-to-br from-[#c2372d] to-[#FF6B55]",
+                            "bg-gradient-to-br from-[#831d16] to-[#E7473C]",
+                            "bg-gradient-to-r from-[#E7473C] to-[#c2372d]",
+                            "bg-gradient-to-r from-[#FF6B55] to-[#831d16]",
+                        ];
+                        const gradientIndex = (String(item.id || '').charCodeAt(0) || 0) % gradients.length;
+                        const gradient = gradients[gradientIndex];
+
+                        return (
+                            <Link key={item.id} href={`/MisInvestigaciones/${item.id}`} className="grow">
+                                <Card
+                                    className="p-0 overflow-hidden rounded-lg border-none shadow
+                                    hover:shadow-lg hover:cursor-pointer transition-all duration-300
+                                    min-w-[300px] flex flex-col h-full gap-0"
+                                >
+                                    {/* Gradient Header */}
+                                    <div className={`${gradient} p-6 text-white flex-shrink-0`}>
+                                        <div className="flex items-start justify-between gap-3">
+                                            <div className="flex-1">
+                                                <h3 className="text-lg font-bold line-clamp-2 mb-2">
+                                                    {item.title}
+                                                </h3>
+                                                <p className="text-sm opacity-90 line-clamp-1">
+                                                    Tu investigación
+                                                </p>
+                                            </div>
+                                        </div>
                                     </div>
-                                </CardContent>
-                            </Card>
-                        </Link>
-                    ))
+
+                                    {/* Content */}
+                                    <div className="flex-1 p-5 flex flex-col">
+                                        <p className="text-sm text-gray-600 line-clamp-3 mb-4 flex-1">
+                                            {truncateDescription(item.description)}
+                                        </p>
+
+                                        {/* Stats Footer */}
+                                        <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+                                            <div className="flex gap-4 text-sm">
+                                                <div className="flex items-center gap-1 text-gray-600">
+                                                    {iconHeart({ size: 14 })}
+                                                    <span className="text-xs">0</span>
+                                                </div>
+                                                <div className="flex items-center gap-1 text-gray-600">
+                                                    {iconEye({ size: 14 })}
+                                                    <span className="text-xs">0</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </Card>
+                            </Link>
+                        );
+                    })
                 ) : (
                     <div className="w-full flex items-center justify-center py-20">
                         <div className="text-center max-w-md">
