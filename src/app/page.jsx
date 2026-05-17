@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useUser } from "@/app/contexts/UserContext";
 import {
   Carousel,
   CarouselContent,
@@ -12,7 +13,7 @@ import {
 } from "@/components/ui/carousel";
 import CustomCard from "./components/CustomCard";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getResearch } from "@/lib/api/research";
+import { getResearch, getRecommendedResearch } from "@/lib/api/research";
 import { getCourses } from "@/lib/api/courses";
 import { getResearchers } from "@/lib/api/forums";
 import { Card } from "@/components/ui/card";
@@ -36,6 +37,7 @@ const FORUM_PLACEHOLDER_IMAGE = "/images/curso1.png";
 const RESEARCH_PLACEHOLDER_DESCRIPTION = "Explora esta investigación destacada y accede a recursos académicos de calidad.";
 
 export default function Home() {
+  const { user } = useUser();
   const [researchCards, setResearchCards] = useState([]);
   const [courseCards, setCourseCards] = useState([]);
   const [forumCards, setForumCards] = useState([]);
@@ -46,7 +48,15 @@ export default function Home() {
   useEffect(() => {
     const fetchResearchData = async () => {
       try {
-        const data = await getResearch();
+        let data;
+        
+        // If user is logged in, get personalized recommendations
+        if (user?.id) {
+          data = await getRecommendedResearch(user.id, 4);
+        } else {
+          // Otherwise, get general research
+          data = await getResearch(4, null);
+        }
         
         // Transform API response to card format
         const transformedCards = data.map((research, index) => ({
@@ -55,6 +65,7 @@ export default function Home() {
           author: research.author || research.user_name || "Investigador",
           description: research.description || "Sin descripción disponible",
           url: `/Investigaciones/${research.id}`,
+          similarity_score: research.similarity_score,
         }));
         
         setResearchCards(transformedCards);
@@ -66,7 +77,7 @@ export default function Home() {
     };
 
     fetchResearchData();
-  }, []);
+  }, [user?.id]);
 
   useEffect(() => {
     const fetchCoursesData = async () => {
@@ -243,6 +254,17 @@ export default function Home() {
               cardTextColor="#F0F0F0"
             />
           </div>
+          <div className="min-w-[260px] flex-1 basis-[280px]">
+            <CustomCard
+              cardImage="/images/tool4.png"
+              cardTitle="Grafo de recomendaciones"
+              cardDescription="Visualiza las conexiones entre tus visitas, likes y recomendaciones."
+              cardURL="/GrafoRecomendaciones"
+              cardBgColor="#E7473C"
+              cardTitleTextColor="#F0F0F0"
+              cardTextColor="#F0F0F0"
+            />
+          </div>
         </div>
       </section>
       <section className="flex flex-wrap items-stretch gap-10 px-20 py-10 bg-[#b62116] text-[#F0F0F0] cursesSection">
@@ -315,7 +337,9 @@ export default function Home() {
         </div>
       </section>
       <section className="px-20 py-10 toolsSection">
-        <h2 className="text-xl font-bold mb-5">Investigaciones Recomendadas</h2>
+        <h2 className="text-xl font-bold mb-5">
+          {user?.id ? "Investigaciones Para Ti" : "Investigaciones Destacadas"}
+        </h2>
         {loadingResearch ? (
           <Carousel
             opts={{
@@ -392,6 +416,12 @@ export default function Home() {
                           <p className="text-sm text-gray-600 line-clamp-3 mb-4 flex-1">
                             {truncateDescription(research.description)}
                           </p>
+                          
+                          {research.similarity_score && (
+                            <p className="text-xs text-gray-500 mb-4">
+                              Similitud: {(research.similarity_score * 100).toFixed(1)}%
+                            </p>
+                          )}
 
                           {/* Stats Footer */}
                           <div className="flex items-center justify-between pt-4 border-t border-gray-200">

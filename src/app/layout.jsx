@@ -9,6 +9,7 @@ import { CustomNavigationMenu } from "./components/NavigationMenu";
 export default function RootLayout({ children }) {
   const pathname = usePathname();
   const hideLayout = pathname.startsWith("/IniciarSesion") || pathname.startsWith("/Registrarse") || pathname.startsWith("/OlvideMiClave");
+  const hideFooter = hideLayout || pathname.startsWith("/GrafoRecomendaciones");
 
   return (
     <html lang="en">
@@ -16,7 +17,7 @@ export default function RootLayout({ children }) {
         <UserProvider>
           {!hideLayout && <CustomNavigationMenu />}
           {children}
-          {!hideLayout && <Footer />}
+          {!hideFooter && <Footer />}
         </UserProvider>
         <Toaster position="bottom-center" richColors  />
       </body>

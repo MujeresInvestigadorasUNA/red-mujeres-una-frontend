@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
+import { useUser } from "@/app/contexts/UserContext";
 import { SearchIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
@@ -17,7 +18,7 @@ import {
 } from "@/components/ui/select";
 import { iconClockwise, iconEye, iconHeart } from "@/app/assets/icons";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getResearch, getResearchById } from "@/lib/api/research";
+import { getResearch, getResearchById, getRelatedResearch } from "@/lib/api/research";
 
 const GRADIENTS = [
     "bg-gradient-to-br from-[#831d16] to-[#c2372d]",
@@ -77,6 +78,7 @@ const isValidImageUrl = (url) => {
 
 export default function Investigacion() {
     const params = useParams();
+    const { user } = useUser();
     const researchId = params.investigacion;
     
     const [currentResearch, setCurrentResearch] = useState(null);
@@ -92,17 +94,16 @@ export default function Investigacion() {
             try {
                 setLoading(true);
                 setLoadingRelated(true);
-                const [current, allResearch] = await Promise.all([
-                    getResearchById(researchId),
-                    getResearch(null),
-                ]);
+                const current = await getResearchById(researchId);
 
-                const currentId = current?.id != null ? String(current.id) : String(researchId);
-
-                const related = allResearch.filter((item) => String(item.id) !== currentId);
                 setCurrentResearch(current);
-                setRelatedResearch(related);
-                setDisplayedResearch(related);
+
+                // Fetch related research based on vector similarity
+                if (current?.id) {
+                    const related = await getRelatedResearch(current.id, 4);
+                    setRelatedResearch(related);
+                    setDisplayedResearch(related);
+                }
             } catch (error) {
                 console.error("Error fetching research data:", error);
             } finally {
@@ -114,7 +115,7 @@ export default function Investigacion() {
         if (researchId) {
             fetchResearchData();
         }
-    }, [researchId]);
+    }, [researchId, user?.id]);
 
     const applyFilter = (research, query) => {
         if (!query.trim()) {
@@ -279,9 +280,6 @@ export default function Investigacion() {
                                                             <h3 className="text-lg font-bold line-clamp-2 mb-2">
                                                                 {research.title || "Sin título"}
                                                             </h3>
-                                                            <p className="text-white/80 text-sm">
-                                                                {research.author || "Autor desconocido"}
-                                                            </p>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -289,8 +287,13 @@ export default function Investigacion() {
                                                 {/* Content Area */}
                                                 <div className="flex-1 px-6 py-3 flex flex-col gap-3">
                                                     <p className="text-gray-700 text-sm line-clamp-3">
-                                                        {truncateDescription(research.description, 100)}
+                                                        {truncateDescription(research.description || "Investigación recomendada por similitud de contenido", 100)}
                                                     </p>
+                                                    {research.similarity_score && (
+                                                        <p className="text-xs text-gray-500">
+                                                            Similitud: {(research.similarity_score * 100).toFixed(1)}%
+                                                        </p>
+                                                    )}
                                                 </div>
 
                                                 {/* Stats Footer */}

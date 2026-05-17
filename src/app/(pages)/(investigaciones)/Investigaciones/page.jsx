@@ -49,18 +49,35 @@ export default function Investigaciones() {
     const [filterType, setFilterType] = useState("");
     const [searchQuery, setSearchQuery] = useState("");
     const [likedResearch, setLikedResearch] = useState(new Set());
+    const [likesCounts, setLikesCounts] = useState({});
     const ITEMS_PER_PAGE = 6;
 
     useEffect(() => {
         const fetchResearch = async () => {
             setLoading(true);
-            const data = await getResearch(100);
+            const data = await getResearch(100, user?.id);
             setAllResearch(data);
+            
+            // Initialize liked research and likes counts from API response
+            const initialLiked = new Set();
+            const initialCounts = {};
+            
+            data.forEach((research) => {
+                // Handle null, boolean and string "true"/"false" values
+                const isLiked = research.is_liked === true || research.is_liked === "true";
+                if (isLiked) {
+                    initialLiked.add(research.id);
+                }
+                initialCounts[research.id] = parseInt(research.likes_count) || 0;
+            });
+            
+            setLikedResearch(initialLiked);
+            setLikesCounts(initialCounts);
             setDisplayedResearch(data.slice(0, ITEMS_PER_PAGE));
             setLoading(false);
         };
         fetchResearch();
-    }, []);
+    }, [user?.id]);
 
     const handleLoadMore = async () => {
         setLoadingMore(true);
@@ -123,28 +140,79 @@ export default function Investigaciones() {
             return;
         }
 
-        try {
-            const isLiked = likedResearch.has(researchId);
-            let response;
+        const isCurrentlyLiked = likedResearch.has(researchId);
+        const previousCount = likesCounts[researchId] || 0;
 
-            if (isLiked) {
+        // Optimistic update - update UI immediately
+        if (isCurrentlyLiked) {
+            // Remove like
+            setLikedResearch((prev) => {
+                const newSet = new Set(prev);
+                newSet.delete(researchId);
+                return newSet;
+            });
+            setLikesCounts((prev) => ({
+                ...prev,
+                [researchId]: previousCount - 1,
+            }));
+        } else {
+            // Add like
+            setLikedResearch((prev) => new Set(prev).add(researchId));
+            setLikesCounts((prev) => ({
+                ...prev,
+                [researchId]: previousCount + 1,
+            }));
+        }
+
+        // Make API call in background
+        try {
+            let response;
+            if (isCurrentlyLiked) {
                 response = await unlikeResearch(user.id, researchId);
-                if (response?.success) {
+            } else {
+                response = await likeResearch(user.id, researchId);
+            }
+
+            if (!response?.success) {
+                // Rollback on failure
+                if (isCurrentlyLiked) {
+                    setLikedResearch((prev) => new Set(prev).add(researchId));
+                    setLikesCounts((prev) => ({
+                        ...prev,
+                        [researchId]: previousCount,
+                    }));
+                } else {
                     setLikedResearch((prev) => {
                         const newSet = new Set(prev);
                         newSet.delete(researchId);
                         return newSet;
                     });
-                    toast.success("Dislike registrado");
+                    setLikesCounts((prev) => ({
+                        ...prev,
+                        [researchId]: previousCount,
+                    }));
                 }
-            } else {
-                response = await likeResearch(user.id, researchId);
-                if (response?.success) {
-                    setLikedResearch((prev) => new Set(prev).add(researchId));
-                    toast.success("Like registrado");
-                }
+                toast.error("Error al procesar el like");
             }
         } catch (error) {
+            // Rollback on error
+            if (isCurrentlyLiked) {
+                setLikedResearch((prev) => new Set(prev).add(researchId));
+                setLikesCounts((prev) => ({
+                    ...prev,
+                    [researchId]: previousCount,
+                }));
+            } else {
+                setLikedResearch((prev) => {
+                    const newSet = new Set(prev);
+                    newSet.delete(researchId);
+                    return newSet;
+                });
+                setLikesCounts((prev) => ({
+                    ...prev,
+                    [researchId]: previousCount,
+                }));
+            }
             toast.error("Error al procesar el like");
             console.error(error);
         }
@@ -336,7 +404,7 @@ export default function Investigaciones() {
                                                     <Heart 
                                                         className={`w-4 h-4 ${likedResearch.has(item.id) ? "fill-current text-red-500" : ""}`}
                                                     />
-                                                    <span className="text-xs">0</span>
+                                                    <span className="text-xs">{likesCounts[item.id] || 0}</span>
                                                 </button>
                                                 <div className="flex items-center gap-1 text-gray-600">
                                                     {iconEye({ size: 14 })}
