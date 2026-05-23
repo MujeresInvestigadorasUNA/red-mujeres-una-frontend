@@ -11,10 +11,12 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getResearch, getRecommendedResearch } from "@/lib/api/research";
+import { getResearch, getRecommendedResearch, likeResearch, unlikeResearch } from "@/lib/api/research";
 import { getResearchers } from "@/lib/api/forums";
 import { Card } from "@/components/ui/card";
-import { iconEye, iconHeart } from "@/app/assets/icons";
+import { iconEye } from "@/app/assets/icons";
+import { Heart } from "lucide-react";
+import { toast } from "sonner";
 import {
   FileText,
   ArrowRight,
@@ -56,7 +58,7 @@ function getInitials(name) {
 }
 
 
-function ResearchCard({ research, gradients, index, isRecommended = false }) {
+function ResearchCard({ research, gradients, index, isRecommended = false, isLiked = false, likesCount = 0, onLike }) {
   const [from, to] =
     gradients[
       (String(research.id || "").charCodeAt(0) || 0) % gradients.length
@@ -123,13 +125,16 @@ function ResearchCard({ research, gradients, index, isRecommended = false }) {
             {research.description}
           </p>
           <div className="flex items-center gap-3 pt-2.5 mt-2.5 border-t border-slate-100">
-            <div className="flex items-center gap-1 text-slate-400">
-              {iconHeart({ size: 12 })}
-              <span className="text-xs">{research.likes_count}</span>
-            </div>
+            <button
+              onClick={(e) => { e.preventDefault(); onLike && onLike(research.id); }}
+              className="flex items-center gap-1 text-slate-400 hover:text-red-500 transition-colors"
+            >
+              <Heart className={`w-3 h-3 ${isLiked ? "fill-current text-red-500" : ""}`} />
+              <span className="text-xs">{likesCount}</span>
+            </button>
             <div className="flex items-center gap-1 text-slate-400">
               {iconEye({ size: 12 })}
-              <span className="text-xs">{research.views_count}</span>
+              <span className="text-xs">{research.visits_count || 0}</span>
             </div>
           </div>
         </div>
@@ -206,11 +211,49 @@ export default function Home() {
   const [loadingAllResearch, setLoadingAllResearch] = useState(true);
   const [loadingRecommended, setLoadingRecommended] = useState(false);
   const [loadingForums, setLoadingForums] = useState(true);
+  const [likedResearch, setLikedResearch] = useState(new Set());
+  const [likesCounts, setLikesCounts] = useState({});
+
+  const handleLike = async (researchId) => {
+    if (!user) { toast.error("Debes iniciar sesión para dar like"); return; }
+    const isLiked = likedResearch.has(researchId);
+    const prev = likesCounts[researchId] || 0;
+
+    setLikedResearch((s) => {
+      const n = new Set(s);
+      isLiked ? n.delete(researchId) : n.add(researchId);
+      return n;
+    });
+    setLikesCounts((c) => ({ ...c, [researchId]: isLiked ? prev - 1 : prev + 1 }));
+
+    try {
+      const res = isLiked
+        ? await unlikeResearch(user.id, researchId)
+        : await likeResearch(user.id, researchId);
+      if (!res?.success) throw new Error();
+    } catch {
+      setLikedResearch((s) => {
+        const n = new Set(s);
+        isLiked ? n.add(researchId) : n.delete(researchId);
+        return n;
+      });
+      setLikesCounts((c) => ({ ...c, [researchId]: prev }));
+      toast.error("Error al procesar el like");
+    }
+  };
 
   useEffect(() => {
     const fetchAllResearch = async () => {
       try {
-        const data = await getResearch(6, null);
+        const data = await getResearch(6, user?.id || null);
+        const initialCounts = {};
+        const initialLiked = new Set();
+        data.forEach((r) => {
+          initialCounts[r.id] = parseInt(r.likes_count) || 0;
+          if (r.is_liked === true || r.is_liked === "true") initialLiked.add(r.id);
+        });
+        setLikesCounts((c) => ({ ...initialCounts, ...c }));
+        setLikedResearch((s) => new Set([...initialLiked, ...s]));
         setAllResearchCards(
           data.map((r) => ({
             id: r.id,
@@ -218,8 +261,8 @@ export default function Home() {
             author: r.author || r.user_name || "Investigadora",
             description: r.description || "Sin descripción disponible",
             url: `/Investigaciones/${r.id}`,
-            likes_count: r.likes_count || 0,
-            views_count: r.views_count || 0,
+            visits_count: r.visits_count || 0,
+            similarity_score: r.similarity_score,
           }))
         );
       } catch (e) {
@@ -229,7 +272,7 @@ export default function Home() {
       }
     };
     fetchAllResearch();
-  }, []);
+  }, [user?.id]);
 
   useEffect(() => {
     if (!user?.id) {
@@ -241,6 +284,18 @@ export default function Home() {
       setLoadingRecommended(true);
       try {
         const data = await getRecommendedResearch(user.id, 6);
+        const initialCounts = {};
+        const initialLiked = new Set();
+        data.forEach((r) => {
+          initialCounts[r.id] = parseInt(r.likes_count) || 0;
+          if (r.is_liked === true || r.is_liked === "true") initialLiked.add(r.id);
+        });
+        setLikesCounts((c) => ({ ...c, ...initialCounts }));
+        setLikedResearch((s) => {
+          const n = new Set(s);
+          initialLiked.forEach((id) => n.add(id));
+          return n;
+        });
         setRecommendedCards(
           data.map((r) => ({
             id: r.id,
@@ -249,8 +304,7 @@ export default function Home() {
             description: r.description || "Sin descripción disponible",
             url: `/Investigaciones/${r.id}`,
             similarity_score: r.similarity_score,
-            likes_count: r.likes_count || 0,
-            views_count: r.views_count || 0,
+            visits_count: r.visits_count || 0,
           }))
         );
       } catch (e) {
@@ -414,6 +468,9 @@ export default function Home() {
                   gradients={RECOMMENDED_GRADIENTS}
                   index={i}
                   isRecommended
+                  isLiked={likedResearch.has(research.id)}
+                  likesCount={likesCounts[research.id] ?? 0}
+                  onLike={handleLike}
                 />
               ))}
             </div>
@@ -464,6 +521,9 @@ export default function Home() {
                 research={research}
                 gradients={COVER_GRADIENTS}
                 index={i}
+                isLiked={likedResearch.has(research.id)}
+                likesCount={likesCounts[research.id] ?? 0}
+                onLike={handleLike}
               />
             ))}
           </div>
