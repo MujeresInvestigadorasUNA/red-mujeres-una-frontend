@@ -178,7 +178,7 @@ export function CustomNavigationMenu() {
                                     Foros
                                 </NavigationMenuTrigger>
                                 <NavigationMenuContent>
-                                    <ul className="grid w-[300px] gap-4">
+                                    <ul className="grid w-75 gap-4">
                                         <li>
                                             <NavigationMenuLink asChild>
                                                 <Link href="/Foros" onClick={closeDesktopMenu}>
@@ -209,7 +209,7 @@ export function CustomNavigationMenu() {
                                     Investigaciones
                                 </NavigationMenuTrigger>
                                 <NavigationMenuContent>
-                                    <ul className="grid w-[300px] gap-4">
+                                    <ul className="grid w-75 gap-4">
                                         <li>
                                             <NavigationMenuLink asChild>
                                                 <Link href="/Investigaciones" onClick={closeDesktopMenu}>
@@ -227,6 +227,22 @@ export function CustomNavigationMenu() {
                                                     </div>
                                                 </Link>
                                             </NavigationMenuLink>
+                                            <NavigationMenuLink asChild>
+                                                <Link href="/MapaDispersion" onClick={closeDesktopMenu}>
+                                                    <div className="font-medium">Mapa de Dispersión 2D</div>
+                                                    <div className="text-muted-foreground">
+                                                        Gráfico de dispersión por similitud semántica con zoom y pan.
+                                                    </div>
+                                                </Link>
+                                            </NavigationMenuLink>
+                                            <NavigationMenuLink asChild>
+                                                <Link href="/MapaDispersion3D" onClick={closeDesktopMenu}>
+                                                    <div className="font-medium">Mapa de Dispersión 3D</div>
+                                                    <div className="text-muted-foreground">
+                                                        Vista 3D interactiva con mayor fidelidad semántica (3 componentes PCA).
+                                                    </div>
+                                                </Link>
+                                            </NavigationMenuLink>
                                         </li>
                                     </ul>
                                 </NavigationMenuContent>
@@ -240,7 +256,7 @@ export function CustomNavigationMenu() {
                                     Cursos
                                 </NavigationMenuTrigger>
                                 <NavigationMenuContent>
-                                    <ul className="grid w-[300px] gap-4">
+                                    <ul className="grid w-75 gap-4">
                                         <li>
                                             <NavigationMenuLink asChild>
                                                 <Link href="/Cursos" onClick={closeDesktopMenu}>
@@ -278,7 +294,7 @@ export function CustomNavigationMenu() {
                         </Link>
                     </div>
                 )}
-                <div className="flex items-center justify-end gap-2 min-w-[160px]">
+                <div className="flex items-center justify-end gap-2 min-w-40">
                     <button
                         type="button"
                         className="rounded bg-[#b62116] px-3 py-1 text-sm font-medium shadow md:hidden"
@@ -348,6 +364,8 @@ export function CustomNavigationMenu() {
                             <Link href="/MiForo" onClick={() => setMobileMenuOpen(false)}>Mi Foro</Link>
                             <Link href="/Investigaciones" onClick={() => setMobileMenuOpen(false)}>Explorar Investigaciones</Link>
                             <Link href="/MisInvestigaciones" onClick={() => setMobileMenuOpen(false)}>Mis Investigaciones</Link>
+                            <Link href="/MapaDispersion" onClick={() => setMobileMenuOpen(false)}>Mapa Dispersión 2D</Link>
+                            <Link href="/MapaDispersion3D" onClick={() => setMobileMenuOpen(false)}>Mapa Dispersión 3D</Link>
                             <Link href="/Cursos" onClick={() => setMobileMenuOpen(false)}>Explorar Cursos</Link>
                             <Link href="/MisCursos" onClick={() => setMobileMenuOpen(false)}>Mis Cursos</Link>
                         </>

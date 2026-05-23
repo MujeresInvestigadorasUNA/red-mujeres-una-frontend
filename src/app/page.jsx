@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useUser } from "@/app/contexts/UserContext";
@@ -11,471 +10,569 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import CustomCard from "./components/CustomCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getResearch, getRecommendedResearch } from "@/lib/api/research";
-import { getCourses } from "@/lib/api/courses";
 import { getResearchers } from "@/lib/api/forums";
 import { Card } from "@/components/ui/card";
 import { iconEye, iconHeart } from "@/app/assets/icons";
+import {
+  FileText,
+  ArrowRight,
+  Sparkles,
+  Users,
+  BookOpen,
+  ScrollText,
+  Network,
+  Map,
+  Box,
+} from "lucide-react";
 
-const truncateDescription = (text, limit = 60) => {
-    if (!text) return "Sin descripción disponible";
-    if (text.length <= limit) return text;
-    return text.substring(0, limit) + "...";
-};
-
-const RESEARCH_PLACEHOLDER_IMAGES = [
-  "/images/curso1.png",
-  "/images/curso2.png",
-  "/images/curso3.png",
+const COVER_GRADIENTS = [
+  ["#831d16", "#c2372d"],
+  ["#c2372d", "#E7473C"],
+  ["#E7473C", "#FF6B55"],
+  ["#831d16", "#E7473C"],
+  ["#c2372d", "#FF6B55"],
+  ["#E7473C", "#831d16"],
 ];
 
-const COURSE_PLACEHOLDER_IMAGE = "/images/curso1.png";
-const FORUM_PLACEHOLDER_IMAGE = "/images/curso1.png";
+const RECOMMENDED_GRADIENTS = [
+  ["#1e3a8a", "#2563eb"],
+  ["#1d4ed8", "#3b82f6"],
+  ["#2563eb", "#60a5fa"],
+  ["#1e3a8a", "#3b82f6"],
+  ["#1d4ed8", "#60a5fa"],
+  ["#3b82f6", "#1e3a8a"],
+];
 
-const RESEARCH_PLACEHOLDER_DESCRIPTION = "Explora esta investigación destacada y accede a recursos académicos de calidad.";
+function getInitials(name) {
+  if (!name) return "?";
+  return name
+    .split(" ")
+    .map((n) => n[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+}
+
+
+function ResearchCard({ research, gradients, index, isRecommended = false }) {
+  const [from, to] =
+    gradients[
+      (String(research.id || "").charCodeAt(0) || 0) % gradients.length
+    ];
+  const initials = getInitials(research.author);
+
+  return (
+    <Link
+      href={research.url}
+      className="block group animate-fadeInUp"
+      style={{ animationDelay: `${index * 70}ms`, animationFillMode: "both" }}
+    >
+      <Card
+        className={`p-0 overflow-hidden border shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col h-full gap-0 ${
+          isRecommended
+            ? "border-blue-100 hover:border-blue-300"
+            : "border-slate-100 hover:border-[#E7473C]/30"
+        }`}
+      >
+        <div
+          className="relative h-28 shrink-0 flex items-center justify-center overflow-hidden"
+          style={{ background: `linear-gradient(135deg, ${from}, ${to})` }}
+        >
+          <div className="absolute -right-6 -top-6 w-24 h-24 rounded-full bg-white/10" />
+          <div className="absolute -left-3 -bottom-4 w-16 h-16 rounded-full bg-white/10" />
+          <FileText
+            className="w-10 h-10 text-white/25 group-hover:text-white/35 transition-all duration-300 group-hover:scale-110"
+            strokeWidth={1}
+          />
+          {isRecommended && (
+            <span className="absolute top-2 left-2 flex items-center gap-1 bg-white/20 backdrop-blur-sm text-white text-[10px] font-semibold px-2 py-0.5 rounded-full">
+              <Sparkles className="w-3 h-3" />
+              IA
+            </span>
+          )}
+          {research.similarity_score && (
+            <span className="absolute bottom-2 right-3 text-[10px] text-white/70 font-mono">
+              {(research.similarity_score * 100).toFixed(0)}% similitud
+            </span>
+          )}
+        </div>
+        <div className="flex flex-col flex-1 p-3.5">
+          <div className="flex items-center gap-2 mb-2">
+            <span
+              className="inline-flex items-center justify-center w-5 h-5 rounded-full text-white text-[9px] font-bold shrink-0"
+              style={{ background: `linear-gradient(135deg, ${from}, ${to})` }}
+            >
+              {initials}
+            </span>
+            <span className="text-xs text-slate-500 truncate">
+              {research.author}
+            </span>
+          </div>
+          <h3
+            className={`text-sm font-semibold text-slate-800 line-clamp-2 mb-1.5 leading-snug transition-colors duration-200 ${
+              isRecommended
+                ? "group-hover:text-blue-700"
+                : "group-hover:text-[#831d16]"
+            }`}
+          >
+            {research.title}
+          </h3>
+          <p className="text-xs text-slate-500 line-clamp-2 flex-1 leading-relaxed">
+            {research.description}
+          </p>
+          <div className="flex items-center gap-3 pt-2.5 mt-2.5 border-t border-slate-100">
+            <div className="flex items-center gap-1 text-slate-400">
+              {iconHeart({ size: 12 })}
+              <span className="text-xs">{research.likes_count}</span>
+            </div>
+            <div className="flex items-center gap-1 text-slate-400">
+              {iconEye({ size: 12 })}
+              <span className="text-xs">{research.views_count}</span>
+            </div>
+          </div>
+        </div>
+      </Card>
+    </Link>
+  );
+}
+
+function ResearchSkeletonGrid({ count = 6 }) {
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {[...Array(count)].map((_, i) => (
+        <Card
+          key={i}
+          className="p-0 overflow-hidden border border-slate-100 shadow-sm flex flex-col gap-0"
+        >
+          <Skeleton className="h-28 w-full rounded-none" />
+          <div className="p-3.5 flex flex-col gap-2">
+            <div className="flex items-center gap-2">
+              <Skeleton className="w-5 h-5 rounded-full" />
+              <Skeleton className="h-3 w-24" />
+            </div>
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-4/5" />
+            <Skeleton className="h-3 w-3/4 mt-1" />
+          </div>
+        </Card>
+      ))}
+    </div>
+  );
+}
+
+function RecommendedLoadingState() {
+  return (
+    <div className="space-y-5">
+      <div className="flex items-center gap-3 py-4">
+        <div className="relative shrink-0">
+          <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+            <Sparkles className="w-5 h-5 text-blue-500 animate-pulse" />
+          </div>
+          <div className="absolute inset-0 rounded-full bg-blue-300 animate-ping opacity-25" />
+        </div>
+        <p className="text-sm text-slate-500 animate-pulse">
+          Analizando tus interacciones con IA...
+        </p>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {[...Array(3)].map((_, i) => (
+          <Card
+            key={i}
+            className="p-0 overflow-hidden border border-blue-100 shadow-sm flex flex-col gap-0"
+          >
+            <Skeleton className="h-28 w-full rounded-none bg-blue-50" />
+            <div className="p-3.5 flex flex-col gap-2">
+              <div className="flex items-center gap-2">
+                <Skeleton className="w-5 h-5 rounded-full bg-blue-50" />
+                <Skeleton className="h-3 w-24 bg-blue-50" />
+              </div>
+              <Skeleton className="h-4 w-full bg-blue-50" />
+              <Skeleton className="h-4 w-4/5 bg-blue-50" />
+            </div>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function Home() {
   const { user } = useUser();
-  const [researchCards, setResearchCards] = useState([]);
-  const [courseCards, setCourseCards] = useState([]);
+  const [allResearchCards, setAllResearchCards] = useState([]);
+  const [recommendedCards, setRecommendedCards] = useState([]);
   const [forumCards, setForumCards] = useState([]);
-  const [loadingResearch, setLoadingResearch] = useState(true);
-  const [loadingCourses, setLoadingCourses] = useState(true);
+  const [loadingAllResearch, setLoadingAllResearch] = useState(true);
+  const [loadingRecommended, setLoadingRecommended] = useState(false);
   const [loadingForums, setLoadingForums] = useState(true);
 
   useEffect(() => {
-    const fetchResearchData = async () => {
+    const fetchAllResearch = async () => {
       try {
-        let data;
-        
-        // If user is logged in, get personalized recommendations
-        if (user?.id) {
-          data = await getRecommendedResearch(user.id, 4);
-        } else {
-          // Otherwise, get general research
-          data = await getResearch(4, null);
-        }
-        
-        // Transform API response to card format
-        const transformedCards = data.map((research, index) => ({
-          id: research.id,
-          title: research.title,
-          author: research.author || research.user_name || "Investigador",
-          description: research.description || "Sin descripción disponible",
-          url: `/Investigaciones/${research.id}`,
-          similarity_score: research.similarity_score,
-        }));
-        
-        setResearchCards(transformedCards);
-      } catch (error) {
-        console.error("Failed to fetch research:", error);
+        const data = await getResearch(6, null);
+        setAllResearchCards(
+          data.map((r) => ({
+            id: r.id,
+            title: r.title,
+            author: r.author || r.user_name || "Investigadora",
+            description: r.description || "Sin descripción disponible",
+            url: `/Investigaciones/${r.id}`,
+            likes_count: r.likes_count || 0,
+            views_count: r.views_count || 0,
+          }))
+        );
+      } catch (e) {
+        console.error(e);
       } finally {
-        setLoadingResearch(false);
+        setLoadingAllResearch(false);
       }
     };
-
-    fetchResearchData();
-  }, [user?.id]);
+    fetchAllResearch();
+  }, []);
 
   useEffect(() => {
-    const fetchCoursesData = async () => {
+    if (!user?.id) {
+      setRecommendedCards([]);
+      setLoadingRecommended(false);
+      return;
+    }
+    const fetchRecommended = async () => {
+      setLoadingRecommended(true);
       try {
-        const data = await getCourses();
-        
-        // Transform API response to card format
-        const transformedCards = data.map((course) => ({
-          id: course.id,
-          image: course.photo || COURSE_PLACEHOLDER_IMAGE,
-          title: course.title,
-          description: course.description || "Accede a este curso y mejora tus habilidades académicas.",
-          url: `/Cursos/${course.id}`,
-          bgColor: "#F0F0F0",
-          titleTextColor: "#831d16",
-          textColor: "#E7473C",
-          withImage: false
-        }));
-        
-        setCourseCards(transformedCards);
-      } catch (error) {
-        console.error("Failed to fetch courses:", error);
+        const data = await getRecommendedResearch(user.id, 6);
+        setRecommendedCards(
+          data.map((r) => ({
+            id: r.id,
+            title: r.title,
+            author: r.author || r.user_name || "Investigadora",
+            description: r.description || "Sin descripción disponible",
+            url: `/Investigaciones/${r.id}`,
+            similarity_score: r.similarity_score,
+            likes_count: r.likes_count || 0,
+            views_count: r.views_count || 0,
+          }))
+        );
+      } catch (e) {
+        console.error(e);
       } finally {
-        setLoadingCourses(false);
+        setLoadingRecommended(false);
       }
     };
-
-    fetchCoursesData();
-  }, []);
+    fetchRecommended();
+  }, [user?.id]);
 
   useEffect(() => {
     const fetchForumsData = async () => {
       try {
         const data = await getResearchers();
-        
-        // Transform API response to card format
-        const transformedCards = data.map((researcher) => ({
-          id: researcher.id,
-          image: researcher.photo || FORUM_PLACEHOLDER_IMAGE,
-          title: `${researcher.first_name} ${researcher.last_name}`,
-          description: researcher.user_description || researcher.user_profession || "Investigadora destacada de la Red.",
-          url: `/Foros/${researcher.id}`
-        }));
-        
-        setForumCards(transformedCards);
-      } catch (error) {
-        console.error("Failed to fetch forums:", error);
+        setForumCards(
+          data.map((r) => ({
+            id: r.id,
+            photo: r.photo || null,
+            title: `${r.first_name} ${r.last_name}`,
+            url: `/Foros/${r.id}`,
+          }))
+        );
+      } catch (e) {
+        console.error(e);
       } finally {
         setLoadingForums(false);
       }
     };
-
     fetchForumsData();
   }, []);
 
   return (
-    <main className="flex-grow h-[100%]">
-      <section className="bg-[#E7473C] px-10 py-10 text-[#F0F0F0] min-h-[calc(100vh-80px)] mainSection">
-        <h1 className="text-2xl font-bold px-10">
-          Red de Mujeres Académicas UNA
-        </h1>
-        <p className="mt-3 px-10">
-          Únete a la Red de Mujeres Académicas, una plataforma para visibilizar logros,
-          compartir conocimientos y conectar con la comunidad. Publica cursos, participa
-          en foros y accede a información clave con tecnología avanzada e inteligencia artificial.
-        </p>
-        <div className="mt-10 px-10">
-          <h2 className="text-xl font-bold mt-10 mb-5">Foros Recomendados</h2>
-          {loadingForums ? (
-            <Carousel
-              opts={{
-                align: "start",
-              }}
-              className="w-full"
+    <main className="grow h-full">
+
+      {/* ── Hero ─────────────────────────────────────────────────── */}
+      <section className="bg-[#E7473C] px-6 md:px-16 xl:px-20 py-5 text-[#F0F0F0] mainSection">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <h1 className="text-xl font-bold leading-tight">
+              Red de Mujeres Académicas UNA
+            </h1>
+            <p className="mt-1 text-xs text-white/80 max-w-lg">
+              Plataforma para visibilizar logros, compartir conocimiento y
+              conectar con la comunidad académica — potenciada con IA.
+            </p>
+          </div>
+          <div className="flex gap-2 shrink-0">
+            <Link
+              href="/Investigaciones"
+              className="text-xs bg-white/15 hover:bg-white/25 text-white px-3 py-1.5 rounded-lg transition-colors"
             >
-              <CarouselContent>
-                {[...Array(4)].map((_, index) => (
-                  <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/4">
-                    <div className="p-4">
-                      <Skeleton className="h-48 w-full rounded-lg mb-3" />
-                      <Skeleton className="h-6 w-3/4 mb-2" />
-                      <Skeleton className="h-4 w-full mb-2" />
-                      <Skeleton className="h-4 w-5/6" />
-                    </div>
-                  </CarouselItem>
-                ))}
-              </CarouselContent>
-              <CarouselPrevious className="hover:cursor-pointer border-[#F0F0F0] bg-[#831d16] text-[#F0F0F0] shadow-md hover:bg-[#6f1913]"/>
-              <CarouselNext className="hover:cursor-pointer border-[#F0F0F0] bg-[#831d16] text-[#F0F0F0] shadow-md hover:bg-[#6f1913]"/>
-            </Carousel>
-          ) : forumCards.length > 0 ? (
-            <Carousel
-              opts={{
-                align: "start",
-              }}
-              className="w-full"
+              Investigaciones
+            </Link>
+            <Link
+              href="/Foros"
+              className="text-xs bg-[#831d16] hover:bg-[#6f1913] text-white px-3 py-1.5 rounded-lg transition-colors"
             >
-              <CarouselContent>
-                {forumCards.map((forum, index) => (
-                  <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/4">
-                    <CustomCard
-                      cardImage={forum.image}
-                      cardTitle={forum.title}
-                      cardDescription={forum.description}
-                      cardURL={forum.url}
-                    />
-                  </CarouselItem>
-                ))}
-              </CarouselContent>
-              <CarouselPrevious className="hover:cursor-pointer border-[#F0F0F0] bg-[#831d16] text-[#F0F0F0] shadow-md hover:bg-[#6f1913]"/>
-              <CarouselNext className="hover:cursor-pointer border-[#F0F0F0] bg-[#831d16] text-[#F0F0F0] shadow-md hover:bg-[#6f1913]"/>
-            </Carousel>
-          ) : (
-            <div className="w-full flex items-center justify-center py-12">
-              <div className="text-center max-w-md">
-                <div className="flex justify-center mb-4">
-                  <div className="p-3 bg-[#831d16] rounded-full">
-                    <svg
-                      className="w-10 h-10 text-[#F0F0F0]"
-                      fill="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-                    </svg>
-                  </div>
-                </div>
-                <h3 className="text-lg font-semibold text-[#F0F0F0] mb-2">
-                  No hay foros disponibles
-                </h3>
-                <p className="text-gray-200 text-sm">
-                  Los foros serán mostrados aquí cuando estén disponibles.
-                </p>
-              </div>
-            </div>
-          )}
-        </div>
-      </section>
-      <section className="px-20 py-10 toolsSection">
-        <h2 className="text-[#E7473C] text-xl font-bold">Herramientas de la Red</h2>
-        <div className="mt-4 flex flex-wrap gap-5">
-          <div className="min-w-[260px] flex-1 basis-[280px]">
-            <CustomCard
-              cardImage="/images/tool1.png"
-              cardTitle="Foros de discusión"
-              cardDescription="Revisa los foros con toda la información de
-              cada una de las mujeres de la Red."
-              cardURL="/Foros"
-              cardBgColor="#E7473C"
-              cardTitleTextColor="#F0F0F0"
-              cardTextColor="#F0F0F0"
-            />
-          </div>
-          <div className="min-w-[260px] flex-1 basis-[280px]">
-            <CustomCard
-              cardImage="/images/tool2.png"
-              cardTitle="Cursos en línea"
-              cardDescription="Accede a una variedad de cursos en línea diseñados
-              para empoderar a las mujeres académicas."
-              cardURL="/Cursos"
-              cardBgColor="#E7473C"
-              cardTitleTextColor="#F0F0F0"
-              cardTextColor="#F0F0F0"
-            />
-          </div>
-          <div className="min-w-[260px] flex-1 basis-[280px]">
-            <CustomCard
-              cardImage="/images/tool3.png"
-              cardTitle="Recursos de investigación"
-              cardDescription="Explora una colección de recursos de investigación
-              para apoyar tu trabajo académico."
-              cardURL="/Investigaciones"
-              cardBgColor="#E7473C"
-              cardTitleTextColor="#F0F0F0"
-              cardTextColor="#F0F0F0"
-            />
-          </div>
-          <div className="min-w-[260px] flex-1 basis-[280px]">
-            <CustomCard
-              cardImage="/images/tool4.png"
-              cardTitle="Grafo de recomendaciones"
-              cardDescription="Visualiza las conexiones entre tus visitas, likes y recomendaciones."
-              cardURL="/GrafoRecomendaciones"
-              cardBgColor="#E7473C"
-              cardTitleTextColor="#F0F0F0"
-              cardTextColor="#F0F0F0"
-            />
+              Foros
+            </Link>
           </div>
         </div>
       </section>
-      <section className="flex flex-wrap items-stretch gap-10 px-20 py-10 bg-[#b62116] text-[#F0F0F0] cursesSection">
-        <div className="flex min-w-[280px] flex-1 basis-[320px] flex-col gap-2">
-          <h2 className="text-xl font-bold mb-2">Cursos Recomendados</h2>
-          {loadingCourses ? (
-            <>
-              {[...Array(5)].map((_, index) => (
-                <div key={index} className="p-3 rounded">
-                  <Skeleton className="h-6 w-3/4 mb-2" />
-                  <Skeleton className="h-4 w-full mb-2" />
-                  <Skeleton className="h-4 w-5/6" />
-                </div>
-              ))}
-            </>
-          ) : courseCards.length > 0 ? (
-            courseCards.map((course) => (
-              <CustomCard
-                key={course.id}
-                cardTitle={course.title}
-                cardDescription={course.description}
-                cardURL={course.url}
-                cardBgColor={course.bgColor}
-                cardTitleTextColor={course.titleTextColor}
-                cardTextColor={course.textColor}
-                cardWithImage={course.withImage}
-              />
-            ))
-          ) : (
-            <div className="w-full flex items-center justify-center py-12">
-              <div className="text-center max-w-md">
-                <div className="flex justify-center mb-4">
-                  <div className="p-3 bg-[#831d16] rounded-full">
-                    <svg
-                      className="w-10 h-10 text-[#F0F0F0]"
-                      fill="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path d="M6 4a2 2 0 012-2h8a2 2 0 012 2v16a1 1 0 01-1.55.894L12 17.69l-4.45 3.104A1 1 0 016 20V4z" />
-                    </svg>
-                  </div>
-                </div>
-                <h3 className="text-lg font-semibold text-[#F0F0F0] mb-2">
-                  No hay cursos disponibles
-                </h3>
-                <p className="text-gray-200 text-sm">
-                  Los cursos serán mostrados aquí cuando estén disponibles.
-                </p>
-              </div>
-            </div>
-          )}
+
+      {/* ── Foros de Investigadoras ───────────────────────────────── */}
+      <section className="px-6 md:px-16 xl:px-20 py-5 border-b border-slate-100 bg-white">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-base font-semibold text-slate-800">
+            Foros de Investigadoras
+          </h2>
           <Link
-            href="/Cursos"
-            className="bg-[#E7473C] text-white text-center px-4 py-2 rounded
-            shadow"
+            href="/Foros"
+            className="text-xs text-[#E7473C] hover:text-[#831d16] flex items-center gap-1 transition-colors"
           >
-            Ver Todos
+            Ver todos <ArrowRight className="w-3 h-3" />
           </Link>
         </div>
-        <div className="min-w-[280px] flex-1 basis-[420px] self-stretch rounded bg-white p-3 shadow-md">
-          <div className="relative h-full min-h-[320px] w-full overflow-hidden rounded">
-            <Image
-              src="/images/cursos.png"
-              alt="Curso 1"
-              fill
-              sizes="(min-width: 1024px) 50vw, 100vw"
-              className="object-cover bg-[#fff]"
-            />
+
+        {loadingForums ? (
+          <div className="flex gap-4 overflow-hidden">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="flex flex-col items-center gap-2 shrink-0 w-20">
+                <Skeleton className="w-14 h-14 rounded-full" />
+                <Skeleton className="h-3 w-16" />
+                <Skeleton className="h-3 w-12" />
+              </div>
+            ))}
           </div>
-        </div>
-      </section>
-      <section className="px-20 py-10 toolsSection">
-        <h2 className="text-xl font-bold mb-5">
-          {user?.id ? "Investigaciones Para Ti" : "Investigaciones Destacadas"}
-        </h2>
-        {loadingResearch ? (
-          <Carousel
-            opts={{
-              align: "start",
-            }}
-            className="w-full"
-          >
-            <CarouselContent>
-              {[...Array(2)].map((_, index) => {
-                return (
-                  <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/2">
-                    <div className="p-4">
-                      <div className="bg-gray-200 p-6 rounded-lg flex-shrink-0">
-                        <Skeleton className="h-6 w-3/4 mb-2 bg-gray-300" />
-                        <Skeleton className="h-4 w-1/2 bg-gray-300" />
-                      </div>
-                      <div className="mt-4">
-                        <Skeleton className="h-4 w-full mb-2" />
-                        <Skeleton className="h-4 w-5/6 mb-2" />
-                        <Skeleton className="h-4 w-4/5 mb-2" />
-                        <div className="flex gap-4 pt-2">
-                          <Skeleton className="h-4 w-8" />
-                          <Skeleton className="h-4 w-8" />
-                        </div>
-                      </div>
+        ) : forumCards.length > 0 ? (
+          <Carousel opts={{ align: "start", dragFree: true }} className="w-full">
+            <CarouselContent className="-ml-2">
+              {forumCards.map((forum, i) => (
+                <CarouselItem key={i} className="pl-2 basis-auto">
+                  <Link
+                    href={forum.url}
+                    className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-slate-50 transition-colors w-19 group"
+                  >
+                    <div className="w-14 h-14 rounded-full overflow-hidden shrink-0 ring-2 ring-transparent group-hover:ring-[#E7473C]/40 transition-all duration-200 bg-[#E7473C]/10 flex items-center justify-center">
+                      {forum.photo ? (
+                        <img
+                          src={forum.photo}
+                          alt={forum.title}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <span className="text-[#E7473C] font-bold text-base">
+                          {getInitials(forum.title)}
+                        </span>
+                      )}
                     </div>
-                  </CarouselItem>
-                );
-              })}
+                    <span className="text-[11px] text-slate-600 font-medium text-center line-clamp-2 leading-tight group-hover:text-[#831d16] transition-colors">
+                      {forum.title}
+                    </span>
+                  </Link>
+                </CarouselItem>
+              ))}
             </CarouselContent>
-            <CarouselPrevious className="hover:cursor-pointer"/>
-            <CarouselNext className="hover:cursor-pointer"/>
-          </Carousel>
-        ) : researchCards.length > 0 ? (
-          <Carousel
-            opts={{
-              align: "start",
-            }}
-            className="w-full"
-          >
-            <CarouselContent>
-              {researchCards.map((research) => {
-                const gradients = [
-                  "bg-gradient-to-br from-[#831d16] to-[#c2372d]",
-                  "bg-gradient-to-br from-[#E7473C] to-[#FF6B55]",
-                  "bg-gradient-to-br from-[#c2372d] to-[#FF6B55]",
-                  "bg-gradient-to-br from-[#831d16] to-[#E7473C]",
-                  "bg-gradient-to-r from-[#E7473C] to-[#c2372d]",
-                  "bg-gradient-to-r from-[#FF6B55] to-[#831d16]",
-                ];
-                const gradientIndex = (String(research.id || '').charCodeAt(0) || 0) % gradients.length;
-                const gradient = gradients[gradientIndex];
-                
-                return (
-                  <CarouselItem key={research.id} className="md:basis-1/2 lg:basis-1/2">
-                    <Link href={research.url} className="block">
-                      <Card
-                        className="p-0 overflow-hidden rounded-lg border-none shadow
-                        hover:shadow-lg hover:cursor-pointer transition-all duration-300
-                        flex flex-col h-full gap-0"
-                      >
-                        {/* Gradient Header */}
-                        <div className={`${gradient} p-6 text-white flex-shrink-0`}>
-                          <h3 className="text-lg font-bold line-clamp-2 mb-2">
-                            {research.title}
-                          </h3>
-                          <p className="text-sm opacity-90 line-clamp-1">
-                            {research.author}
-                          </p>
-                        </div>
-
-                        {/* Content */}
-                        <div className="flex-1 p-5 flex flex-col">
-                          <p className="text-sm text-gray-600 line-clamp-3 mb-4 flex-1">
-                            {truncateDescription(research.description)}
-                          </p>
-                          
-                          {research.similarity_score && (
-                            <p className="text-xs text-gray-500 mb-4">
-                              Similitud: {(research.similarity_score * 100).toFixed(1)}%
-                            </p>
-                          )}
-
-                          {/* Stats Footer */}
-                          <div className="flex items-center justify-between pt-4 border-t border-gray-200">
-                            <div className="flex gap-4 text-sm">
-                              <div className="flex items-center gap-1 text-gray-600">
-                                {iconHeart({ size: 14 })}
-                                <span className="text-xs">0</span>
-                              </div>
-                              <div className="flex items-center gap-1 text-gray-600">
-                                {iconEye({ size: 14 })}
-                                <span className="text-xs">0</span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </Card>
-                    </Link>
-                  </CarouselItem>
-                );
-              })}
-            </CarouselContent>
-            <CarouselPrevious className="hover:cursor-pointer"/>
-            <CarouselNext className="hover:cursor-pointer"/>
+            <CarouselPrevious className="hover:cursor-pointer -left-4 border-slate-200 bg-white text-slate-600 shadow-sm hover:bg-slate-50 h-7 w-7" />
+            <CarouselNext className="hover:cursor-pointer -right-4 border-slate-200 bg-white text-slate-600 shadow-sm hover:bg-slate-50 h-7 w-7" />
           </Carousel>
         ) : (
-          <div className="w-full flex items-center justify-center py-12">
-            <div className="text-center max-w-md">
-              <div className="flex justify-center mb-4">
-                <div className="p-4 bg-gray-100 rounded-full">
-                  <svg
-                    className="w-12 h-12 text-gray-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={1.5}
-                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                    />
-                  </svg>
-                </div>
+          <p className="text-slate-400 text-xs py-3">
+            No hay foros disponibles en este momento.
+          </p>
+        )}
+      </section>
+
+      {/* ── Recomendadas Para Ti (solo usuarios logueados) ────────── */}
+      {user?.id && (
+        <section className="px-6 md:px-16 xl:px-20 py-8 bg-linear-to-br from-blue-50 to-indigo-50/60 border-b border-blue-100">
+          <div className="flex items-end justify-between mb-5">
+            <div className="flex items-start gap-2.5">
+              <div className="p-1.5 bg-blue-100 rounded-lg shrink-0 mt-0.5">
+                <Sparkles className="w-4 h-4 text-blue-600" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-700 mb-2">
+              <div>
+                <h2 className="text-base font-bold text-slate-800">
+                  Recomendadas Para Ti
+                </h2>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Seleccionadas por IA según tus visitas e interacciones.
+                </p>
+              </div>
+            </div>
+            <Link
+              href="/Investigaciones"
+              className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1 shrink-0 font-medium transition-colors"
+            >
+              Ver todas <ArrowRight className="w-3 h-3" />
+            </Link>
+          </div>
+
+          {loadingRecommended ? (
+            <RecommendedLoadingState />
+          ) : recommendedCards.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {recommendedCards.map((research, i) => (
+                <ResearchCard
+                  key={research.id}
+                  research={research}
+                  gradients={RECOMMENDED_GRADIENTS}
+                  index={i}
+                  isRecommended
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="flex items-center gap-4 py-6">
+              <div className="p-3 bg-blue-100 rounded-full shrink-0">
+                <Sparkles className="w-6 h-6 text-blue-400" strokeWidth={1.5} />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-slate-700">
+                  Sin recomendaciones aún
+                </p>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Explora investigaciones para que la IA aprenda tus intereses.
+                </p>
+              </div>
+            </div>
+          )}
+        </section>
+      )}
+
+      {/* ── Investigaciones Recientes ─────────────────────────────── */}
+      <section className="px-6 md:px-16 xl:px-20 py-8 toolsSection">
+        <div className="flex items-end justify-between mb-5">
+          <div>
+            <h2 className="text-base font-bold text-slate-800">
+              Investigaciones Recientes
+            </h2>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Explora las investigaciones más recientes de la Red.
+            </p>
+          </div>
+          <Link
+            href="/Investigaciones"
+            className="text-xs text-[#E7473C] hover:text-[#831d16] flex items-center gap-1 shrink-0 font-medium transition-colors"
+          >
+            Ver todas <ArrowRight className="w-3 h-3" />
+          </Link>
+        </div>
+
+        {loadingAllResearch ? (
+          <ResearchSkeletonGrid count={6} />
+        ) : allResearchCards.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {allResearchCards.map((research, i) => (
+              <ResearchCard
+                key={research.id}
+                research={research}
+                gradients={COVER_GRADIENTS}
+                index={i}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center max-w-xs">
+              <div className="p-3 bg-slate-100 rounded-full inline-flex mb-3">
+                <FileText className="w-8 h-8 text-slate-400" strokeWidth={1.5} />
+              </div>
+              <h3 className="text-sm font-semibold text-slate-700 mb-1">
                 No hay investigaciones disponibles
               </h3>
-              <p className="text-gray-500 text-sm">
-                Las investigaciones serán mostradas aquí cuando estén disponibles.
+              <p className="text-slate-500 text-xs">
+                Las investigaciones aparecerán aquí cuando estén disponibles.
               </p>
             </div>
           </div>
         )}
       </section>
+
+      {/* ── Herramientas de la Red ────────────────────────────────── */}
+      <section className="px-6 md:px-16 xl:px-20 py-8 toolsSection bg-slate-50 border-y border-slate-100">
+        <h2 className="text-[#E7473C] text-base font-bold mb-4">
+          Herramientas de la Red
+        </h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          {[
+            {
+              icon: Users,
+              title: "Foros",
+              desc: "Conoce a las investigadoras de la Red.",
+              url: "/Foros",
+              from: "#831d16",
+              to: "#E7473C",
+            },
+            {
+              icon: BookOpen,
+              title: "Cursos",
+              desc: "Cursos para mujeres académicas.",
+              url: "/Cursos",
+              from: "#92400e",
+              to: "#f59e0b",
+            },
+            {
+              icon: ScrollText,
+              title: "Investigaciones",
+              desc: "Colección completa de investigaciones.",
+              url: "/Investigaciones",
+              from: "#065f46",
+              to: "#10b981",
+            },
+            {
+              icon: Network,
+              title: "Grafo IA",
+              desc: "Visualiza conexiones y recomendaciones.",
+              url: "/GrafoRecomendaciones",
+              from: "#4c1d95",
+              to: "#8b5cf6",
+            },
+            {
+              icon: Map,
+              title: "Mapa 2D",
+              desc: "Distribución semántica de investigaciones.",
+              url: "/MapaDispersion",
+              from: "#1e3a8a",
+              to: "#3b82f6",
+            },
+            {
+              icon: Box,
+              title: "Mapa 3D",
+              desc: "Espacio semántico en tres dimensiones.",
+              url: "/MapaDispersion3D",
+              from: "#0e7490",
+              to: "#06b6d4",
+            },
+          ].map(({ icon: Icon, title, desc, url, from, to }) => (
+            <Link key={url} href={url} className="block group">
+              <Card className="p-0 overflow-hidden border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col h-full gap-0 hover:border-transparent">
+                <div
+                  className="relative h-20 shrink-0 flex items-center justify-center overflow-hidden"
+                  style={{ background: `linear-gradient(135deg, ${from}, ${to})` }}
+                >
+                  <div className="absolute -right-4 -top-4 w-16 h-16 rounded-full bg-white/10" />
+                  <div className="absolute -left-2 -bottom-3 w-12 h-12 rounded-full bg-white/10" />
+                  <Icon
+                    className="w-8 h-8 text-white/75 group-hover:text-white transition-all duration-300 group-hover:scale-110"
+                    strokeWidth={1.5}
+                  />
+                </div>
+                <div className="p-3 flex flex-col flex-1">
+                  <h3 className="text-xs font-semibold text-slate-800 mb-1 group-hover:text-slate-900 transition-colors">
+                    {title}
+                  </h3>
+                  <p className="text-[11px] text-slate-500 leading-relaxed flex-1 line-clamp-2">
+                    {desc}
+                  </p>
+                  <div
+                    className="flex items-center gap-0.5 mt-2 text-[10px] font-medium"
+                    style={{ color: from }}
+                  >
+                    Explorar <ArrowRight className="w-2.5 h-2.5" />
+                  </div>
+                </div>
+              </Card>
+            </Link>
+          ))}
+        </div>
+      </section>
+
     </main>
   );
 }

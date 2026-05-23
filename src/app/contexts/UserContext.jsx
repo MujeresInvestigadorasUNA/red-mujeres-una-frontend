@@ -1,5 +1,6 @@
 "use client";
 import React, { createContext, useState, useContext, useEffect } from 'react';
+import { getUserInfo } from "@/lib/api/auth";
 
 const UserContext = createContext();
 
@@ -11,11 +12,55 @@ export const UserProvider = ({ children }) => {
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
     const storedToken = localStorage.getItem('access_token');
-    if (storedUser && storedUser.length > 0 && storedToken) {
+
+    if (storedUser && storedUser.length > 0) {
+      if (!storedToken) {
+        logout("/IniciarSesion");
+        return;
+      }
+
       setUser(JSON.parse(storedUser));
       setAccessToken(storedToken);
     }
   }, []);
+
+  useEffect(() => {
+    if (!user) {
+      return;
+    }
+
+    if (!accessToken) {
+      logout("/IniciarSesion");
+      return;
+    }
+
+    const userId = user?.id ?? user?.user_id;
+    if (!userId) {
+      return;
+    }
+
+    let isMounted = true;
+    const validateToken = async () => {
+      try {
+        const response = await getUserInfo({ user_id: userId, access_token: accessToken });
+        if (!isMounted) {
+          return;
+        }
+
+        if (response.status === 401 || response.status === 403) {
+          logout("/IniciarSesion");
+        }
+      } catch (error) {
+        console.error("Error validating access token:", error);
+      }
+    };
+
+    validateToken();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [user, accessToken]);
 
   // Function to update user data
   const setUserData = (userData) => {

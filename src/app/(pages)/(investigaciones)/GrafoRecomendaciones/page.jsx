@@ -6,7 +6,7 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { Line, OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
 import { useUser } from "@/app/contexts/UserContext";
-import { getRecommendationGraph } from "@/lib/api/research";
+import { getRecommendationGraph, getResearchPdfUrl } from "@/lib/api/research";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -296,6 +296,24 @@ export default function GrafoRecomendaciones() {
     });
   };
 
+  const handleOpenDocument = async (researchId) => {
+    if (!researchId) {
+      return;
+    }
+
+    try {
+      const result = await getResearchPdfUrl(researchId);
+      if (!result?.inlineUrl) {
+        console.error("No PDF url available for research", researchId);
+        return;
+      }
+
+      window.open(result.inlineUrl, "_blank", "noopener,noreferrer");
+    } catch (error) {
+      console.error("Error fetching research PDF url:", error);
+    }
+  };
+
   const metaEntries = graphData?.meta ? Object.entries(graphData.meta) : [];
   const nodes = graphData?.nodes ?? [];
   const edges = graphData?.edges ?? [];
@@ -513,14 +531,13 @@ export default function GrafoRecomendaciones() {
                           </div>
                           <div className="flex flex-col gap-2 pt-2">
                             {nodeMap[selectedNodeId]?.research_link ? (
-                              <a
-                                className="text-xs text-[#831d16] hover:underline"
-                                href={nodeMap[selectedNodeId].research_link}
-                                target="_blank"
-                                rel="noreferrer"
+                              <button
+                                type="button"
+                                className="text-xs text-[#831d16] hover:underline text-left"
+                                onClick={() => handleOpenDocument(nodeMap[selectedNodeId]?.research_id)}
                               >
                                 Abrir documento
-                              </a>
+                              </button>
                             ) : null}
                             {nodeMap[selectedNodeId]?.vector_link ? (
                               <a

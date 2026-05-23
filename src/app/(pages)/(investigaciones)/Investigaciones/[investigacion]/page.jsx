@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams } from "next/navigation";
 import { useUser } from "@/app/contexts/UserContext";
 import { SearchIcon } from "lucide-react";
@@ -18,7 +18,13 @@ import {
 } from "@/components/ui/select";
 import { iconClockwise, iconEye, iconHeart } from "@/app/assets/icons";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getResearch, getResearchById, getRelatedResearch } from "@/lib/api/research";
+import {
+    getResearch,
+    getResearchById,
+    getRelatedResearch,
+    getResearchPdfUrl,
+    registerResearchVisit,
+} from "@/lib/api/research";
 
 const GRADIENTS = [
     "bg-gradient-to-br from-[#831d16] to-[#c2372d]",
@@ -35,40 +41,6 @@ const truncateDescription = (text, limit = 100) => {
 
 const PLACEHOLDER_DESCRIPTION = "Exploración detallada de esta investigación académica de la Red de Mujeres Académicas.";
 
-const hasValidSasToken = () => {
-    return !!process.env.NEXT_PUBLIC_BLOB_CONTAINER_PDF_SAS_TOKEN;
-};
-
-const appendSasTokenIfNeeded = (url) => {
-    if (!url) return null;
-
-    const lowerUrl = url.toLowerCase();
-    const isAzureBlob = lowerUrl.includes("blob.core.windows.net") || lowerUrl.includes("dfs.core.windows.net");
-    const hasSasToken = lowerUrl.includes("sig=") || lowerUrl.includes("se=") || lowerUrl.includes("sp=");
-
-    if (isAzureBlob && !hasSasToken && hasValidSasToken()) {
-        const token = process.env.NEXT_PUBLIC_BLOB_CONTAINER_PDF_SAS_TOKEN;
-        const separator = url.includes("?") ? "&" : "?";
-        return `${url}${separator}${token}`;
-    }
-
-    return url;
-};
-
-const canDisplayPdfInline = (url) => {
-    if (!url) return false;
-
-    const lowerUrl = url.toLowerCase();
-    const isAzureBlob = lowerUrl.includes("blob.core.windows.net") || lowerUrl.includes("dfs.core.windows.net");
-    const hasSasToken = lowerUrl.includes("sig=") || lowerUrl.includes("se=") || lowerUrl.includes("sp=");
-
-    if (isAzureBlob && !hasSasToken) {
-        return hasValidSasToken();
-    }
-
-    return true;
-};
-
 const isValidImageUrl = (url) => {
     if (!url) return false;
     const imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg"];
@@ -82,12 +54,19 @@ export default function Investigacion() {
     const researchId = params.investigacion;
     
     const [currentResearch, setCurrentResearch] = useState(null);
+    const [pdfLinks, setPdfLinks] = useState({ inlineUrl: null, downloadUrl: null });
     const [relatedResearch, setRelatedResearch] = useState([]);
     const [displayedResearch, setDisplayedResearch] = useState([]);
     const [filterType, setFilterType] = useState("");
     const [searchQuery, setSearchQuery] = useState("");
     const [loading, setLoading] = useState(true);
     const [loadingRelated, setLoadingRelated] = useState(true);
+    const refreshTimeoutRef = useRef(null);
+    const pdfContainerRef = useRef(null);
+    const refreshBufferMs = 3 * 60 * 1000;
+    const fallbackRefreshMs = 25 * 60 * 1000;
+    const viewerUrl = pdfLinks.inlineUrl;
+    const downloadUrl = pdfLinks.downloadUrl;
 
     useEffect(() => {
         const fetchResearchData = async () => {
@@ -113,9 +92,78 @@ export default function Investigacion() {
         };
         
         if (researchId) {
+            setPdfLinks({ inlineUrl: null, downloadUrl: null });
             fetchResearchData();
         }
+
+        if (researchId && user?.id) {
+            registerResearchVisit(user.id, researchId);
+        }
     }, [researchId, user?.id]);
+
+    useEffect(() => {
+        let isMounted = true;
+
+        const clearRefreshTimeout = () => {
+            if (refreshTimeoutRef.current) {
+                clearTimeout(refreshTimeoutRef.current);
+                refreshTimeoutRef.current = null;
+            }
+        };
+
+        const scheduleRefresh = (expiresAt, refreshFn) => {
+            clearRefreshTimeout();
+            if (!expiresAt) {
+                refreshTimeoutRef.current = setTimeout(refreshFn, fallbackRefreshMs);
+                return;
+            }
+
+            const expiresMs = new Date(expiresAt).getTime();
+            if (!Number.isFinite(expiresMs)) {
+                refreshTimeoutRef.current = setTimeout(refreshFn, fallbackRefreshMs);
+                return;
+            }
+
+            const delayMs = Math.max(expiresMs - Date.now() - refreshBufferMs, 1000);
+            refreshTimeoutRef.current = setTimeout(refreshFn, delayMs);
+        };
+
+        const refreshPdfUrl = async () => {
+            if (!researchId || !currentResearch?.research_link) {
+                return;
+            }
+
+            const result = await getResearchPdfUrl(researchId);
+            if (!isMounted) {
+                return;
+            }
+
+            if (result?.inlineUrl || result?.downloadUrl) {
+                setPdfLinks({
+                    inlineUrl: result.inlineUrl || null,
+                    downloadUrl: result.downloadUrl || result.inlineUrl || null,
+                });
+            } else {
+                setPdfLinks({ inlineUrl: null, downloadUrl: null });
+            }
+
+            scheduleRefresh(result?.expiresAt, refreshPdfUrl);
+        };
+
+        if (!researchId || !currentResearch?.research_link) {
+            clearRefreshTimeout();
+            setPdfLinks({ inlineUrl: null, downloadUrl: null });
+            return undefined;
+        }
+
+        refreshPdfUrl();
+
+        return () => {
+            isMounted = false;
+            clearRefreshTimeout();
+        };
+    }, [researchId, currentResearch?.research_link]);
+
 
     const applyFilter = (research, query) => {
         if (!query.trim()) {
@@ -151,6 +199,19 @@ export default function Investigacion() {
         setDisplayedResearch(relatedResearch);
     };
 
+    const handleFullscreen = () => {
+        const container = pdfContainerRef.current;
+        if (!container) {
+            return;
+        }
+
+        if (container.requestFullscreen) {
+            container.requestFullscreen();
+        } else if (container.webkitRequestFullscreen) {
+            container.webkitRequestFullscreen();
+        }
+    };
+
     return (
         <main className="flex-grow px-20 py-10 h-[100%]">
             {loading ? (
@@ -164,34 +225,47 @@ export default function Investigacion() {
                 </div>
             ) : currentResearch ? (
                 <>
+                    <div className="flex items-center justify-between gap-3 flex-wrap">
                     <h1 className="text-2xl font-bold">{currentResearch.title}</h1>
+                    <div className="flex items-center justify-between gap-3 flex-wrap">
+                            {viewerUrl ? (
+                                <Button
+                                    type="button"
+                                    onClick={handleFullscreen}
+                                    className="bg-[#fff] hover:bg-[#f0f0f0] text-[#831d16]"
+                                >
+                                    Ver pantalla completa
+                                </Button>
+                            ) : null}
+                            {downloadUrl ? (
+                                <Button asChild className="bg-[#E7473C] hover:bg-[#831d16] text-white">
+                                    <a href={downloadUrl} download>
+                                        Descargar PDF
+                                    </a>
+                                </Button>
+                            ) : null}
+                        </div>
+                        </div>
                     <p className="mt-3 text-gray-700">
                         {currentResearch.description || PLACEHOLDER_DESCRIPTION}
                     </p>
-                    <section className="mt-8 space-y-4">
-                        <div className="flex items-center justify-between gap-3 flex-wrap">
-                            {currentResearch.research_link && (
-                                <Button asChild className="bg-[#E7473C] hover:bg-[#831d16] text-white">
-                                    <a href={appendSasTokenIfNeeded(currentResearch.research_link)} target="_blank" rel="noreferrer">
-                                        Abrir PDF
-                                    </a>
-                                </Button>
-                            )}
-                        </div>
-                        {currentResearch.research_link && canDisplayPdfInline(currentResearch.research_link) ? (
-                            <embed
-                                src={appendSasTokenIfNeeded(currentResearch.research_link)}
-                                type="application/pdf"
-                                title={`${currentResearch.title} - PDF de investigación`}
-                                className="w-full h-[90vh] rounded-lg border border-gray-200 bg-white"
-                            />
+                    
+                    <section className="mt-4 space-y-4">
+                        {viewerUrl ? (
+                            <div ref={pdfContainerRef} className="w-full">
+                                <iframe
+                                    src={viewerUrl}
+                                    title={`${currentResearch.title} - PDF de investigación`}
+                                    className="w-full h-[90vh] rounded-lg border border-gray-200 bg-white"
+                                />
+                            </div>
                         ) : currentResearch.research_link ? (
                             <div className="rounded-lg border border-dashed border-gray-300 bg-gray-50 px-6 py-10 text-center text-gray-600 space-y-3">
                                 <p className="font-medium text-gray-700">
-                                    El archivo no puede mostrarse embebido porque el almacenamiento no permite acceso público.
+                                    No se pudo obtener un enlace seguro para este documento.
                                 </p>
                                 <p className="text-sm">
-                                    Abre el documento en una nueva pestaña o solicita una URL firmada para la vista previa.
+                                    Reintenta en unos minutos o recarga la pagina.
                                 </p>
                             </div>
                         ) : (

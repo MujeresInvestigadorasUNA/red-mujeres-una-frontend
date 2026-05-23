@@ -278,6 +278,124 @@ export async function unlikeResearch(user_id, research_id) {
   }
 }
 
+export async function registerResearchVisit(user_id, research_id) {
+  const tokenFromStorage = typeof window !== "undefined"
+    ? localStorage.getItem("access_token")
+    : null;
+
+  const headers = {
+    Accept: "application/json",
+  };
+
+  if (tokenFromStorage) {
+    headers.Authorization = `Bearer ${tokenFromStorage}`;
+  }
+
+  try {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/research/user/${user_id}/visits/${research_id}`,
+      {
+        method: "POST",
+        headers,
+      }
+    );
+
+    if (!response.ok) {
+      console.error("Error registering research visit:", response.statusText);
+      return null;
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error registering research visit:", error);
+    return null;
+  }
+}
+
+export async function getResearchPdfUrl(research_id) {
+  const tokenFromStorage = typeof window !== "undefined"
+    ? localStorage.getItem("access_token")
+    : null;
+
+  const headers = {
+    Accept: "application/json",
+  };
+
+  if (tokenFromStorage) {
+    headers.Authorization = `Bearer ${tokenFromStorage}`;
+  }
+
+  try {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/research/${research_id}/pdf-url`,
+      {
+        method: "GET",
+        headers,
+      }
+    );
+
+    if (!response.ok) {
+      console.error("Error fetching research PDF url:", response.statusText);
+      return null;
+    }
+
+    const data = await response.json();
+
+    if (typeof data === "string") {
+      return { inlineUrl: data, downloadUrl: null, expiresAt: null };
+    }
+
+    const inlineUrl = data?.inline_url || data?.inlineUrl || data?.url || data?.pdf_url || data?.research_link || null;
+    const downloadUrl = data?.download_url || data?.downloadUrl || null;
+
+    if (!inlineUrl && !downloadUrl) {
+      return null;
+    }
+
+    return {
+      inlineUrl,
+      downloadUrl: downloadUrl || inlineUrl,
+      expiresAt: data?.expires_at || data?.expiresAt || null,
+    };
+  } catch (error) {
+    console.error("Error fetching research PDF url:", error);
+    return null;
+  }
+}
+
+export async function getEmbeddingMap({ dim = 2, top_k = 3, min_score = 0.6 } = {}) {
+  const tokenFromStorage = typeof window !== "undefined"
+    ? localStorage.getItem("access_token")
+    : null;
+
+  const headers = { Accept: "application/json" };
+  if (tokenFromStorage) {
+    headers.Authorization = `Bearer ${tokenFromStorage}`;
+  }
+
+  try {
+    const params = new URLSearchParams();
+    params.set("dim", String(dim));
+    params.set("top_k", String(top_k));
+    params.set("min_score", String(min_score));
+
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/research/embedding-map?${params.toString()}`,
+      { method: "GET", headers }
+    );
+
+    if (!response.ok) {
+      console.error("Error fetching embedding map:", response.statusText);
+      return null;
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching embedding map:", error);
+    return null;
+  }
+}
+
 export async function getRelatedResearch(research_id, limit = 4) {
   const tokenFromStorage = typeof window !== "undefined"
     ? localStorage.getItem("access_token")

@@ -1,7 +1,7 @@
 "use client";
 import { capitalizeWords } from "@/app/assets/utils";
 import { getUser } from "@/lib/api/forums";
-import { getResearchByUserId } from "@/lib/api/research";
+import { getResearchByUserId, getResearchPdfUrl } from "@/lib/api/research";
 import { getCoursesByUserId } from "@/lib/api/courses";
 import Image from "next/image";
 import Link from "next/link";
@@ -107,6 +107,26 @@ export default function forum({ params }) {
             setLoadingCourses(false);
         }
     }
+
+    const handleOpenResearch = async (researchId) => {
+        if (!researchId) {
+            toast.error("No se pudo abrir la investigacion.");
+            return;
+        }
+
+        try {
+            const result = await getResearchPdfUrl(researchId);
+            if (!result?.inlineUrl) {
+                toast.error("No se pudo obtener el documento.");
+                return;
+            }
+
+            window.open(result.inlineUrl, "_blank", "noopener,noreferrer");
+        } catch (error) {
+            console.error("Error fetching research PDF url:", error);
+            toast.error("No se pudo abrir el documento.");
+        }
+    };
 
     const applyResearchFilter = (researchData, query) => {
         if (!query.trim()) {
@@ -302,14 +322,13 @@ export default function forum({ params }) {
                                 <div className="rounded border border-gray-300 p-3">
                                     <h3 className="text-md font-bold mb-2">{item.title}</h3>
                                     {item.research_link && (
-                                        <a 
-                                            href={item.research_link}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
+                                        <button
+                                            type="button"
+                                            onClick={() => handleOpenResearch(item.id || item.research_id)}
                                             className="text-blue-600 hover:underline break-words text-sm"
                                         >
                                             Ver Investigación
-                                        </a>
+                                        </button>
                                     )}
                                 </div>
                             </div>

@@ -9,7 +9,7 @@ import { CustomNavigationMenu } from "./components/NavigationMenu";
 export default function RootLayout({ children }) {
   const pathname = usePathname();
   const hideLayout = pathname.startsWith("/IniciarSesion") || pathname.startsWith("/Registrarse") || pathname.startsWith("/OlvideMiClave");
-  const hideFooter = hideLayout || pathname.startsWith("/GrafoRecomendaciones");
+  const hideFooter = hideLayout || pathname.startsWith("/GrafoRecomendaciones") || pathname.startsWith("/MapaDispersion3D") || pathname.startsWith("/MapaDispersion");
 
   return (
     <html lang="en">

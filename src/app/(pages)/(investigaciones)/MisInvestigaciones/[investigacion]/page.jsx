@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
-import { getResearchById, updateResearch } from "@/lib/api/research";
+import { useUser } from "@/app/contexts/UserContext";
+import { getResearchById, getResearchPdfUrl, registerResearchVisit, updateResearch } from "@/lib/api/research";
 
 const PLACEHOLDER_IMAGES = [
     "/images/curso1.png",
@@ -18,40 +19,6 @@ const PLACEHOLDER_IMAGES = [
 ];
 
 const PLACEHOLDER_DESCRIPTION = "Exploración detallada de esta investigación académica de la Red de Mujeres Académicas.";
-
-const hasValidSasToken = () => {
-    return !!process.env.NEXT_PUBLIC_BLOB_CONTAINER_PDF_SAS_TOKEN;
-};
-
-const appendSasTokenIfNeeded = (url) => {
-    if (!url) return null;
-
-    const lowerUrl = url.toLowerCase();
-    const isAzureBlob = lowerUrl.includes("blob.core.windows.net") || lowerUrl.includes("dfs.core.windows.net");
-    const hasSasToken = lowerUrl.includes("sig=") || lowerUrl.includes("se=") || lowerUrl.includes("sp=");
-
-    if (isAzureBlob && !hasSasToken && hasValidSasToken()) {
-        const token = process.env.NEXT_PUBLIC_BLOB_CONTAINER_PDF_SAS_TOKEN;
-        const separator = url.includes("?") ? "&" : "?";
-        return `${url}${separator}${token}`;
-    }
-
-    return url;
-};
-
-const canDisplayPdfInline = (url) => {
-    if (!url) return false;
-
-    const lowerUrl = url.toLowerCase();
-    const isAzureBlob = lowerUrl.includes("blob.core.windows.net") || lowerUrl.includes("dfs.core.windows.net");
-    const hasSasToken = lowerUrl.includes("sig=") || lowerUrl.includes("se=") || lowerUrl.includes("sp=");
-
-    if (isAzureBlob && !hasSasToken) {
-        return hasValidSasToken();
-    }
-
-    return true;
-};
 
 const isValidImageUrl = (url) => {
     if (!url) return false;
@@ -63,12 +30,19 @@ const isValidImageUrl = (url) => {
 export default function Investigacion() {
     const params = useParams();
     const researchId = useMemo(() => params.investigacion, [params.investigacion]);
+    const { user } = useUser();
 
     const [currentResearch, setCurrentResearch] = useState(null);
+    const [pdfLinks, setPdfLinks] = useState({ inlineUrl: null, downloadUrl: null });
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const refreshTimeoutRef = useRef(null);
+    const refreshBufferMs = 3 * 60 * 1000;
+    const fallbackRefreshMs = 25 * 60 * 1000;
+    const viewerUrl = pdfLinks.inlineUrl;
+    const downloadUrl = pdfLinks.downloadUrl;
 
     useEffect(() => {
         const fetchResearch = async () => {
@@ -91,8 +65,81 @@ export default function Investigacion() {
             }
         };
 
+        setPdfLinks({ inlineUrl: null, downloadUrl: null });
         fetchResearch();
     }, [researchId]);
+
+    useEffect(() => {
+        let isMounted = true;
+
+        const clearRefreshTimeout = () => {
+            if (refreshTimeoutRef.current) {
+                clearTimeout(refreshTimeoutRef.current);
+                refreshTimeoutRef.current = null;
+            }
+        };
+
+        const scheduleRefresh = (expiresAt, refreshFn) => {
+            clearRefreshTimeout();
+            if (!expiresAt) {
+                refreshTimeoutRef.current = setTimeout(refreshFn, fallbackRefreshMs);
+                return;
+            }
+
+            const expiresMs = new Date(expiresAt).getTime();
+            if (!Number.isFinite(expiresMs)) {
+                refreshTimeoutRef.current = setTimeout(refreshFn, fallbackRefreshMs);
+                return;
+            }
+
+            const delayMs = Math.max(expiresMs - Date.now() - refreshBufferMs, 1000);
+            refreshTimeoutRef.current = setTimeout(refreshFn, delayMs);
+        };
+
+        const refreshPdfUrl = async () => {
+            if (!researchId || !currentResearch?.research_link) {
+                return;
+            }
+
+            const result = await getResearchPdfUrl(researchId);
+            if (!isMounted) {
+                return;
+            }
+
+            if (result?.inlineUrl || result?.downloadUrl) {
+                setPdfLinks({
+                    inlineUrl: result.inlineUrl || null,
+                    downloadUrl: result.downloadUrl || result.inlineUrl || null,
+                });
+            } else {
+                setPdfLinks({ inlineUrl: null, downloadUrl: null });
+            }
+
+            scheduleRefresh(result?.expiresAt, refreshPdfUrl);
+        };
+
+        if (!researchId || !currentResearch?.research_link) {
+            clearRefreshTimeout();
+            setPdfLinks({ inlineUrl: null, downloadUrl: null });
+            return undefined;
+        }
+
+        refreshPdfUrl();
+
+        return () => {
+            isMounted = false;
+            clearRefreshTimeout();
+        };
+    }, [researchId, currentResearch?.research_link]);
+
+
+    useEffect(() => {
+        if (!researchId || !user?.id) {
+            return;
+        }
+
+        registerResearchVisit(user.id, researchId);
+    }, [researchId, user?.id]);
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -198,28 +245,27 @@ export default function Investigacion() {
                     <section className="mt-8 space-y-4">
                         <div className="flex items-center justify-between gap-3 flex-wrap">
                             <h2 className="text-2xl font-bold">Documento de investigación</h2>
-                            {currentResearch.research_link && (
+                            {downloadUrl ? (
                                 <Button asChild className="bg-[#E7473C] hover:bg-[#831d16] text-white">
-                                    <a href={currentResearch.research_link} target="_blank" rel="noreferrer">
-                                        Abrir PDF
+                                    <a href={downloadUrl} download>
+                                        Descargar PDF
                                     </a>
                                 </Button>
-                            )}
+                            ) : null}
                         </div>
-                        {currentResearch.research_link && canDisplayPdfInline(currentResearch.research_link) ? (
-                            <embed
-                                src={appendSasTokenIfNeeded(currentResearch.research_link)}
-                                type="application/pdf"
+                        {viewerUrl ? (
+                            <iframe
+                                src={viewerUrl}
                                 title={`${currentResearch.title} - PDF de investigación`}
                                 className="w-full h-[90vh] rounded-lg border border-gray-200 bg-white"
                             />
                         ) : currentResearch.research_link ? (
                             <div className="rounded-lg border border-dashed border-gray-300 bg-gray-50 px-6 py-10 text-center text-gray-600 space-y-3">
                                 <p className="font-medium text-gray-700">
-                                    El archivo no puede mostrarse embebido porque el almacenamiento no permite acceso público.
+                                    No se pudo obtener un enlace seguro para este documento.
                                 </p>
                                 <p className="text-sm">
-                                    Abre el documento en una nueva pestaña o solicita una URL firmada para la vista previa.
+                                    Reintenta en unos minutos o recarga la pagina.
                                 </p>
                             </div>
                         ) : (
