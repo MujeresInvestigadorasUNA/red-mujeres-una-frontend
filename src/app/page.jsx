@@ -68,11 +68,11 @@ function ResearchCard({ research, gradients, index, isRecommended = false, isLik
   return (
     <Link
       href={research.url}
-      className="block group animate-fadeInUp"
+      className="flex flex-col flex-1 group animate-fadeInUp min-w-0"
       style={{ animationDelay: `${index * 70}ms`, animationFillMode: "both" }}
     >
       <Card
-        className={`p-0 overflow-hidden border shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col h-full gap-0 ${
+        className={`p-0 overflow-hidden border shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col flex-1 gap-0 ${
           isRecommended
             ? "border-blue-100 hover:border-blue-300"
             : "border-slate-100 hover:border-[#E7473C]/30"
@@ -92,11 +92,6 @@ function ResearchCard({ research, gradients, index, isRecommended = false, isLik
             <span className="absolute top-2 left-2 flex items-center gap-1 bg-white/20 backdrop-blur-sm text-white text-[10px] font-semibold px-2 py-0.5 rounded-full">
               <Sparkles className="w-3 h-3" />
               IA
-            </span>
-          )}
-          {research.similarity_score && (
-            <span className="absolute bottom-2 right-3 text-[10px] text-white/70 font-mono">
-              {(research.similarity_score * 100).toFixed(0)}% similitud
             </span>
           )}
         </div>
@@ -124,6 +119,15 @@ function ResearchCard({ research, gradients, index, isRecommended = false, isLik
           <p className="text-xs text-slate-500 line-clamp-2 flex-1 leading-relaxed">
             {research.description}
           </p>
+          {isRecommended && (
+            <div className="flex items-center gap-1.5 mt-2 px-2 py-1 rounded-md bg-blue-50 border border-blue-100">
+              <Sparkles className="w-3 h-3 text-blue-500 shrink-0" />
+              <span className="text-[11px] text-blue-700 font-medium leading-tight">
+                Según tus gustos, esto te puede gustar
+                {research.similarity_score ? ` en un ${(research.similarity_score * 100).toFixed(0)}%` : ""}
+              </span>
+            </div>
+          )}
           <div className="flex items-center gap-3 pt-2.5 mt-2.5 border-t border-slate-100">
             <button
               onClick={(e) => { e.preventDefault(); onLike && onLike(research.id); }}
@@ -169,11 +173,11 @@ function ResearchSkeletonGrid({ count = 6 }) {
 
 function RecommendedLoadingState() {
   return (
-    <div className="space-y-5">
-      <div className="flex items-center gap-3 py-4">
+    <div className="space-y-4">
+      <div className="flex items-center gap-3 py-2">
         <div className="relative shrink-0">
-          <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-            <Sparkles className="w-5 h-5 text-blue-500 animate-pulse" />
+          <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+            <Sparkles className="w-4 h-4 text-blue-500 animate-pulse" />
           </div>
           <div className="absolute inset-0 rounded-full bg-blue-300 animate-ping opacity-25" />
         </div>
@@ -181,11 +185,11 @@ function RecommendedLoadingState() {
           Analizando tus interacciones con IA...
         </p>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {[...Array(3)].map((_, i) => (
+      <div className="flex gap-4 overflow-hidden">
+        {[...Array(4)].map((_, i) => (
           <Card
             key={i}
-            className="p-0 overflow-hidden border border-blue-100 shadow-sm flex flex-col gap-0"
+            className="p-0 overflow-hidden border border-blue-100 shadow-sm flex flex-col gap-0 shrink-0 w-64"
           >
             <Skeleton className="h-28 w-full rounded-none bg-blue-50" />
             <div className="p-3.5 flex flex-col gap-2">
@@ -460,20 +464,25 @@ export default function Home() {
           {loadingRecommended ? (
             <RecommendedLoadingState />
           ) : recommendedCards.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {recommendedCards.map((research, i) => (
-                <ResearchCard
-                  key={research.id}
-                  research={research}
-                  gradients={RECOMMENDED_GRADIENTS}
-                  index={i}
-                  isRecommended
-                  isLiked={likedResearch.has(research.id)}
-                  likesCount={likesCounts[research.id] ?? 0}
-                  onLike={handleLike}
-                />
-              ))}
-            </div>
+            <Carousel opts={{ align: "start", dragFree: true }} className="w-full">
+              <CarouselContent className="-ml-3">
+                {recommendedCards.map((research, i) => (
+                  <CarouselItem key={research.id} className="pl-3 basis-70 sm:basis-75 flex flex-col">
+                    <ResearchCard
+                      research={research}
+                      gradients={RECOMMENDED_GRADIENTS}
+                      index={i}
+                      isRecommended
+                      isLiked={likedResearch.has(research.id)}
+                      likesCount={likesCounts[research.id] ?? 0}
+                      onLike={handleLike}
+                    />
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious className="hover:cursor-pointer -left-4 border-blue-200 bg-white text-blue-600 shadow-sm hover:bg-blue-50 h-7 w-7" />
+              <CarouselNext className="hover:cursor-pointer -right-4 border-blue-200 bg-white text-blue-600 shadow-sm hover:bg-blue-50 h-7 w-7" />
+            </Carousel>
           ) : (
             <div className="flex items-center gap-4 py-6">
               <div className="p-3 bg-blue-100 rounded-full shrink-0">

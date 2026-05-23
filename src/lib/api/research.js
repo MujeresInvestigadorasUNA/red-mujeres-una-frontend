@@ -396,7 +396,7 @@ export async function getEmbeddingMap({ dim = 2, top_k = 3, min_score = 0.6 } = 
   }
 }
 
-export async function getRelatedResearch(research_id, limit = 4) {
+export async function getRelatedResearch(research_id, limit = 4, viewer_user_id = null) {
   const tokenFromStorage = typeof window !== "undefined"
     ? localStorage.getItem("access_token")
     : null;
@@ -410,7 +410,9 @@ export async function getRelatedResearch(research_id, limit = 4) {
   }
 
   try {
-    const url = `${process.env.NEXT_PUBLIC_API_URL}/research/user/${research_id}/related-from-interactions?limit=${limit}`;
+    const params = new URLSearchParams({ limit });
+    if (viewer_user_id) params.set("viewer_user_id", viewer_user_id);
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/research/${research_id}/related?${params}`;
 
     const response = await fetch(url, {
       method: "GET",

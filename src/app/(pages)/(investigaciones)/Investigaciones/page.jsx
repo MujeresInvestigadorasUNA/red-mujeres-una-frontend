@@ -331,7 +331,7 @@ export default function Investigaciones() {
                                                 </button>
                                                 <div className="flex items-center gap-1 text-slate-400">
                                                     {iconEye({ size: 14 })}
-                                                    <span className="text-xs">{item.views_count || 0}</span>
+                                                    <span className="text-xs">{item.visits_count || 0}</span>
                                                 </div>
                                             </div>
                                             <button
