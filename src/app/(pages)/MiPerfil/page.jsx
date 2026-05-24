@@ -3,103 +3,67 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import { Separator } from "@/components/ui/separator";
 import { useEffect, useRef, useState } from "react";
-import { getUserInfo, updateUser, uploadProfilePicture } from "@/lib/api/auth";
+import { getUserInfo, updateUser, uploadProfilePicture, getProfilePictureUrl } from "@/lib/api/auth";
 import { useUser } from "@/app/contexts/UserContext";
 import { toast } from "sonner";
 import Image from "next/image";
-import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
-import { iconCamara, iconEye, iconEyeSlash } from "@/app/assets/icons";
-import { Switch } from "@/components/ui/switch";
-import { X } from "lucide-react";
+import { Camera, Eye, EyeOff, Loader2, User } from "lucide-react";
 
 export default function MiPerfil() {
-    const { user, accessToken, setUserData, logout } = useUser();
+    const { user, setUserData } = useUser();
     const photoInputRef = useRef(null);
-    const blobContainerSasToken =
-        process.env.NEXT_PUBLIC_BLOB_CONTAINER_IMAGE_SAS_TOKEN ||
-        process.env.NEXT_PUBLIC_BLOB_CONTAINER_IMAGES_SAS_TOKEN ||
-        "";
 
     const [form, setForm] = useState({
         firstName: "",
         lastName: "",
         userProfession: "",
         email: "",
-        photo: null,
+        photo: null,       // URL base del servidor (sin SAS)
         isPublic: false,
         userDescription: "",
     });
-    const [photoFile, setPhotoFile] = useState(null);
+    const [photoFile, setPhotoFile] = useState(null);       // archivo local seleccionado
+    const [photoPreview, setPhotoPreview] = useState(null); // blob URL para preview local
+    const [photoSignedUrl, setPhotoSignedUrl] = useState(null); // URL firmada del servidor
     const [isLoading, setIsLoading] = useState(true);
+    const [isSaving, setIsSaving] = useState(false);
 
-    const withBlobSasToken = (imageUrl) => {
-        if (!imageUrl || !blobContainerSasToken) return imageUrl;
-        if (imageUrl.startsWith("blob:") || imageUrl.startsWith("data:") || imageUrl.startsWith("/")) {
-            return imageUrl;
+    const fetchSignedPhotoUrl = async (userId) => {
+        try {
+            const response = await getProfilePictureUrl({ user_id: userId });
+            if (!response.ok) return;
+            const data = await response.json();
+            setPhotoSignedUrl(data?.url || data?.signed_url || data || null);
+        } catch {
+            // Si falla, simplemente no mostramos foto
         }
-        if (!imageUrl.includes("blob.core.windows.net") || imageUrl.includes("sig=")) {
-            return imageUrl;
-        }
-
-        const normalizedToken = blobContainerSasToken.startsWith("?")
-            ? blobContainerSasToken.slice(1)
-            : blobContainerSasToken;
-
-        return imageUrl.includes("?")
-            ? `${imageUrl}&${normalizedToken}`
-            : `${imageUrl}?${normalizedToken}`;
     };
 
     const onChange = (e) => {
         if (e.target.name === "photo") {
             const file = e.target.files[0];
-            if (file) {
-                setForm((prev) => {
-                    if (typeof prev.photo === "string" && prev.photo.startsWith("blob:")) {
-                        URL.revokeObjectURL(prev.photo);
-                    }
-                    return { ...prev, photo: URL.createObjectURL(file) };
-                });
-                setPhotoFile(file);
-            }
+            if (!file) return;
+            if (photoPreview) URL.revokeObjectURL(photoPreview);
+            const preview = URL.createObjectURL(file);
+            setPhotoFile(file);
+            setPhotoPreview(preview);
             return;
         }
-
         setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-    };
-
-    const handlePhotoClick = () => {
-        photoInputRef.current?.click();
-    };
-
-    const handleErasePhoto = () => {
-        if (typeof form.photo === "string" && form.photo.startsWith("blob:")) {
-            URL.revokeObjectURL(form.photo);
-        }
-        setPhotoFile(null);
-        setForm((prev) => ({ ...prev, photo: null }));
     };
 
     const handleOnPublicChange = (checked) => {
         setForm((prev) => ({ ...prev, isPublic: checked }));
     };
 
-    const redirectToLoginOnExpiredToken = (status, detail) => {
-        if (status !== 401 || detail !== "Token expired") {
-            return false;
-        }
-
-        toast.error("Tu sesion ha expirado. Inicia sesion nuevamente.");
-        logout("/IniciarSesion");
-        return true;
-    };
-
     const normalizeTextField = (value) => {
-        const trimmedValue = value.trim();
-        if (!trimmedValue) return "";
-
-        return `${trimmedValue.charAt(0).toUpperCase()}${trimmedValue.slice(1)}`;
+        const trimmed = value.trim();
+        if (!trimmed) return "";
+        return `${trimmed.charAt(0).toUpperCase()}${trimmed.slice(1)}`;
     };
 
     const handleSubmit = async (e) => {
@@ -111,20 +75,14 @@ export default function MiPerfil() {
             lastName: normalizeTextField(form.lastName),
             userProfession: normalizeTextField(form.userProfession),
         };
-
         setForm(normalizedForm);
 
-        // Basic form validation
-        if (
-            !normalizedForm.firstName ||
-            !normalizedForm.lastName ||
-            !normalizedForm.email ||
-            !normalizedForm.userProfession
-        ) {
+        if (!normalizedForm.firstName || !normalizedForm.lastName || !normalizedForm.email || !normalizedForm.userProfession) {
             toast.error("Por favor, complete todos los campos requeridos");
             return;
         }
 
+        setIsSaving(true);
         try {
             const response = await updateUser({
                 id: user.id,
@@ -134,40 +92,29 @@ export default function MiPerfil() {
                 user_description: normalizedForm.userDescription,
                 is_public: normalizedForm.isPublic,
                 email: normalizedForm.email,
-                user_type_id: user.user_type_id,
-                access_token: accessToken,
             });
 
             if (!response.ok) {
                 const data = await response.json();
-
-                if (redirectToLoginOnExpiredToken(response.status, data.detail)) {
-                    return;
-                }
-
-                return toast.warning(data.detail?.[0]?.msg || "Error al guardar los cambios");
+                toast.warning(data.detail?.[0]?.msg || "Error al guardar los cambios");
+                return;
             }
 
             if (photoFile) {
-                const uploadResponse = await uploadProfilePicture({
-                    id: user.id,
-                    file: photoFile,
-                    access_token: accessToken,
-                });
-
+                const uploadResponse = await uploadProfilePicture({ id: user.id, file: photoFile });
                 if (!uploadResponse.ok) {
                     const uploadData = await uploadResponse.json();
-
-                    if (redirectToLoginOnExpiredToken(uploadResponse.status, uploadData.detail)) {
-                        return;
-                    }
-
-                    return toast.warning(uploadData.detail?.[0]?.msg || "Error al actualizar la foto de perfil");
+                    toast.warning(uploadData.detail?.[0]?.msg || "Error al actualizar la foto de perfil");
+                    return;
                 }
+                // Limpiar preview local y obtener la nueva URL firmada del servidor
+                if (photoPreview) URL.revokeObjectURL(photoPreview);
+                setPhotoFile(null);
+                setPhotoPreview(null);
+                await fetchSignedPhotoUrl(user.id);
             }
 
-            const latestData = await fetchUserInfo();
-
+            const latestData = await fetchUserInfo(false);
             setUserData({
                 id: user.id,
                 first_name: latestData?.first_name || normalizedForm.firstName,
@@ -175,7 +122,7 @@ export default function MiPerfil() {
                 user_profession: latestData?.user_profession || normalizedForm.userProfession,
                 user_description: latestData?.user_description || normalizedForm.userDescription,
                 is_public: latestData?.is_public ?? normalizedForm.isPublic,
-                photo: latestData?.photo || normalizedForm.photo,
+                photo: latestData?.photo || form.photo,
                 email: latestData?.email || normalizedForm.email,
                 user_type_id: latestData?.user_type_id || user.user_type_id,
             });
@@ -183,236 +130,263 @@ export default function MiPerfil() {
         } catch (err) {
             console.error(err);
             toast.warning("Error de conexión");
+        } finally {
+            setIsSaving(false);
         }
     };
 
-    const fetchUserInfo = async () => {
+    // showLoading controla si activamos el skeleton; en guardado no queremos mostrarlo
+    const fetchUserInfo = async (showLoading = true) => {
         try {
-            setIsLoading(true);
-            const response = await getUserInfo({ user_id: user.id, access_token: accessToken });
+            if (showLoading) setIsLoading(true);
+            const response = await getUserInfo({ user_id: user.id });
             const data = await response.json();
             if (!response.ok) {
                 toast.warning(data.detail?.[0]?.msg || "Error al obtener la información del usuario");
-                setIsLoading(false);
                 return null;
             }
             setPhotoFile(null);
             setForm({
                 firstName: data.first_name || "",
                 lastName: data.last_name || "",
-                userProfession: data.user_profession || data.profession || "",
+                userProfession: data.user_profession || "",
                 email: data.email || "",
                 photo: data.photo || null,
                 isPublic: data.is_public || false,
                 userDescription: data.user_description || "",
             });
-            setIsLoading(false);
+
+            if (data.photo) {
+                await fetchSignedPhotoUrl(user.id);
+            } else {
+                setPhotoSignedUrl(null);
+            }
+
             return data;
         } catch (err) {
             toast.warning("Error de conexión");
-            setIsLoading(false);
             return null;
+        } finally {
+            if (showLoading) setIsLoading(false);
         }
     };
 
     useEffect(() => {
         if (!user?.id) return;
         fetchUserInfo();
-    }, [user, accessToken]);
+    }, [user?.id]);
 
     useEffect(() => {
         return () => {
-            if (typeof form.photo === "string" && form.photo.startsWith("blob:")) {
-                URL.revokeObjectURL(form.photo);
-            }
+            if (photoPreview) URL.revokeObjectURL(photoPreview);
         };
-    }, [form.photo]);
+    }, [photoPreview]);
 
-    const isPublicLabel = form.isPublic ? "Foro Público" : "Foro Privado";
-    const isPublicIcon = form.isPublic
-        ? iconEye({ color: "#E7473C" })
-        : iconEyeSlash({ color: "#999" });
+    // Preview local tiene prioridad; si no hay preview, mostramos la URL firmada del servidor
+    const displayPhoto = photoPreview || photoSignedUrl || null;
+    const fullName = `${form.firstName} ${form.lastName}`.trim();
+
+    if (isLoading) {
+        return (
+            <main className="flex mainSection pb-20 pt-10 px-5 md:px-10">
+                <div className="w-full max-w-2xl mx-auto flex flex-col gap-8">
+                    <div className="flex flex-col items-center gap-4">
+                        <Skeleton className="w-32 h-32 rounded-full" />
+                        <Skeleton className="h-7 w-48" />
+                        <Skeleton className="h-5 w-32" />
+                    </div>
+                    <div className="flex flex-col gap-4">
+                        <div className="flex gap-4">
+                            <Skeleton className="h-12 w-full rounded-lg" />
+                            <Skeleton className="h-12 w-full rounded-lg" />
+                        </div>
+                        <Skeleton className="h-12 w-full rounded-lg" />
+                        <Skeleton className="h-12 w-full rounded-lg" />
+                        <Skeleton className="h-28 w-full rounded-lg" />
+                        <Skeleton className="h-10 w-full rounded-lg" />
+                    </div>
+                </div>
+            </main>
+        );
+    }
 
     return (
         <main className="flex mainSection pb-20 pt-10 px-5 md:px-10">
-            {isLoading ? (
-                <div className="flex flex-col gap-6 w-full max-w-5xl m-auto">
-                    <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-6 items-start">
-                        <div className="flex flex-col gap-4">
-                            <div className="flex gap-4">
-                                <div className="grid w-full gap-3">
-                                    <Skeleton className="h-6 w-20" />
-                                    <Skeleton className="h-12 w-full rounded" />
-                                </div>
-                                <div className="grid w-full gap-3">
-                                    <Skeleton className="h-6 w-20" />
-                                    <Skeleton className="h-12 w-full rounded" />
-                                </div>
+            <form
+                className="w-full max-w-2xl mx-auto flex flex-col gap-8"
+                onSubmit={handleSubmit}
+            >
+                {/* Foto de perfil */}
+                <div className="flex flex-col items-center gap-3">
+                    <button
+                        type="button"
+                        onClick={() => photoInputRef.current?.click()}
+                        className="relative group w-32 h-32 rounded-full overflow-hidden border-4 border-white/20 shadow-lg focus:outline-none focus:ring-2 focus:ring-white/40"
+                    >
+                        {displayPhoto ? (
+                            <Image
+                                src={displayPhoto}
+                                alt="Foto de perfil"
+                                width={128}
+                                height={128}
+                                className="w-full h-full object-cover"
+                                unoptimized={!!photoPreview}
+                            />
+                        ) : (
+                            <div className="w-full h-full bg-white/10 flex items-center justify-center">
+                                <User className="w-14 h-14 text-white/40" />
                             </div>
-
-                            <div className="grid w-full gap-3">
-                                <Skeleton className="h-6 w-24" />
-                                <Skeleton className="h-12 w-full rounded" />
-                            </div>
-
-                            <div className="grid w-full gap-3">
-                                <Skeleton className="h-6 w-32" />
-                                <Skeleton className="h-12 w-full rounded" />
-                            </div>
-
-                            <div className="flex items-center gap-2">
-                                <Skeleton className="h-6 w-12" />
-                                <Skeleton className="h-6 w-32" />
-                            </div>
+                        )}
+                        <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                            <Camera className="w-7 h-7 text-white" />
                         </div>
+                    </button>
 
-                        <div className="w-full">
-                            <Skeleton className="h-[320px] w-full rounded" />
+                    {fullName && (
+                        <p className="text-white text-xl font-semibold">{fullName}</p>
+                    )}
+                    {form.userProfession && (
+                        <p className="text-white/60 text-sm">{form.userProfession}</p>
+                    )}
+
+                    <input
+                        id="photo"
+                        name="photo"
+                        type="file"
+                        accept="image/*"
+                        ref={photoInputRef}
+                        onChange={onChange}
+                        className="hidden"
+                    />
+                </div>
+
+                <Separator className="bg-white/10" />
+
+                {/* Campos del formulario */}
+                <div className="flex flex-col gap-5">
+                    <div className="flex gap-4">
+                        <div className="grid w-full gap-2">
+                            <Label htmlFor="firstName" className="text-white/80 text-sm font-medium">
+                                Nombre <span className="text-red-400">*</span>
+                            </Label>
+                            <Input
+                                id="firstName"
+                                name="firstName"
+                                placeholder="Tu nombre"
+                                type="text"
+                                value={form.firstName}
+                                onChange={onChange}
+                                required
+                                className="bg-white/10 border-white/20 text-white placeholder:text-white/30 h-11 rounded-lg focus:border-white/40 focus:bg-white/15"
+                            />
+                        </div>
+                        <div className="grid w-full gap-2">
+                            <Label htmlFor="lastName" className="text-white/80 text-sm font-medium">
+                                Apellidos <span className="text-red-400">*</span>
+                            </Label>
+                            <Input
+                                id="lastName"
+                                name="lastName"
+                                placeholder="Tus apellidos"
+                                type="text"
+                                value={form.lastName}
+                                onChange={onChange}
+                                required
+                                className="bg-white/10 border-white/20 text-white placeholder:text-white/30 h-11 rounded-lg focus:border-white/40 focus:bg-white/15"
+                            />
                         </div>
                     </div>
 
-                    <Skeleton className="h-8 w-full rounded" />
-                </div>
-            ) : (
-                <form className="flex flex-col gap-6 w-full max-w-5xl m-auto" onSubmit={handleSubmit}>
-                <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-6 items-start">
-                    <div className="flex flex-col gap-4">
-                        <div className="flex gap-4">
-                            <div className="grid w-full gap-3">
-                                <Label htmlFor="firstName" className="font-semibold text-white text-md">
-                                    Nombre
-                                </Label>
-                                <Input
-                                    id="firstName"
-                                    name="firstName"
-                                    placeholder="Nombre"
-                                    type="text"
-                                    value={form.firstName}
-                                    onChange={onChange}
-                                    required
-                                    className="bg-white h-12 rounded"
-                                    style={{ fontSize: "1rem" }}
-                                />
-                            </div>
-                            <div className="grid w-full items-center gap-3">
-                                <Label htmlFor="lastName" className="font-semibold text-white text-md">
-                                    Apellidos
-                                </Label>
-                                <Input
-                                    id="lastName"
-                                    name="lastName"
-                                    placeholder="Apellidos"
-                                    type="text"
-                                    value={form.lastName}
-                                    onChange={onChange}
-                                    required
-                                    className="bg-white h-12 rounded"
-                                    style={{ fontSize: "1rem" }}
-                                />
-                            </div>
-                        </div>
+                    <div className="grid gap-2">
+                        <Label htmlFor="userProfession" className="text-white/80 text-sm font-medium">
+                            Profesión <span className="text-red-400">*</span>
+                        </Label>
+                        <Input
+                            id="userProfession"
+                            name="userProfession"
+                            placeholder="Tu profesión"
+                            type="text"
+                            value={form.userProfession}
+                            onChange={onChange}
+                            required
+                            className="bg-white/10 border-white/20 text-white placeholder:text-white/30 h-11 rounded-lg focus:border-white/40 focus:bg-white/15"
+                        />
+                    </div>
 
-                        <div className="grid w-full items-center gap-3">
-                            <Label htmlFor="userProfession" className="font-semibold text-white text-md">
-                                Profesión
-                            </Label>
-                            <Input
-                                id="userProfession"
-                                name="userProfession"
-                                placeholder="Profesión"
-                                type="text"
-                                value={form.userProfession}
-                                onChange={onChange}
-                                required
-                                className="bg-white h-12 rounded"
-                                style={{ fontSize: "1rem" }}
-                            />
-                        </div>
+                    <div className="grid gap-2">
+                        <Label htmlFor="email" className="text-white/80 text-sm font-medium">
+                            Correo Electrónico <span className="text-red-400">*</span>
+                        </Label>
+                        <Input
+                            id="email"
+                            name="email"
+                            placeholder="tu@email.com"
+                            type="email"
+                            value={form.email}
+                            onChange={onChange}
+                            required
+                            className="bg-white/10 border-white/20 text-white placeholder:text-white/30 h-11 rounded-lg focus:border-white/40 focus:bg-white/15"
+                        />
+                    </div>
 
-                        <div className="grid w-full items-center gap-3">
-                            <Label htmlFor="email" className="font-semibold text-white text-md">
-                                Correo Electrónico
-                            </Label>
-                            <Input
-                                id="email"
-                                name="email"
-                                placeholder="Correo Electrónico"
-                                type="email"
-                                value={form.email}
-                                onChange={onChange}
-                                required
-                                className="bg-white h-12 rounded"
-                                style={{ fontSize: "1rem" }}
-                            />
-                        </div>
+                    <div className="grid gap-2">
+                        <Label htmlFor="userDescription" className="text-white/80 text-sm font-medium">
+                            Descripción
+                        </Label>
+                        <Textarea
+                            id="userDescription"
+                            name="userDescription"
+                            placeholder="Cuéntale a la comunidad un poco sobre ti..."
+                            value={form.userDescription}
+                            onChange={onChange}
+                            rows={4}
+                            className="bg-white/10 border-white/20 text-white placeholder:text-white/30 rounded-lg focus:border-white/40 focus:bg-white/15 resize-none"
+                        />
+                    </div>
 
+                    <Separator className="bg-white/10" />
+
+                    {/* Toggle visibilidad del foro */}
+                    <div className="flex items-center justify-between bg-white/5 border border-white/10 rounded-lg px-4 py-3">
+                        <div className="flex flex-col gap-0.5">
+                            <span className="text-white text-sm font-medium">
+                                {form.isPublic ? "Foro Público" : "Foro Privado"}
+                            </span>
+                            <span className="text-white/50 text-xs">
+                                {form.isPublic
+                                    ? "Tu perfil es visible para todos en el foro"
+                                    : "Tu perfil no aparece en el foro"}
+                            </span>
+                        </div>
                         <div className="flex items-center gap-2">
+                            {form.isPublic
+                                ? <Eye className="w-4 h-4 text-[#E7473C]" />
+                                : <EyeOff className="w-4 h-4 text-white/40" />
+                            }
                             <Switch
                                 id="isPublic"
-                                name="isPublic"
                                 checked={form.isPublic}
                                 onCheckedChange={handleOnPublicChange}
                             />
-                            <Label htmlFor="isPublic" className="text-white flex items-center gap-1">
-                                {isPublicLabel}
-                                {isPublicIcon}
-                            </Label>
                         </div>
-                    </div>
-
-                    <div className="w-full">
-                        <Input
-                            id="photo"
-                            name="photo"
-                            type="file"
-                            accept="image/*"
-                            ref={photoInputRef}
-                            onChange={onChange}
-                            className="hidden"
-                        />
-                        {!form.photo && (
-                            <Empty
-                                className="border border-dashed border-[#999] bg-[#f9f9f9] h-[320px] w-full hover:cursor-pointer hover:border-[#666] hover:brightness-95 transition-all duration-200"
-                                onClick={handlePhotoClick}
-                            >
-                                <EmptyHeader>
-                                    <EmptyMedia variant="icon">
-                                        {iconCamara({ size: 48, color: "#999" })}
-                                    </EmptyMedia>
-                                    <EmptyTitle>Una Foto Profesional</EmptyTitle>
-                                    <EmptyDescription>
-                                        Sube una foto profesional para que otros sepan quién eres.
-                                    </EmptyDescription>
-                                </EmptyHeader>
-                            </Empty>
-                        )}
-                        {form.photo && (
-                            <div className="relative inline-block w-full h-[320px] group">
-                                <Image
-                                    onClick={handlePhotoClick}
-                                    src={withBlobSasToken(form.photo)}
-                                    alt="Foto de perfil"
-                                    width={3000}
-                                    height={3000}
-                                    className="w-full h-full rounded object-cover hover:cursor-pointer hover:brightness-95 transition-all duration-200"
-                                />
-                                <Button
-                                    type="button"
-                                    variant="destructive"
-                                    size="icon"
-                                    onClick={handleErasePhoto}
-                                    className="absolute top-2 right-2 rounded-full w-6 h-6 p-1 shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:cursor-pointer hover:brightness-90"
-                                >
-                                    <X className="w-4 h-4" />
-                                </Button>
-                            </div>
-                        )}
                     </div>
                 </div>
 
-                <Button type="submit" className="bg-[#b62116] text-white hover:bg-red-700 transition hover:cursor-pointer">
-                    Guardar Cambios
+                <Button
+                    type="submit"
+                    disabled={isSaving}
+                    className="h-11 bg-[#b62116] hover:bg-red-700 text-white font-medium rounded-lg transition disabled:opacity-60"
+                >
+                    {isSaving ? (
+                        <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Guardando...
+                        </>
+                    ) : (
+                        "Guardar Cambios"
+                    )}
                 </Button>
-            </form>            )}        </main>
+            </form>
+        </main>
     );
 }

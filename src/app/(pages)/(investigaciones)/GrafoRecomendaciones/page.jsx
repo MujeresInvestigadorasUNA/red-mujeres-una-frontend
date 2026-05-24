@@ -370,13 +370,45 @@ export default function GrafoRecomendaciones() {
       ) : (
         <div className="h-[calc(100vh-80px)] overflow-hidden px-4 py-4 md:px-6">
           {loading ? (
-            <Card className="p-6">
-              <div className="flex flex-col gap-3">
-                <Skeleton className="h-5 w-40" />
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-3/4" />
+            <div className="h-full flex items-center justify-center">
+              <div className="flex flex-col items-center gap-6 text-center max-w-sm">
+                {/* Spinner 3D */}
+                <div className="relative w-24 h-24">
+                  <div className="absolute inset-0 rounded-full border-4 border-slate-200" />
+                  <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-[#E7473C] animate-spin" />
+                  <div className="absolute inset-3 rounded-full border-4 border-transparent border-t-[#831d16] animate-spin" style={{ animationDuration: "1.4s", animationDirection: "reverse" }} />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-5 h-5 rounded-full bg-[#E7473C]/20 animate-pulse" />
+                  </div>
+                </div>
+
+                {/* Texto */}
+                <div className="flex flex-col gap-2">
+                  <h2 className="text-base font-semibold text-slate-800">Generando grafo IA</h2>
+                  <p className="text-xs text-slate-500 leading-relaxed">
+                    Analizando investigaciones y calculando conexiones semánticas...
+                  </p>
+                </div>
+
+                {/* Nodos animados simulando el grafo */}
+                <div className="flex items-center gap-3">
+                  {[["#2563eb", "0s"], ["#d97706", "0.2s"], ["#059669", "0.4s"], ["#E7473C", "0.6s"], ["#8b5cf6", "0.8s"]].map(([color, delay], i) => (
+                    <div
+                      key={i}
+                      className="w-3 h-3 rounded-full animate-bounce"
+                      style={{ backgroundColor: color, animationDelay: delay, animationDuration: "1.1s" }}
+                    />
+                  ))}
+                </div>
+
+                {/* Líneas de skeleton */}
+                <div className="w-full flex flex-col gap-2">
+                  <Skeleton className="h-2 w-full rounded-full" />
+                  <Skeleton className="h-2 w-4/5 rounded-full" />
+                  <Skeleton className="h-2 w-3/5 rounded-full" />
+                </div>
               </div>
-            </Card>
+            </div>
           ) : errorMessage ? (
             <Card className="p-6">
               <p className="text-sm text-red-600">{errorMessage}</p>

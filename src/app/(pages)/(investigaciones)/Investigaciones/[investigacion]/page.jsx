@@ -153,7 +153,7 @@ export default function Investigacion() {
                 setCurrentResearch(current);
 
                 if (current?.id) {
-                    const related = await getRelatedResearch(current.id, 6);
+                    const related = await getRelatedResearch(current.id, 6, user?.id);
                     setRelatedResearch(related);
                     const counts = {};
                     const liked = new Set();

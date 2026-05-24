@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Map as MapIcon } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const DEFAULT_TOP_K = 5;
 const DEFAULT_MIN_SCORE = 0.6;
@@ -411,64 +412,42 @@ export default function MapaDispersion() {
     <main className="grow bg-slate-50/30">
       <div className="h-[calc(100vh-80px)] overflow-hidden px-4 py-4 md:px-6">
         {loading ? (
-          <div className="h-full w-full flex flex-col items-center justify-center rounded-xl gap-6 relative overflow-hidden bg-slate-900">
-            <div
-              className="absolute inset-0"
-              style={{
-                backgroundImage:
-                  "linear-gradient(rgba(30,41,59,0.6) 1px, transparent 1px), linear-gradient(90deg, rgba(30,41,59,0.6) 1px, transparent 1px)",
-                backgroundSize: "48px 48px",
-              }}
-            />
-            <svg className="absolute inset-0 w-full h-full" aria-hidden="true">
-              {[
-                { cx: "18%", cy: "40%", r: 5, c: "#2563eb", dur: "3.2s" },
-                { cx: "44%", cy: "26%", r: 4, c: "#059669", dur: "2.7s" },
-                { cx: "68%", cy: "38%", r: 6, c: "#7c3aed", dur: "3.5s" },
-                { cx: "28%", cy: "66%", r: 4, c: "#d97706", dur: "3s" },
-                { cx: "60%", cy: "70%", r: 5, c: "#db2777", dur: "2.9s" },
-                { cx: "78%", cy: "50%", r: 3, c: "#0891b2", dur: "3.3s" },
-                { cx: "52%", cy: "50%", r: 4, c: "#4d7c0f", dur: "2.5s" },
-              ].map((d, i) => (
-                <circle key={i} cx={d.cx} cy={d.cy} r={d.r} fill={d.c}>
-                  <animate attributeName="opacity" values="0.2;0.7;0.2" dur={d.dur} repeatCount="indefinite" />
-                  <animate attributeName="r" values={`${d.r};${d.r * 1.5};${d.r}`} dur={d.dur} repeatCount="indefinite" />
-                </circle>
-              ))}
-              {[
-                ["18%", "40%", "44%", "26%"],
-                ["44%", "26%", "68%", "38%"],
-                ["68%", "38%", "60%", "70%"],
-                ["28%", "66%", "52%", "50%"],
-                ["52%", "50%", "78%", "50%"],
-                ["18%", "40%", "28%", "66%"],
-              ].map(([x1, y1, x2, y2], i) => (
-                <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#334155" strokeWidth="1" strokeDasharray="5 5">
-                  <animate attributeName="opacity" values="0;0.35;0" dur={`${2.8 + i * 0.3}s`} repeatCount="indefinite" />
-                </line>
-              ))}
-            </svg>
-            <div className="relative z-10 flex flex-col items-center gap-4">
-              <div className="relative">
-                <div className="w-16 h-16 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center">
-                  <MapIcon className="w-8 h-8 text-blue-400" />
+          <div className="h-full flex items-center justify-center">
+            <div className="flex flex-col items-center gap-6 text-center max-w-sm">
+              {/* Spinner */}
+              <div className="relative w-24 h-24">
+                <div className="absolute inset-0 rounded-full border-4 border-slate-200" />
+                <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-[#2563eb] animate-spin" />
+                <div className="absolute inset-3 rounded-full border-4 border-transparent border-t-[#0891b2] animate-spin" style={{ animationDuration: "1.4s", animationDirection: "reverse" }} />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="w-5 h-5 rounded-full bg-[#2563eb]/20 animate-pulse" />
                 </div>
-                <div className="absolute inset-0 rounded-full border border-blue-500/40 animate-ping" />
               </div>
-              <div className="text-center">
-                <p className="text-white text-lg font-semibold">Generando mapa 2D</p>
-                <p className="text-slate-400 text-sm mt-1.5">
-                  Calculando reducción PCA de embeddings semánticos
+
+              {/* Texto */}
+              <div className="flex flex-col gap-2">
+                <h2 className="text-base font-semibold text-slate-800">Generando mapa 2D</h2>
+                <p className="text-xs text-slate-500 leading-relaxed">
+                  Calculando reducción PCA de embeddings semánticos...
                 </p>
               </div>
-              <div className="flex gap-1.5">
-                {[0, 1, 2, 3].map((i) => (
+
+              {/* Dots de cluster */}
+              <div className="flex items-center gap-3">
+                {[["#2563eb", "0s"], ["#d97706", "0.2s"], ["#059669", "0.4s"], ["#7c3aed", "0.6s"], ["#0891b2", "0.8s"]].map(([color, delay], i) => (
                   <div
                     key={i}
-                    className="w-2 h-2 rounded-full bg-blue-400 animate-bounce"
-                    style={{ animationDelay: `${i * 0.12}s` }}
+                    className="w-3 h-3 rounded-full animate-bounce"
+                    style={{ backgroundColor: color, animationDelay: delay, animationDuration: "1.1s" }}
                   />
                 ))}
+              </div>
+
+              {/* Skeleton lines */}
+              <div className="w-full flex flex-col gap-2">
+                <Skeleton className="h-2 w-full rounded-full" />
+                <Skeleton className="h-2 w-4/5 rounded-full" />
+                <Skeleton className="h-2 w-3/5 rounded-full" />
               </div>
             </div>
           </div>

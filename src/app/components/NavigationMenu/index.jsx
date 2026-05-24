@@ -24,6 +24,7 @@ import {
     DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu"
 import { getResearchById } from "@/lib/api/research"
+import { getProfilePictureUrl } from "@/lib/api/auth"
 import {
     getNotifications,
     getUnreadNotificationsCount,
@@ -41,6 +42,18 @@ export function CustomNavigationMenu() {
     const [notificationsOpen, setNotificationsOpen] = React.useState(false);
     const [notifications, setNotifications] = React.useState([]);
     const [unreadCount, setUnreadCount] = React.useState(0);
+    const [userPhotoUrl, setUserPhotoUrl] = React.useState(null);
+
+    React.useEffect(() => {
+        if (!user?.id) {
+            setUserPhotoUrl(null);
+            return;
+        }
+        getProfilePictureUrl({ user_id: user.id })
+            .then((res) => res.ok ? res.json() : null)
+            .then((data) => setUserPhotoUrl(data?.url || data?.signed_url || data || null))
+            .catch(() => setUserPhotoUrl(null));
+    }, [user?.id]);
 
     const refreshNotifications = React.useCallback(() => {
         setNotifications(getNotifications());
@@ -192,7 +205,7 @@ export function CustomNavigationMenu() {
                                                 <Link href="/MiForo" onClick={closeDesktopMenu}>
                                                     <div className="font-medium">Mi Foro</div>
                                                     <div className="text-muted-foreground">
-                                                        Accede a tu foro personal y gestiona tus publicaciones.
+                                                        Accede a tu foro personal con tus investigaciones y cursos.
                                                     </div>
                                                 </Link>
                                             </NavigationMenuLink>
@@ -328,13 +341,43 @@ export function CustomNavigationMenu() {
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                     <Button className="hidden bg-[#b62116] text-white hover:bg-red-700
-                                transition hover:cursor-pointer rounded-full w-10 h-10 p-0 md:flex">
-                                        {user.first_name ? user.first_name[0].toUpperCase() : "U"}
+                                transition hover:cursor-pointer rounded-full w-10 h-10 p-0 md:flex overflow-hidden">
+                                        {userPhotoUrl ? (
+                                            <img
+                                                src={userPhotoUrl}
+                                                alt="Foto de perfil"
+                                                className="w-full h-full object-cover rounded-full"
+                                            />
+                                        ) : (
+                                            user.first_name ? user.first_name[0].toUpperCase() : "U"
+                                        )}
                                     </Button>
                                 </DropdownMenuTrigger>
-                                <DropdownMenuContent className="w-56 max-w-[calc(100vw-2rem)] mr-5" align="start" variant="dark">
-                                    <DropdownMenuLabel className="font-normal text-sm text-gray-500 text-center whitespace-normal break-all leading-tight px-1">
-                                        {user.email}
+                                <DropdownMenuContent className="w-60 max-w-[calc(100vw-2rem)] mr-5" align="end" variant="dark">
+                                    <DropdownMenuLabel className="font-normal px-3 py-2">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 rounded-full overflow-hidden shrink-0 bg-[#b62116] flex items-center justify-center">
+                                                {userPhotoUrl ? (
+                                                    <img
+                                                        src={userPhotoUrl}
+                                                        alt="Foto de perfil"
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                ) : (
+                                                    <span className="text-white font-semibold text-sm">
+                                                        {user.first_name ? user.first_name[0].toUpperCase() : "U"}
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <div className="flex flex-col min-w-0">
+                                                <span className="text-sm font-medium text-slate-800 truncate">
+                                                    {user.first_name} {user.last_name}
+                                                </span>
+                                                <span className="text-xs text-slate-400 truncate">
+                                                    {user.email}
+                                                </span>
+                                            </div>
+                                        </div>
                                     </DropdownMenuLabel>
                                     <DropdownMenuSeparator />
                                     <DropdownMenuItem>
@@ -473,25 +516,5 @@ export function CustomNavigationMenu() {
                 </>
             )}
         </nav>
-    )
-}
-
-function ListItem({
-    title,
-    children,
-    href,
-    ...props
-}) {
-    return (
-        <li {...props}>
-            <NavigationMenuLink asChild>
-                <Link href={href}>
-                    <div className="text-sm leading-none font-medium">{title}</div>
-                    <p className="text-muted-foreground line-clamp-2 text-sm leading-snug">
-                        {children}
-                    </p>
-                </Link>
-            </NavigationMenuLink>
-        </li>
     )
 }

@@ -13,6 +13,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { getResearch, getRecommendedResearch, likeResearch, unlikeResearch } from "@/lib/api/research";
 import { getResearchers } from "@/lib/api/forums";
+import { getProfilePictureUrl } from "@/lib/api/auth";
 import { Card } from "@/components/ui/card";
 import { iconEye } from "@/app/assets/icons";
 import { Heart } from "lucide-react";
@@ -324,10 +325,26 @@ export default function Home() {
     const fetchForumsData = async () => {
       try {
         const data = await getResearchers();
+
+        // Obtener URLs firmadas para las fotos en paralelo
+        const signedPhotos = await Promise.all(
+          data.map(async (r) => {
+            if (!r.photo) return null;
+            try {
+              const res = await getProfilePictureUrl({ user_id: r.id });
+              if (!res.ok) return null;
+              const d = await res.json();
+              return d?.url || d?.signed_url || d || null;
+            } catch {
+              return null;
+            }
+          })
+        );
+
         setForumCards(
-          data.map((r) => ({
+          data.map((r, i) => ({
             id: r.id,
-            photo: r.photo || null,
+            photo: signedPhotos[i],
             title: `${r.first_name} ${r.last_name}`,
             url: `/Foros/${r.id}`,
           }))
