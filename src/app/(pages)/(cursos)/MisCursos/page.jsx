@@ -1,30 +1,29 @@
 "use client";
 import { useUser } from "@/app/contexts/UserContext";
-import { iconClockwise } from "@/app/assets/icons";
-import { SearchIcon, Heart, Share2 } from "lucide-react"
+import { Heart, Share2, Search, RefreshCw, BookOpen, FileText } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { ButtonGroup } from "@/components/ui/button-group"
 import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-    Select,
-    SelectContent,
-    SelectGroup,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
 import { useEffect, useState, useMemo } from "react";
 import { createCourse, getCoursesByUserId, likeCourse, unlikeCourse } from "@/lib/api/courses";
 import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
 import Link from "next/link";
+import { iconEye } from "@/app/assets/icons";
 
-const truncateDescription = (text, limit = 60) => {
-    if (!text) return "Sin descripción disponible";
-    if (text.length <= limit) return text;
-    return text.substring(0, limit) + "...";
-};
+const COVER_GRADIENTS = [
+    ["#831d16", "#c2372d"],
+    ["#c2372d", "#E7473C"],
+    ["#E7473C", "#FF6B55"],
+    ["#831d16", "#E7473C"],
+    ["#c2372d", "#FF6B55"],
+    ["#E7473C", "#831d16"],
+];
+
+function getInitials(name) {
+    if (!name) return "?";
+    return name.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase();
+}
 
 export default function MisCursos() {
     const { user } = useUser();
@@ -33,10 +32,9 @@ export default function MisCursos() {
     const [loadingCourses, setLoadingCourses] = useState(true);
     const [loadingMore, setLoadingMore] = useState(false);
     const [displayCount, setDisplayCount] = useState(6);
-    const [filterType, setFilterType] = useState("");
     const [searchQuery, setSearchQuery] = useState("");
     const [likedCourses, setLikedCourses] = useState(new Set());
-    const ITEMS_PER_PAGE = 6;
+    const ITEMS_PER_PAGE = 9;
 
     const userId = useMemo(() => user?.id ?? user?.user_id ?? null, [user]);
 
@@ -74,39 +72,27 @@ export default function MisCursos() {
         if (!query.trim()) {
             return courses;
         }
-        
+
         const lowerQuery = query.toLowerCase();
-        
-        return courses.filter((course) => {
-            switch (filterType) {
-                case "titulo":
-                    return course.title?.toLowerCase().includes(lowerQuery) || false;
-                case "descripcion":
-                    return course.description?.toLowerCase().includes(lowerQuery) || false;
-                case "fechaInicio":
-                    return course.startDate?.toLowerCase().includes(lowerQuery) || false;
-                default:
-                    return true;
-            }
-        });
+
+        return courses.filter((course) =>
+            course.title?.toLowerCase().includes(lowerQuery) ||
+            course.description?.toLowerCase().includes(lowerQuery)
+        );
     };
 
-    const handleSearch = () => {
-        const filtered = applyFilter(allCourses, searchQuery);
-        setDisplayedCourses(filtered.slice(0, ITEMS_PER_PAGE));
+    const handleSearchChange = (e) => {
+        setSearchQuery(e.target.value);
         setDisplayCount(ITEMS_PER_PAGE);
     };
 
-    const handleFilterChange = (value) => {
-        setFilterType(value);
+    const handleClear = () => {
         setSearchQuery("");
-        setDisplayedCourses(allCourses.slice(0, ITEMS_PER_PAGE));
         setDisplayCount(ITEMS_PER_PAGE);
     };
 
     const handleRefresh = () => {
         setSearchQuery("");
-        setFilterType("");
         setDisplayedCourses(allCourses.slice(0, ITEMS_PER_PAGE));
         setDisplayCount(ITEMS_PER_PAGE);
     };
@@ -115,6 +101,16 @@ export default function MisCursos() {
         setLoadingCourses(true);
         fetchCourses();
     }, [userId]);
+
+    const q = searchQuery.toLowerCase().trim();
+    const filtered = allCourses.filter(
+        (course) =>
+            !q ||
+            course.title?.toLowerCase().includes(q) ||
+            course.description?.toLowerCase().includes(q)
+    );
+    const displayed = filtered.slice(0, displayCount);
+    const hasMore = filtered.length > displayCount;
 
     const handleShareCourse = (courseId) => {
         const shareUrl = `${process.env.NEXT_PUBLIC_FRONTEND_URL}/MisCursos/${courseId}`;
@@ -175,153 +171,151 @@ export default function MisCursos() {
     };
 
     return (
-        <main className="flex-grow px-20 py-10 h-screen toolsSection">
-            <div className="flex gap-3 mb-5">
-                <Button
-                    onClick={handleOnAddCourse}
-                    className="bg-[#E7473C] hover:bg-[#831d16] text-white
-                    hover:text-white hover:cursor-pointer rounded"
-                >
-                    Agregar Curso
-                </Button>
-                <Select value={filterType} onValueChange={handleFilterChange}>
-                    <SelectTrigger className="w-[180px] bg-[#fff] rounded">
-                        <SelectValue placeholder="Filtrar Por" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectGroup>
-                            <SelectItem value="titulo">Nombre</SelectItem>
-                            <SelectItem value="descripcion">Descripción</SelectItem>
-                            <SelectItem value="fechaInicio">Fecha Inicio</SelectItem>
-                        </SelectGroup>
-                    </SelectContent>
-                </Select>
-                <ButtonGroup className="rounded bg-[#fff] w-full">
+        <main className="min-h-screen bg-slate-50">
+            {/* ── Header ─────────────────────────────────────────── */}
+            <section
+                className="px-6 md:px-16 xl:px-20 py-8"
+                style={{ background: "linear-gradient(135deg, #831d16, #E7473C)" }}
+            >
+                <div className="flex items-center gap-2 mb-1">
+                    <BookOpen className="w-4 h-4 text-white/60" />
+                    <span className="text-white/60 text-xs font-medium uppercase tracking-wide">
+                        Panel Personal
+                    </span>
+                </div>
+                <h1 className="text-2xl font-bold text-white">Mis Cursos</h1>
+                <p className="text-white/70 text-sm mt-1 max-w-xl leading-relaxed">
+                    Crea y gestiona tus cursos para compartir conocimiento con la comunidad de la Red de Mujeres Académicas UNA.
+                </p>
+            </section>
+
+            {/* ── Content ───────────────────────────────────────── */}
+            <section className="px-6 md:px-16 xl:px-20 py-8 max-w-7xl mx-auto">
+            <div className="flex gap-2 mb-5 max-w-sm">
+                <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
                     <Input
-                        className="rounded"
-                        placeholder="Buscar..."
+                        placeholder="Buscar cursos..."
                         value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                        onChange={handleSearchChange}
+                        className="pl-9 h-9 text-sm bg-white border-slate-200"
                     />
+                </div>
+                {searchQuery && (
                     <Button
-                        onClick={handleSearch}
-                        className="bg-[#E7473C] hover:bg-[#831d16] rounded text-white
-                        hover:text-white hover:cursor-pointer"
-                        variant="outline"
-                        aria-label="Search"
+                        variant="ghost"
+                        size="icon"
+                        onClick={handleClear}
+                        className="h-9 w-9 text-slate-400 hover:text-slate-600"
                     >
-                        <SearchIcon />
+                        <RefreshCw className="w-3.5 h-3.5" />
                     </Button>
-                </ButtonGroup>
-                <Button 
-                    onClick={handleRefresh}
-                    className="bg-[#fff] hover:bg-[#f0f0f0] rounded text-[#831d16]
-                    hover:text-[#831d16] hover:cursor-pointer shadow"
-                >
-                    {iconClockwise({})}
-                </Button>
+                )}
             </div>
-            <div className="flex flex-wrap gap-3">
+
+            {!loadingCourses && (
+                <p className="text-xs text-slate-400 mb-5">
+                    {filtered.length} curso{filtered.length !== 1 ? "s" : ""}
+                    {searchQuery && ` para "${searchQuery}"`}
+                </p>
+            )}
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 pb-10">
                 {loadingCourses ? (
-                    <>
-                        {[...Array(6)].map((_, index) => {
-                            return (
-                                <div key={index} className="grow min-w-[300px]">
-                                    <div className="p-0 overflow-hidden rounded-lg border-none shadow flex flex-col h-full">
-                                        {/* Gray Header Skeleton */}
-                                        <div className="bg-gray-200 p-6 flex-shrink-0">
-                                            <div className="flex items-start justify-between gap-3">
-                                                <div className="flex-1">
-                                                    <Skeleton className="h-6 w-3/4 mb-2 bg-gray-300" />
-                                                    <Skeleton className="h-4 w-1/2 bg-gray-300" />
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {/* Content Skeleton */}
-                                        <div className="flex-1 p-5 flex flex-col">
-                                            <Skeleton className="h-4 w-full mb-2" />
-                                            <Skeleton className="h-4 w-5/6 mb-2" />
-                                            <Skeleton className="h-4 w-4/5 mb-4" />
-
-                                            {/* Stats Footer Skeleton */}
-                                            <div className="flex items-center justify-between pt-4 border-t border-gray-200">
-                                                <div className="flex gap-4">
-                                                    <Skeleton className="h-5 w-8" />
-                                                    <Skeleton className="h-5 w-8" />
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+                    [...Array(9)].map((_, i) => (
+                        <Card key={i} className="p-0 overflow-hidden border border-slate-100 shadow-sm flex flex-col gap-0">
+                            <Skeleton className="h-36 w-full rounded-none" />
+                            <div className="p-4 flex flex-col gap-3 flex-1">
+                                <div className="flex items-center gap-2">
+                                    <Skeleton className="w-7 h-7 rounded-full shrink-0" />
+                                    <Skeleton className="h-3 w-28" />
                                 </div>
-                            );
-                        })}
-                    </>
-                ) : displayedCourses.length > 0 ? (
-                    displayedCourses.map((course) => {
-                        const gradients = [
-                            "bg-gradient-to-br from-[#831d16] to-[#c2372d]",
-                            "bg-gradient-to-br from-[#E7473C] to-[#FF6B55]",
-                            "bg-gradient-to-br from-[#c2372d] to-[#FF6B55]",
-                            "bg-gradient-to-br from-[#831d16] to-[#E7473C]",
-                            "bg-gradient-to-r from-[#E7473C] to-[#c2372d]",
-                            "bg-gradient-to-r from-[#FF6B55] to-[#831d16]",
-                        ];
-                        const gradientIndex = (String(course.id || '').charCodeAt(0) || 0) % gradients.length;
-                        const gradient = gradients[gradientIndex];
+                                <Skeleton className="h-4 w-full" />
+                                <Skeleton className="h-4 w-5/6" />
+                                <Skeleton className="h-3 w-full mt-1" />
+                                <Skeleton className="h-3 w-4/5" />
+                                <Skeleton className="h-3 w-3/4" />
+                                <div className="flex items-center justify-between pt-3 mt-auto border-t border-slate-100">
+                                    <div className="flex gap-3">
+                                        <Skeleton className="h-3 w-10" />
+                                        <Skeleton className="h-3 w-10" />
+                                    </div>
+                                    <Skeleton className="h-3 w-4" />
+                                </div>
+                            </div>
+                        </Card>
+                    ))
+                ) : displayed.length > 0 ? (
+                    displayed.map((course) => {
+                        const [from, to] = COVER_GRADIENTS[(String(course.id || "").charCodeAt(0) || 0) % COVER_GRADIENTS.length];
+                        const authorName = course.instructor || course.user_name || "Instructor";
+                        const initials = getInitials(authorName);
 
                         return (
-                            <Link key={course.id} href={`/MisCursos/${course.id}`} className="grow">
-                                <Card
-                                    className="p-0 overflow-hidden rounded-lg border-none shadow
-                                    hover:shadow-lg hover:cursor-pointer transition-all duration-300
-                                    min-w-[300px] flex flex-col h-full gap-0"
-                                >
-                                    {/* Gradient Header */}
-                                    <div className={`${gradient} p-6 text-white flex-shrink-0`}>
-                                        <div className="flex items-start justify-between gap-3">
-                                            <div className="flex-1">
-                                                <h3 className="text-lg font-bold line-clamp-2 mb-2">
-                                                    {course.title || "Sin título"}
-                                                </h3>
-                                                <p className="text-sm opacity-90 line-clamp-1">
-                                                    Tu curso
-                                                </p>
-                                            </div>
-                                        </div>
+                            <Link key={course.id} href={`/MisCursos/${course.id}`} className="block group">
+                                <Card className="p-0 overflow-hidden border border-slate-100 shadow-sm hover:shadow-lg hover:border-[#E7473C]/30 transition-all duration-300 flex flex-col h-full gap-0">
+
+                                    {/* Cover */}
+                                    <div
+                                        className="relative h-36 shrink-0 flex items-center justify-center overflow-hidden"
+                                        style={{ background: `linear-gradient(135deg, ${from}, ${to})` }}
+                                    >
+                                        {/* Decorative circles */}
+                                        <div className="absolute -right-8 -top-8 w-36 h-36 rounded-full bg-white/10" />
+                                        <div className="absolute -left-4 -bottom-6 w-24 h-24 rounded-full bg-white/10" />
+                                        <div className="absolute right-8 bottom-4 w-10 h-10 rounded-full bg-white/8" />
+
+                                        {/* Book icon */}
+                                        <BookOpen
+                                            className="w-14 h-14 text-white/25 group-hover:text-white/35 transition-all duration-300 group-hover:scale-110"
+                                            strokeWidth={1}
+                                        />
                                     </div>
 
                                     {/* Content */}
-                                    <div className="flex-1 p-5 flex flex-col">
-                                        <p className="text-sm text-gray-600 line-clamp-3 mb-4 flex-1">
-                                            {truncateDescription(course.description)}
+                                    <div className="flex flex-col flex-1 p-4">
+                                        {/* Author */}
+                                        <div className="flex items-center gap-2 mb-3">
+                                            <span
+                                                className="inline-flex items-center justify-center w-7 h-7 rounded-full text-white text-[10px] font-bold shrink-0"
+                                                style={{ background: `linear-gradient(135deg, ${from}, ${to})` }}
+                                            >
+                                                {initials}
+                                            </span>
+                                            <span className="text-xs text-slate-500 truncate">{authorName}</span>
+                                        </div>
+
+                                        {/* Title */}
+                                        <h3 className="text-sm font-semibold text-slate-800 line-clamp-2 mb-2 leading-snug group-hover:text-[#831d16] transition-colors duration-200">
+                                            {course.title || "Sin título"}
+                                        </h3>
+
+                                        {/* Description */}
+                                        <p className="text-xs text-slate-500 line-clamp-3 flex-1 leading-relaxed">
+                                            {course.description || "Sin descripción disponible."}
                                         </p>
 
-                                        {/* Stats Footer */}
-                                        <div className="flex items-center justify-between pt-4 border-t border-gray-200">
-                                            <div className="flex gap-4 text-sm">
+                                        {/* Stats footer */}
+                                        <div className="flex items-center justify-between pt-3 mt-3 border-t border-slate-100">
+                                            <div className="flex gap-3">
                                                 <button
-                                                    onClick={(e) => {
-                                                        e.preventDefault();
-                                                        handleLikeCourse(course.id);
-                                                    }}
-                                                    className="flex items-center gap-1 text-gray-600 hover:text-red-500 transition-colors"
+                                                    onClick={(e) => { e.preventDefault(); handleLikeCourse(course.id); }}
+                                                    className="flex items-center gap-1 text-slate-400 hover:text-red-500 transition-colors"
                                                 >
-                                                    <Heart 
-                                                        className={`w-4 h-4 ${likedCourses.has(course.id) ? "fill-current text-red-500" : ""}`}
-                                                    />
+                                                    <Heart className={`w-3.5 h-3.5 ${likedCourses.has(course.id) ? "fill-current text-red-500" : ""}`} />
                                                     <span className="text-xs">0</span>
                                                 </button>
+                                                <div className="flex items-center gap-1 text-slate-400">
+                                                    {iconEye({ size: 14 })}
+                                                    <span className="text-xs">{course.visits_count || 0}</span>
+                                                </div>
                                             </div>
                                             <button
-                                                onClick={(e) => {
-                                                    e.preventDefault();
-                                                    handleShareCourse(course.id);
-                                                }}
-                                                className="flex items-center gap-1 text-gray-600 hover:text-blue-500 transition-colors"
+                                                onClick={(e) => { e.preventDefault(); handleShareCourse(course.id); }}
+                                                className="text-slate-400 hover:text-[#E7473C] transition-colors"
+                                                title="Compartir"
                                             >
-                                                <Share2 className="w-4 h-4" />
+                                                <Share2 className="w-3.5 h-3.5" />
                                             </button>
                                         </div>
                                     </div>
@@ -330,32 +324,19 @@ export default function MisCursos() {
                         );
                     })
                 ) : (
-                    <div className="w-full flex items-center justify-center py-20">
-                        <div className="text-center max-w-md">
+                    <div className="col-span-full flex items-center justify-center py-24">
+                        <div className="text-center max-w-sm">
                             <div className="flex justify-center mb-4">
-                                <div className="p-4 bg-gray-100 rounded-full">
-                                    <svg
-                                        className="w-12 h-12 text-gray-400"
-                                        fill="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path d="M6 4a2 2 0 012-2h8a2 2 0 012 2v16a1 1 0 01-1.55.894L12 17.69l-4.45 3.104A1 1 0 016 20V4z" />
-                                    </svg>
+                                <div className="p-4 bg-slate-100 rounded-full">
+                                    <BookOpen className="w-10 h-10 text-slate-400" strokeWidth={1.5} />
                                 </div>
                             </div>
-                            <h3 className="text-lg font-semibold text-gray-700 mb-2">
+                            <h3 className="text-base font-semibold text-slate-700 mb-1">
                                 No hay cursos disponibles
                             </h3>
-                            <p className="text-gray-500 text-sm mb-6">
-                                Aún no has creado ningún curso. ¡Comienza a compartir tu conocimiento!
+                            <p className="text-slate-500 text-sm">
+                                No encontramos resultados con los criterios de búsqueda. Intenta con otros términos.
                             </p>
-                            <Button
-                                className="bg-[#E7473C] hover:bg-[#831d16] text-white
-                                hover:text-white hover:cursor-pointer rounded"
-                                onClick={handleOnAddCourse}
-                            >
-                                + Crear tu primer curso
-                            </Button>
                         </div>
                     </div>
                 )}
@@ -363,15 +344,15 @@ export default function MisCursos() {
             {displayCount < allCourses.length && !loadingCourses && (
                 <div className="flex justify-center mt-8">
                     <Button
-                        onClick={handleLoadMore}
-                        disabled={loadingMore}
-                        className="bg-[#E7473C] hover:bg-[#831d16] rounded text-white
-                        hover:text-white hover:cursor-pointer w-full"
+                        onClick={() => setDisplayCount((c) => c + ITEMS_PER_PAGE)}
+                        variant="outline"
+                        className="border-slate-200 text-slate-600 hover:border-[#E7473C] hover:text-[#E7473C] transition-colors w-full"
                     >
-                        {loadingMore ? "Cargando..." : "Cargar más"}
+                        Cargar más · {filtered.length - displayCount} restantes
                     </Button>
                 </div>
             )}
+            </section>
         </main>
     );
 }

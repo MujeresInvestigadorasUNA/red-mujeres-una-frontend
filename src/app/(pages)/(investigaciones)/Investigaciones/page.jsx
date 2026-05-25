@@ -1,9 +1,8 @@
 "use client";
 import { useUser } from "@/app/contexts/UserContext";
-import { SearchIcon, Heart, Share2, EyeOff, FileText, MoreVertical } from "lucide-react";
+import { Heart, Share2, EyeOff, FileText, MoreVertical, Search, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { ButtonGroup } from "@/components/ui/button-group";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -12,16 +11,8 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-    Select,
-    SelectContent,
-    SelectGroup,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
-import { iconClockwise, iconEye } from "@/app/assets/icons";
+import { iconEye } from "@/app/assets/icons";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { getResearch, likeResearch, unlikeResearch } from "@/lib/api/research";
@@ -73,7 +64,6 @@ export default function Investigaciones() {
     const [loading, setLoading] = useState(true);
     const [loadingMore, setLoadingMore] = useState(false);
     const [displayCount, setDisplayCount] = useState(9);
-    const [filterType, setFilterType] = useState("");
     const [searchQuery, setSearchQuery] = useState("");
     const [likedResearch, setLikedResearch] = useState(new Set());
     const [likesCounts, setLikesCounts] = useState({});
@@ -114,30 +104,21 @@ export default function Investigaciones() {
     const applyFilter = (research, query) => {
         if (!query.trim()) return research;
         const q = query.toLowerCase();
-        return research.filter((item) => {
-            switch (filterType) {
-                case "investigador":
-                    return item.author?.toLowerCase().includes(q) || item.user_name?.toLowerCase().includes(q) || false;
-                case "titulo":
-                    return item.title?.toLowerCase().includes(q) || false;
-                case "descripcion":
-                    return item.description?.toLowerCase().includes(q) || false;
-                default:
-                    return true;
-            }
-        });
+        return research.filter((item) =>
+            item.author?.toLowerCase().includes(q) ||
+            item.user_name?.toLowerCase().includes(q) ||
+            item.title?.toLowerCase().includes(q) ||
+            item.description?.toLowerCase().includes(q)
+        );
     };
 
-    const handleSearch = () => {
-        const filtered = applyFilter(allResearch, searchQuery);
-        setDisplayedResearch(filtered.slice(0, ITEMS_PER_PAGE));
+    const handleSearchChange = (e) => {
+        setSearchQuery(e.target.value);
         setDisplayCount(ITEMS_PER_PAGE);
     };
 
-    const handleFilterChange = (value) => {
-        setFilterType(value);
+    const handleClear = () => {
         setSearchQuery("");
-        setDisplayedResearch(allResearch.slice(0, ITEMS_PER_PAGE));
         setDisplayCount(ITEMS_PER_PAGE);
     };
 
@@ -148,6 +129,18 @@ export default function Investigaciones() {
             () => toast.error("Error al copiar la URL"),
         );
     };
+
+    const q = searchQuery.toLowerCase().trim();
+    const filtered = allResearch.filter(
+        (item) =>
+            !q ||
+            item.author?.toLowerCase().includes(q) ||
+            item.user_name?.toLowerCase().includes(q) ||
+            item.title?.toLowerCase().includes(q) ||
+            item.description?.toLowerCase().includes(q)
+    );
+    const displayed = filtered.slice(0, displayCount);
+    const hasMore = filtered.length > displayCount;
 
     const handleLike = async (researchId) => {
         if (!user) { toast.error("Debes iniciar sesión para dar like"); return; }
@@ -178,65 +171,62 @@ export default function Investigaciones() {
     };
 
     return (
-        <main className="grow px-6 md:px-12 xl:px-20 py-10 toolsSection">
+        <main className="grow">
             {/* Header */}
-            <div className="mb-6">
-                <h1 className="text-2xl font-bold text-slate-800">Investigaciones</h1>
-                <p className="mt-1.5 text-sm text-slate-500">
+            <section
+                className="px-6 md:px-16 xl:px-20 py-8"
+                style={{ background: "linear-gradient(135deg, #831d16, #E7473C)" }}
+            >
+                <div className="flex items-center gap-2 mb-1">
+                    <FileText className="w-4 h-4 text-white/60" />
+                    <span className="text-white/60 text-xs font-medium uppercase tracking-wide">
+                        Investigación
+                    </span>
+                </div>
+                <h1 className="text-2xl font-bold text-white">Investigaciones</h1>
+                <p className="text-white/70 text-sm mt-1 max-w-xl leading-relaxed">
                     Encuentra aquí todas las investigaciones realizadas por las integrantes de la Red de Mujeres Académicas.
                 </p>
-            </div>
+            </section>
 
             {/* Search & Filter bar */}
-            <div className="flex gap-2 mb-8">
-                <Select value={filterType} onValueChange={handleFilterChange}>
-                    <SelectTrigger className="w-44 bg-white rounded shrink-0">
-                        <SelectValue placeholder="Filtrar por" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectGroup>
-                            <SelectItem value="investigador">Investigadora</SelectItem>
-                            <SelectItem value="titulo">Título</SelectItem>
-                            <SelectItem value="descripcion">Descripción</SelectItem>
-                        </SelectGroup>
-                    </SelectContent>
-                </Select>
-                <ButtonGroup className="rounded bg-white w-full">
-                    <Input
-                        className="rounded"
-                        placeholder="Buscar investigaciones..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                    />
-                    <Button
-                        onClick={handleSearch}
-                        className="bg-[#E7473C] hover:bg-[#831d16] rounded text-white hover:text-white hover:cursor-pointer"
-                        variant="outline"
-                        aria-label="Buscar"
-                    >
-                        <SearchIcon />
-                    </Button>
-                </ButtonGroup>
-                <Button
-                    onClick={() => {
-                        setSearchQuery("");
-                        setFilterType("");
-                        setDisplayedResearch(allResearch.slice(0, ITEMS_PER_PAGE));
-                        setDisplayCount(ITEMS_PER_PAGE);
-                    }}
-                    className="bg-white hover:bg-slate-50 rounded text-[#831d16] hover:text-[#831d16] hover:cursor-pointer shadow shrink-0"
-                >
-                    {iconClockwise({})}
-                </Button>
+            <div className="px-6 md:px-16 xl:px-20 pt-8">
+                <div className="flex gap-2 mb-5 max-w-sm">
+                    <div className="relative flex-1">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+                        <Input
+                            placeholder="Buscar investigaciones..."
+                            value={searchQuery}
+                            onChange={handleSearchChange}
+                            className="pl-9 h-9 text-sm bg-white border-slate-200"
+                        />
+                    </div>
+                    {searchQuery && (
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={handleClear}
+                            className="h-9 w-9 text-slate-400 hover:text-slate-600"
+                        >
+                            <RefreshCw className="w-3.5 h-3.5" />
+                        </Button>
+                    )}
+                </div>
+
+                {!loading && (
+                    <p className="text-xs text-slate-400 mb-5">
+                        {filtered.length} investigación{filtered.length !== 1 ? "es" : ""}
+                        {searchQuery && ` para "${searchQuery}"`}
+                    </p>
+                )}
             </div>
 
             {/* Cards grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 px-6 md:px-16 xl:px-20 pb-10">
                 {loading ? (
                     [...Array(9)].map((_, i) => <ResearchCardSkeleton key={i} />)
-                ) : displayedResearch.length > 0 ? (
-                    displayedResearch.map((item) => {
+                ) : displayed.length > 0 ? (
+                    displayed.map((item) => {
                         const [from, to] = COVER_GRADIENTS[(String(item.id || "").charCodeAt(0) || 0) % COVER_GRADIENTS.length];
                         const authorName = item.author || item.user_name || "Investigadora";
                         const initials = getInitials(authorName);
@@ -359,7 +349,7 @@ export default function Investigaciones() {
                                 No hay investigaciones disponibles
                             </h3>
                             <p className="text-slate-500 text-sm">
-                                No encontramos resultados con los criterios de búsqueda. Intenta con otros términos o filtros.
+                                No encontramos resultados con los criterios de búsqueda. Intenta con otros términos.
                             </p>
                         </div>
                     </div>
@@ -367,14 +357,14 @@ export default function Investigaciones() {
             </div>
 
             {/* Load more */}
-            {displayCount < allResearch.length && !loading && (
+            {hasMore && !loading && (
                 <div className="flex justify-center mt-8">
                     <Button
-                        onClick={handleLoadMore}
-                        disabled={loadingMore}
-                        className="bg-[#E7473C] hover:bg-[#831d16] rounded text-white hover:text-white hover:cursor-pointer px-10"
+                        onClick={() => setDisplayCount((c) => c + ITEMS_PER_PAGE)}
+                        variant="outline"
+                        className="border-slate-200 text-slate-600 hover:border-[#E7473C] hover:text-[#E7473C] transition-colors"
                     >
-                        {loadingMore ? "Cargando..." : "Cargar más"}
+                        Cargar más · {filtered.length - displayCount} restantes
                     </Button>
                 </div>
             )}

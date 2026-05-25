@@ -158,7 +158,7 @@ export default function Foros() {
                             const [gradFrom, gradTo] = AVATAR_GRADIENTS[i % AVATAR_GRADIENTS.length];
                             return (
                                 <Link key={forum.id || i} href={`/Foros/${forum.id}`}>
-                                    <Card className="p-4 border border-slate-100 hover:border-[#E7473C]/40 hover:shadow-md transition-all duration-200 group h-full flex flex-col gap-3">
+                                    <Card className="p-4 border border-slate-100 hover:border-slate-300 hover:shadow-sm transition-all duration-200 group h-full flex flex-col gap-3">
                                         {/* Avatar + nombre */}
                                         <div className="flex items-center gap-3">
                                             <div
@@ -178,7 +178,7 @@ export default function Foros() {
                                                 )}
                                             </div>
                                             <div className="flex flex-col min-w-0">
-                                                <span className="text-sm font-semibold text-slate-800 truncate group-hover:text-[#E7473C] transition-colors duration-200">
+                                                <span className="text-sm font-semibold text-slate-800 truncate group-hover:text-[#555] transition-colors duration-200">
                                                     {fullName}
                                                 </span>
                                                 {forum.user_profession && (

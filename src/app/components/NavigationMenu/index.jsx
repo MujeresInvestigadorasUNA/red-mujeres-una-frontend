@@ -182,7 +182,7 @@ export function CustomNavigationMenu() {
                         value={desktopMenuValue}
                         onValueChange={setDesktopMenuValue}
                     >
-                        <NavigationMenuList>
+                        <NavigationMenuList className="gap-8">
                             <NavigationMenuItem>
                                 <NavigationMenuTrigger
                                     className="bg-transparent text-white"
@@ -291,6 +291,31 @@ export function CustomNavigationMenu() {
                                     </ul>
                                 </NavigationMenuContent>
                             </NavigationMenuItem>
+                            {user?.user_type_id === 3 && (
+                                <NavigationMenuItem>
+                                    <NavigationMenuTrigger
+                                        className="bg-transparent hover:bg-transparent
+                                    focus:bg-transparent active:bg-transparent text-white"
+                                        onClick={(e) => e.preventDefault()}
+                                    >
+                                        Administración
+                                    </NavigationMenuTrigger>
+                                    <NavigationMenuContent>
+                                        <ul className="grid w-75 gap-4">
+                                            <li>
+                                                <NavigationMenuLink asChild>
+                                                    <Link href="/Usuarios" onClick={closeDesktopMenu}>
+                                                        <div className="font-medium">Usuarios</div>
+                                                        <div className="text-muted-foreground">
+                                                            Gestiona todos los usuarios de la plataforma.
+                                                        </div>
+                                                    </Link>
+                                                </NavigationMenuLink>
+                                            </li>
+                                        </ul>
+                                    </NavigationMenuContent>
+                                </NavigationMenuItem>
+                            )}
                         </NavigationMenuList>
                         <NavigationMenuViewport />
                     </NavigationMenu>
@@ -411,6 +436,9 @@ export function CustomNavigationMenu() {
                             <Link href="/MapaDispersion3D" onClick={() => setMobileMenuOpen(false)}>Mapa Dispersión 3D</Link>
                             <Link href="/Cursos" onClick={() => setMobileMenuOpen(false)}>Explorar Cursos</Link>
                             <Link href="/MisCursos" onClick={() => setMobileMenuOpen(false)}>Mis Cursos</Link>
+                            {user?.user_type_id === 3 && (
+                                <Link href="/Usuarios" onClick={() => setMobileMenuOpen(false)}>Usuarios</Link>
+                            )}
                         </>
                     ) : (
                         <>

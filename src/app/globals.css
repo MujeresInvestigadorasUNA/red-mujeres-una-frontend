@@ -137,3 +137,16 @@
     @apply bg-background text-foreground;
     }
 }
+
+/* Center NavigationMenu dropdowns */
+[data-radix-navigation-menu-viewport] {
+  position: fixed !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  width: fit-content !important;
+  max-width: 100vw !important;
+}
+
+[data-radix-navigation-menu-content] {
+  width: auto !important;
+}
