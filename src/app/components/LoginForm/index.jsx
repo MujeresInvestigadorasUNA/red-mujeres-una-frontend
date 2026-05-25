@@ -2,7 +2,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import { iconEye, iconEyeSlash, iconReturn } from "@/app/assets/icons";
+import { iconEye, iconEyeSlash } from "@/app/assets/icons";
 import { 
     InputGroup, 
     InputGroupAddon, 
@@ -62,12 +62,6 @@ export default function LoginForm() {
 
     return (
         <>
-            <Link
-                href="/" 
-                className="absolute top-5 left-5"
-            >
-                {iconReturn({ size: 30, color: "white" })}
-            </Link>
             <Image 
                 src="/images/logo.png" 
                 alt="Logo" 

@@ -2,7 +2,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import { iconReturn } from "@/app/assets/icons";
 import { toast } from "sonner";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -54,9 +53,6 @@ export default function ForgotPasswordForm() {
 
     return (
         <>
-            <Link href="/" className="absolute top-5 left-5">
-                {iconReturn({ size: 30, color: "white" })}
-            </Link>
             <Image
                 src="/images/logo.png"
                 alt="Logo"
