@@ -416,7 +416,7 @@ export default function Home() {
           </div>
         ) : forumCards.length > 0 ? (
           <Carousel opts={{ align: "start", dragFree: true }} className="w-full">
-            <CarouselContent className="-ml-2">
+            <CarouselContent className="-ml-2 px-4">
               {forumCards.map((forum, i) => (
                 <CarouselItem key={i} className="pl-2 basis-auto">
                   <Link

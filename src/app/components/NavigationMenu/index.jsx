@@ -11,7 +11,6 @@ import {
     NavigationMenuLink,
     NavigationMenuList,
     NavigationMenuTrigger,
-    NavigationMenuViewport
 } from "@/components/ui/navigation-menu"
 import Image from "next/image"
 import { useUser } from "@/app/contexts/UserContext"
@@ -103,6 +102,19 @@ export function CustomNavigationMenu() {
         return `La investigación \"${title}\" se está procesando.`;
     };
 
+    const DesktopMenuItem = ({ href, title, description }) => (
+        <li>
+            <NavigationMenuLink
+                render={
+                    <Link href={href} onClick={closeDesktopMenu}>
+                        <div className="font-medium">{title}</div>
+                        <div className="text-muted-foreground">{description}</div>
+                    </Link>
+                }
+            />
+        </li>
+    );
+
     React.useEffect(() => {
         refreshNotifications();
     }, [refreshNotifications]);
@@ -176,148 +188,114 @@ export function CustomNavigationMenu() {
                         className="border-[#8A192A] border-3 rounded-full shadow"
                     />
                 </Link>
+
                 {user ? (
                     <NavigationMenu
                         className="hidden md:flex"
+                        viewport={false}
                         value={desktopMenuValue}
                         onValueChange={setDesktopMenuValue}
                     >
-                        <NavigationMenuList className="gap-8">
+                        <NavigationMenuList>
                             <NavigationMenuItem>
                                 <NavigationMenuTrigger
                                     className="bg-transparent text-white"
-                                    onClick={(e) => e.preventDefault()}
+                                    onClick={(event) => event.preventDefault()}
                                 >
                                     Foros
                                 </NavigationMenuTrigger>
                                 <NavigationMenuContent>
-                                    <ul className="grid w-75 gap-4">
-                                        <li>
-                                            <NavigationMenuLink asChild>
-                                                <Link href="/Foros" onClick={closeDesktopMenu}>
-                                                    <div className="font-medium">Explorar Foros</div>
-                                                    <div className="text-muted-foreground">
-                                                        Explora todos los foros publicados por la comunidad.
-                                                    </div>
-                                                </Link>
-                                            </NavigationMenuLink>
-                                            <NavigationMenuLink asChild>
-                                                <Link href="/MiForo" onClick={closeDesktopMenu}>
-                                                    <div className="font-medium">Mi Foro</div>
-                                                    <div className="text-muted-foreground">
-                                                        Accede a tu foro personal con tus investigaciones y cursos.
-                                                    </div>
-                                                </Link>
-                                            </NavigationMenuLink>
-                                        </li>
+                                    <ul className="grid w-96 gap-2">
+                                        <DesktopMenuItem
+                                            href="/Foros"
+                                            title="Explorar Foros"
+                                            description="Explora todos los foros publicados por la comunidad."
+                                        />
+                                        <DesktopMenuItem
+                                            href="/MiForo"
+                                            title="Mi Foro"
+                                            description="Accede a tu foro personal con tus investigaciones y cursos."
+                                        />
                                     </ul>
                                 </NavigationMenuContent>
                             </NavigationMenuItem>
+
                             <NavigationMenuItem>
                                 <NavigationMenuTrigger
-                                    className="bg-transparent hover:bg-transparent
-                                focus:bg-transparent active:bg-transparent text-white"
-                                    onClick={(e) => e.preventDefault()}
+                                    className="bg-transparent hover:bg-transparent focus:bg-transparent active:bg-transparent text-white"
+                                    onClick={(event) => event.preventDefault()}
                                 >
                                     Investigaciones
                                 </NavigationMenuTrigger>
                                 <NavigationMenuContent>
-                                    <ul className="grid w-75 gap-4">
-                                        <li>
-                                            <NavigationMenuLink asChild>
-                                                <Link href="/Investigaciones" onClick={closeDesktopMenu}>
-                                                    <div className="font-medium">Explorar Investigaciones</div>
-                                                    <div className="text-muted-foreground">
-                                                        Explora todas las investigaciones publicadas por la comunidad.
-                                                    </div>
-                                                </Link>
-                                            </NavigationMenuLink>
-                                            <NavigationMenuLink asChild>
-                                                <Link href="/MisInvestigaciones" onClick={closeDesktopMenu}>
-                                                    <div className="font-medium">Mis Investigaciones</div>
-                                                    <div className="text-muted-foreground">
-                                                        Accede a tus investigaciones personales y gestiona tus publicaciones.
-                                                    </div>
-                                                </Link>
-                                            </NavigationMenuLink>
-                                            <NavigationMenuLink asChild>
-                                                <Link href="/MapaDispersion" onClick={closeDesktopMenu}>
-                                                    <div className="font-medium">Mapa de Dispersión 2D</div>
-                                                    <div className="text-muted-foreground">
-                                                        Gráfico de dispersión por similitud semántica con zoom y pan.
-                                                    </div>
-                                                </Link>
-                                            </NavigationMenuLink>
-                                            <NavigationMenuLink asChild>
-                                                <Link href="/MapaDispersion3D" onClick={closeDesktopMenu}>
-                                                    <div className="font-medium">Mapa de Dispersión 3D</div>
-                                                    <div className="text-muted-foreground">
-                                                        Vista 3D interactiva con mayor fidelidad semántica (3 componentes PCA).
-                                                    </div>
-                                                </Link>
-                                            </NavigationMenuLink>
-                                        </li>
+                                    <ul className="grid w-96 gap-2">
+                                        <DesktopMenuItem
+                                            href="/Investigaciones"
+                                            title="Explorar Investigaciones"
+                                            description="Explora todas las investigaciones publicadas por la comunidad."
+                                        />
+                                        <DesktopMenuItem
+                                            href="/MisInvestigaciones"
+                                            title="Mis Investigaciones"
+                                            description="Accede a tus investigaciones personales y gestiona tus publicaciones."
+                                        />
+                                        <DesktopMenuItem
+                                            href="/MapaDispersion"
+                                            title="Mapa de Dispersión 2D"
+                                            description="Gráfico de dispersión por similitud semántica con zoom y pan."
+                                        />
+                                        <DesktopMenuItem
+                                            href="/MapaDispersion3D"
+                                            title="Mapa de Dispersión 3D"
+                                            description="Vista 3D interactiva con mayor fidelidad semántica (3 componentes PCA)."
+                                        />
                                     </ul>
                                 </NavigationMenuContent>
                             </NavigationMenuItem>
+
                             <NavigationMenuItem>
                                 <NavigationMenuTrigger
-                                    className="bg-transparent hover:bg-transparent
-                                focus:bg-transparent active:bg-transparent text-white"
-                                    onClick={(e) => e.preventDefault()}
+                                    className="bg-transparent hover:bg-transparent focus:bg-transparent active:bg-transparent text-white"
+                                    onClick={(event) => event.preventDefault()}
                                 >
                                     Cursos
                                 </NavigationMenuTrigger>
                                 <NavigationMenuContent>
-                                    <ul className="grid w-75 gap-4">
-                                        <li>
-                                            <NavigationMenuLink asChild>
-                                                <Link href="/Cursos" onClick={closeDesktopMenu}>
-                                                    <div className="font-medium">Explorar Cursos</div>
-                                                    <div className="text-muted-foreground">
-                                                        Explora todos los cursos disponibles en la plataforma.
-                                                    </div>
-                                                </Link>
-                                            </NavigationMenuLink>
-                                            <NavigationMenuLink asChild>
-                                                <Link href="/MisCursos" onClick={closeDesktopMenu}>
-                                                    <div className="font-medium">Mis Cursos</div>
-                                                    <div className="text-muted-foreground">
-                                                        Accede a tus cursos personales y gestiona tus inscripciones.
-                                                    </div>
-                                                </Link>
-                                            </NavigationMenuLink>
-                                        </li>
+                                    <ul className="grid w-96 gap-2">
+                                        <DesktopMenuItem
+                                            href="/Cursos"
+                                            title="Explorar Cursos"
+                                            description="Explora todos los cursos disponibles en la plataforma."
+                                        />
+                                        <DesktopMenuItem
+                                            href="/MisCursos"
+                                            title="Mis Cursos"
+                                            description="Accede a tus cursos personales y gestiona tus inscripciones."
+                                        />
                                     </ul>
                                 </NavigationMenuContent>
                             </NavigationMenuItem>
+
                             {user?.user_type_id === 3 && (
                                 <NavigationMenuItem>
                                     <NavigationMenuTrigger
-                                        className="bg-transparent hover:bg-transparent
-                                    focus:bg-transparent active:bg-transparent text-white"
-                                        onClick={(e) => e.preventDefault()}
+                                        className="bg-transparent hover:bg-transparent focus:bg-transparent active:bg-transparent text-white"
+                                        onClick={(event) => event.preventDefault()}
                                     >
                                         Administración
                                     </NavigationMenuTrigger>
                                     <NavigationMenuContent>
-                                        <ul className="grid w-75 gap-4">
-                                            <li>
-                                                <NavigationMenuLink asChild>
-                                                    <Link href="/Usuarios" onClick={closeDesktopMenu}>
-                                                        <div className="font-medium">Usuarios</div>
-                                                        <div className="text-muted-foreground">
-                                                            Gestiona todos los usuarios de la plataforma.
-                                                        </div>
-                                                    </Link>
-                                                </NavigationMenuLink>
-                                            </li>
+                                        <ul className="grid w-75 gap-2">
+                                            <DesktopMenuItem
+                                                href="/Usuarios"
+                                                title="Usuarios"
+                                                description="Gestiona todos los usuarios de la plataforma."
+                                            />
                                         </ul>
                                     </NavigationMenuContent>
                                 </NavigationMenuItem>
                             )}
                         </NavigationMenuList>
-                        <NavigationMenuViewport />
                     </NavigationMenu>
                 ) : (
                     <div className="hidden md:flex items-center gap-6 text-white">
@@ -332,16 +310,18 @@ export function CustomNavigationMenu() {
                         </Link>
                     </div>
                 )}
+
                 <div className="flex items-center justify-end gap-2 min-w-40">
                     <button
                         type="button"
                         className="rounded bg-[#b62116] px-3 py-1 text-sm font-medium shadow md:hidden"
-                        onClick={() => setMobileMenuOpen((prev) => !prev)}
+                        onClick={() => setMobileMenuOpen((previous) => !previous)}
                         aria-label="Abrir menú"
                         aria-expanded={mobileMenuOpen}
                     >
                         Menú
                     </button>
+
                     {user ? (
                         <>
                             <button
@@ -363,10 +343,10 @@ export function CustomNavigationMenu() {
                                     </span>
                                 )}
                             </button>
+
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                    <Button className="hidden bg-[#b62116] text-white hover:bg-red-700
-                                transition hover:cursor-pointer rounded-full w-10 h-10 p-0 md:flex overflow-hidden">
+                                    <Button className="hidden bg-[#b62116] text-white hover:bg-red-700 transition hover:cursor-pointer rounded-full w-10 h-10 p-0 md:flex overflow-hidden">
                                         {userPhotoUrl ? (
                                             <img
                                                 src={userPhotoUrl}
@@ -424,6 +404,7 @@ export function CustomNavigationMenu() {
                     )}
                 </div>
             </div>
+
             {mobileMenuOpen && (
                 <div className="mt-3 grid gap-2 rounded bg-[#b62116] p-3 text-sm shadow md:hidden">
                     {user ? (
@@ -447,6 +428,7 @@ export function CustomNavigationMenu() {
                             <Link href="/Cursos" onClick={() => setMobileMenuOpen(false)}>Cursos</Link>
                         </>
                     )}
+
                     <div className="mt-2 border-t border-white/30 pt-2">
                         {user ? (
                             <div className="grid gap-2">
@@ -468,6 +450,7 @@ export function CustomNavigationMenu() {
                     </div>
                 </div>
             )}
+
             {notificationsOpen && (
                 <>
                     <div
@@ -491,6 +474,7 @@ export function CustomNavigationMenu() {
                                 ×
                             </button>
                         </div>
+
                         <div className="mt-3 flex justify-end">
                             <button
                                 type="button"
@@ -500,6 +484,7 @@ export function CustomNavigationMenu() {
                                 Marcar todo como leído
                             </button>
                         </div>
+
                         <div className="mt-3 text-sm text-gray-700 max-h-[calc(100vh-10rem)] overflow-y-auto pr-1">
                             {notifications.length === 0 ? (
                                 <div className="py-10 text-center text-gray-500">No hay notificaciones</div>
@@ -508,6 +493,7 @@ export function CustomNavigationMenu() {
                                     {notifications.map((item) => {
                                         const config = statusConfig[item.status] || statusConfig.processing;
                                         const canNavigate = item.type === "research" && item.researchId && item.status === "ready";
+
                                         return (
                                             <button
                                                 key={item.id}
@@ -544,5 +530,5 @@ export function CustomNavigationMenu() {
                 </>
             )}
         </nav>
-    )
+    );
 }
