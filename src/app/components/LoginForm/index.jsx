@@ -63,12 +63,12 @@ export default function LoginForm() {
     return (
         <>
             <Image 
-                src="/images/logo.png" 
+                src="/images/Logo_Transparente.png" 
                 alt="Logo" 
                 width={3000} 
                 height={3000}
-                className="w-40 h-40 object-cover rounded-full border-4 
-                border-white shadow-lg" 
+                className="w-60 h-50 object-cover border-4 bg-white rounded
+                border-white shadow-lg pt-3 px-2 rounded" 
             />
             <form 
                 className="flex flex-col gap-3 bg-[#E7473C] rounded p-4 

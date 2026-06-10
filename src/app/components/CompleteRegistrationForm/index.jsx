@@ -268,13 +268,13 @@ export default function CompleteRegistrationForm() {
         {iconReturn({ size: 30 })}
       </Link>
       <section className="w-1/2 toolsSection bg-[#F0F0F0]">
-        <Image
-          src="/images/logo.png"
-          alt="Portada de la Red de Mujeres Academicas UNA"
-          width={3000}
+        <Image 
+          src="/images/Logo_Transparente.png" 
+          alt="Logo" 
+          width={3000} 
           height={3000}
-          className="w-50 h-50 m-auto mt-10"
-          priority
+          className="w-60 h-50 object-cover border-4 bg-white rounded
+          border-white shadow-lg pt-3 px-2 rounded" 
         />
         <h1 className="text-3xl font-bold text-center text-[#E7473C]">
           Red de Mujeres Academicas UNA
