@@ -391,14 +391,14 @@ export default function Home() {
       </section>
 
       {/* ── Foros de Investigadoras ───────────────────────────────── */}
-      <section className="px-6 md:px-16 xl:px-20 py-5 border-b border-slate-100 bg-white">
+      <section className="bg-[#E7473C] px-6 md:px-16 xl:px-20 py-5 text-[#F0F0F0] mainSection">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-base font-semibold text-slate-800">
+          <h2 className="text-base font-semibold text-white">
             Foros de Investigadoras
           </h2>
           <Link
             href="/Foros"
-            className="text-xs text-[#E7473C] hover:text-[#831d16] flex items-center gap-1 transition-colors"
+            className="text-xs font-medium text-white/80 hover:text-white flex items-center gap-1 transition-colors"
           >
             Ver todos <ArrowRight className="w-3 h-3" />
           </Link>
@@ -408,9 +408,9 @@ export default function Home() {
           <div className="flex gap-4 overflow-hidden">
             {[...Array(6)].map((_, i) => (
               <div key={i} className="flex flex-col items-center gap-2 shrink-0 w-20">
-                <Skeleton className="w-14 h-14 rounded-full" />
-                <Skeleton className="h-3 w-16" />
-                <Skeleton className="h-3 w-12" />
+                <Skeleton className="w-14 h-14 rounded-full bg-white/20" />
+                <Skeleton className="h-3 w-16 bg-white/20" />
+                <Skeleton className="h-3 w-12 bg-white/20" />
               </div>
             ))}
           </div>
@@ -421,9 +421,9 @@ export default function Home() {
                 <CarouselItem key={i} className="pl-2 basis-auto">
                   <Link
                     href={forum.url}
-                    className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-slate-50 transition-colors w-19 group"
+                    className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-white/15 transition-colors w-19 group"
                   >
-                    <div className="w-14 h-14 rounded-full overflow-hidden shrink-0 ring-2 ring-transparent group-hover:ring-[#E7473C]/40 transition-all duration-200 bg-[#E7473C]/10 flex items-center justify-center">
+                    <div className="w-14 h-14 rounded-full overflow-hidden shrink-0 ring-2 ring-white/30 group-hover:ring-white/70 transition-all duration-200 bg-white/20 flex items-center justify-center">
                       {forum.photo ? (
                         <img
                           src={forum.photo}
@@ -431,23 +431,23 @@ export default function Home() {
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <span className="text-[#E7473C] font-bold text-base">
+                        <span className="font-bold text-base text-white">
                           {getInitials(forum.title)}
                         </span>
                       )}
                     </div>
-                    <span className="text-[11px] text-slate-600 font-medium text-center line-clamp-2 leading-tight group-hover:text-[#831d16] transition-colors">
+                    <span className="text-[11px] text-white/90 font-medium text-center line-clamp-2 leading-tight group-hover:text-white transition-colors">
                       {forum.title}
                     </span>
                   </Link>
                 </CarouselItem>
               ))}
             </CarouselContent>
-            <CarouselPrevious className="hover:cursor-pointer -left-4 border-slate-200 bg-white text-slate-600 shadow-sm hover:bg-slate-50 h-7 w-7" />
-            <CarouselNext className="hover:cursor-pointer -right-4 border-slate-200 bg-white text-slate-600 shadow-sm hover:bg-slate-50 h-7 w-7" />
+            <CarouselPrevious className="hover:cursor-pointer -left-4 border-white/30 bg-white/15 text-white shadow-sm hover:bg-white/25 h-7 w-7" />
+            <CarouselNext className="hover:cursor-pointer -right-4 border-white/30 bg-white/15 text-white shadow-sm hover:bg-white/25 h-7 w-7" />
           </Carousel>
         ) : (
-          <p className="text-slate-400 text-xs py-3">
+          <p className="text-white/60 text-xs py-3">
             No hay foros disponibles en este momento.
           </p>
         )}

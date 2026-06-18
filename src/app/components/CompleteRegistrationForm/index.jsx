@@ -176,33 +176,30 @@ export default function CompleteRegistrationForm() {
         return;
       }
 
-      let firebaseUser = auth?.currentUser;
-      if (!firebaseUser || firebaseUser.email !== verifiedEmail) {
-        const sessionRaw = signupSessionId
-          ? localStorage.getItem(`signup_session_${signupSessionId}`)
-          : null;
-        const sessionData = sessionRaw ? JSON.parse(sessionRaw) : null;
-        const temporaryPassword = sessionData?.temporaryPassword || "";
+      // Siempre re-autenticar justo antes de updatePassword para evitar auth/requires-recent-login
+      const sessionRaw = signupSessionId
+        ? localStorage.getItem(`signup_session_${signupSessionId}`)
+        : null;
+      const sessionData = sessionRaw ? JSON.parse(sessionRaw) : null;
+      const temporaryPassword = sessionData?.temporaryPassword || "";
 
-        if (!temporaryPassword) {
-          setError("No se encontro sesion de registro. Vuelve al paso 1 y envia otro link.");
+      if (!temporaryPassword) {
+        setError("No se encontro sesion de registro. Vuelve al paso 1 y envia otro link.");
+        return;
+      }
+
+      let firebaseUser;
+      try {
+        const signInResult = await signInWithEmailAndPassword(auth, verifiedEmail, temporaryPassword);
+        firebaseUser = signInResult.user;
+      } catch (signInErr) {
+        if (signInErr?.code === "auth/invalid-credential") {
+          if (signupSessionId) localStorage.removeItem(`signup_session_${signupSessionId}`);
+          localStorage.removeItem("signup_active_session_id");
+          setError("La sesion temporal de registro vencio o es invalida. Vuelve al paso 1 y solicita un nuevo link.");
           return;
         }
-
-        try {
-          const signInResult = await signInWithEmailAndPassword(auth, verifiedEmail, temporaryPassword);
-          firebaseUser = signInResult.user;
-        } catch (signInErr) {
-          if (signInErr?.code === "auth/invalid-credential") {
-            if (signupSessionId) {
-              localStorage.removeItem(`signup_session_${signupSessionId}`);
-            }
-            localStorage.removeItem("signup_active_session_id");
-            setError("La sesion temporal de registro vencio o es invalida. Vuelve al paso 1 y solicita un nuevo link.");
-            return;
-          }
-          throw signInErr;
-        }
+        throw signInErr;
       }
 
       await reload(firebaseUser);
@@ -269,11 +266,11 @@ export default function CompleteRegistrationForm() {
       </Link>
       <section className="w-1/2 toolsSection bg-[#F0F0F0]">
         <Image
-          src="/images/logo.png"
+          src="/images/Logo-Red-De-Mujeres-notext.png"
           alt="Portada de la Red de Mujeres Academicas UNA"
-          width={3000}
-          height={3000}
-          className="w-50 h-50 m-auto mt-10"
+          width={400}
+          height={400}
+          className="w-72 h-auto object-contain mx-auto mt-10"
           priority
         />
         <h1 className="text-3xl font-bold text-center text-[#E7473C]">
@@ -281,7 +278,7 @@ export default function CompleteRegistrationForm() {
         </h1>
         <p className="text-center mt-5 px-10 text-gray-600 text-lg">
           Plataforma para la visibilizacion, colaboracion y apoyo entre
-          mujeres academicas de la Universidad Nacional de Asuncion.
+          mujeres academicas de la Universidad Nacional de Costa Rica.
         </p>
         <div className="flex justify-center mt-5 gap-5">
           {iconInstagram({ size: 24, color: "#8A192A" })}

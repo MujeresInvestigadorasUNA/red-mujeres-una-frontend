@@ -18,6 +18,7 @@ import {
   signInWithEmailAndPassword,
 } from "firebase/auth";
 import { auth, hasFirebaseConfig } from "@/lib/firebase/client";
+import { cleanupIncompleteFirebaseUser } from "@/lib/api/auth";
 
 export default function SignUpForm() {
   const baseCompleteUrl =
@@ -115,6 +116,34 @@ export default function SignUpForm() {
         return;
       }
 
+      // Si hay una sesión guardada para este correo, reenviar verificación directamente
+      const existingActiveId = localStorage.getItem("signup_active_session_id");
+      if (existingActiveId) {
+        const existingSessionRaw = localStorage.getItem(`signup_session_${existingActiveId}`);
+        if (existingSessionRaw) {
+          try {
+            const existingSession = JSON.parse(existingSessionRaw);
+            if (existingSession?.email === email && existingSession?.temporaryPassword) {
+              const signInResult = await signInWithEmailAndPassword(
+                auth,
+                email,
+                existingSession.temporaryPassword
+              );
+              await sendEmailVerification(signInResult.user, {
+                url: buildVerificationRedirectUrl(existingActiveId),
+                handleCodeInApp: true,
+              });
+              setSignupSessionId(existingActiveId);
+              setVerificationLinkSent(true);
+              setSuccess("Ya iniciaste el proceso con este correo. Te reenviamos el link de verificacion.");
+              return;
+            }
+          } catch {
+            // La sesión guardada expiró o es inválida, continuar con flujo normal
+          }
+        }
+      }
+
       const sessionId = createSignupSessionId();
       const temporaryPassword = `Tmp#${Math.random().toString(36).slice(-10)}A1`;
 
@@ -142,6 +171,45 @@ export default function SignUpForm() {
       );
     } catch (err) {
       console.error(err);
+      if (err?.code === "auth/email-already-in-use") {
+        // Consultar al backend: ¿existe este correo en la BD?
+        try {
+          const cleanupRes = await cleanupIncompleteFirebaseUser({ email });
+          const cleanupData = await cleanupRes.json();
+
+          if (cleanupData.status === "conflict") {
+            // Correo ya registrado en la BD → no continuar
+            setError("Este correo ya tiene una cuenta registrada. Inicia sesion en lugar de registrarte.");
+            setVerificationLinkSent(true);
+
+            return;
+          }
+
+          if (cleanupData.status === "cleaned") {
+            // Backend eliminó el usuario incompleto de Firebase → reintentar registro
+            setLoading(true);
+            const sessionId = createSignupSessionId();
+            const temporaryPassword = `Tmp#${Math.random().toString(36).slice(-10)}A1`;
+            const firebaseCredentials = await createUserWithEmailAndPassword(auth, email, temporaryPassword);
+            persistSignupSession({ sessionId, emailValue: email, temporaryPassword });
+            setSignupSessionId(sessionId);
+            await sendEmailVerification(firebaseCredentials.user, {
+              url: buildVerificationRedirectUrl(sessionId),
+              handleCodeInApp: true,
+            });
+            setVerificationLinkSent(true);
+            setSuccess("Te enviamos el link de verificacion. Abre el correo para completar tu registro.");
+            return;
+          }
+        } catch {
+          // Si el backend falla, mostrar botón de reenvío como fallback
+        }
+
+        // Fallback: sin sesión local y backend no pudo limpiar
+        //setVerificationLinkSent(true);
+        //setError("Este correo tiene un registro pendiente. Revisa tu bandeja de entrada o usa 'Reenviar link de verificacion'.");
+        return;
+      }
       localStorage.removeItem("signup_active_session_id");
       setError(getFirebaseErrorMessage(err?.code));
     } finally {
@@ -212,13 +280,13 @@ export default function SignUpForm() {
 
   return (
     <>
-      <section className="w-1/2 toolsSection bg-[#F0F0F0]">
+      <section className="w-1/2 toolsSection ">
         <Image
-          src="/images/logo.png"
+          src="/images/Logo-Red-De-Mujeres-notext.png"
           alt="Portada de la Red de Mujeres Academicas UNA"
-          width={3000}
-          height={3000}
-          className="w-50 h-50 m-auto mt-10"
+          width={400}
+          height={400}
+          className="w-72 h-auto object-contain mx-auto mt-10"
           priority
         />
         <h1 className="text-3xl font-bold text-center text-[#E7473C]">
@@ -226,7 +294,7 @@ export default function SignUpForm() {
         </h1>
         <p className="text-center mt-5 px-10 text-gray-600 text-lg">
           Plataforma para la visibilizacion, colaboracion y apoyo entre
-          mujeres academicas de la Universidad Nacional de Asuncion.
+          mujeres academicas de la Universidad Nacional de Costa Rica.
         </p>
         <div className="flex justify-center mt-5 gap-5">
           {iconInstagram({ size: 24, color: "#8A192A" })}
@@ -243,8 +311,23 @@ export default function SignUpForm() {
             Paso 1: Verificar email
           </h2>
 
-          {error && <p className="text-red-500">{error}</p>}
-          {success && <p className="text-emerald-200">{success}</p>}
+          {error && (
+            <div className="bg-red-100 border border-red-300 text-red-800 rounded-lg px-4 py-3 text-sm">
+              {error}
+            </div>
+          )}
+
+          {success &&
+          <div className = "flex flex-col gap-3">
+            <div className="bg-green-200 border border-green-300 text-green-800 rounded-lg px-4 py-3 text-sm">
+              {success}
+            </div>
+
+            <div className="bg-yellow-200 border border-yellow-300 text-yellow-800 rounded-lg px-4 py-3 text-sm">
+              📬 Si no ves el correo en los próximos minutos, revisa tu bandeja de spam o correo no deseado.
+            </div>
+            </div>
+          }
 
           <div className="grid w-full items-center gap-3">
             <Label htmlFor="email" className="font-semibold text-white">

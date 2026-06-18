@@ -61,88 +61,81 @@ export default function LoginForm() {
     };
 
     return (
-        <>
-            <Image 
-                src="/images/logo.png" 
-                alt="Logo" 
-                width={3000} 
-                height={3000}
-                className="w-40 h-40 object-cover rounded-full border-4 
-                border-white shadow-lg" 
-            />
-            <form 
-                className="flex flex-col gap-3 bg-[#E7473C] rounded p-4 
-                px-5 w-1/2" 
-                onSubmit={handleSubmit}
-            >
-                <h2 className="text-2xl font-bold text-center text-white">
+        <div className="bg-white rounded-2xl shadow-xl px-8 py-10 w-full max-w-md flex flex-col items-center gap-5">
+            <div className="flex flex-col items-center gap-2">
+                <Image
+                    src="/images/Logo-Red-De-Mujeres-notext.png"
+                    alt="Logo"
+                    width={400}
+                    height={400}
+                    className="w-20 h-auto object-contain"
+                />
+                <div className="text-center">
+                    <p className="font-semibold text-gray-800 text-sm">Red de Mujeres Académicas e Investigadoras</p>
+                    <p className="text-xs text-gray-400 uppercase tracking-wide">Universidad Nacional de Costa Rica</p>
+                </div>
+            </div>
+
+            <div className="w-full border-t border-gray-100" />
+
+            <form className="flex flex-col gap-4 w-full" onSubmit={handleSubmit}>
+                <h2 className="text-xl font-bold text-center text-gray-800">
                     Iniciar Sesión
                 </h2>
-                <Label 
-                    htmlFor="email" 
-                    className="font-semibold text-white text-md"
-                >
-                    Correo Electrónico
-                </Label>
-                <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    placeholder="Correo Electrónico"
-                    value={form.email}
-                    onChange={onChange}
-                    className="bg-white h-12 rounded"
-                    style={{ fontSize: "1rem"}}
-                />
-                <Label 
-                    htmlFor="password" 
-                    className="font-semibold text-white text-md"
-                >
-                    Contraseña
-                </Label>
-                <InputGroup className="bg-white h-12 rounded">
-                    <InputGroupInput 
-                        id="password" 
-                        name="password" 
-                        type={showPassword ? "text" : "password"} 
-                        placeholder="Contraseña"
-                        value={form.password} 
+                <div className="flex flex-col gap-1">
+                    <Label htmlFor="email" className="font-semibold text-gray-700 text-sm">
+                        Correo Electrónico
+                    </Label>
+                    <Input
+                        id="email"
+                        name="email"
+                        type="email"
+                        placeholder="correo@ejemplo.com"
+                        value={form.email}
                         onChange={onChange}
-                        style={{ fontSize: "1rem"}}
+                        className="h-11 rounded-lg border-gray-200"
+                        style={{ fontSize: "1rem" }}
                     />
-                    <InputGroupAddon align="inline-end">
-                        <InputGroupButton 
-                            type="button" 
-                            onClick={togglePassword}
-                        >
-                            {showPassword ? 
-                                iconEyeSlash({ size: 16, color: "#8A192A" }) : 
-                                iconEye({ size: 16, color: "#8A192A" })
-                            }
-                        </InputGroupButton>
-                    </InputGroupAddon>
-                </InputGroup>
-                <p className="text-gray-200 text-sm text-center">
-                    <Link href="/OlvideMiClave" className="hover:underline">
-                        ¿Olvidaste tu contraseña? <br /> Haz clic aquí para recuperarla
-                    </Link>
-                </p>
-                <Button 
-                    type="submit" 
-                    className="bg-[#B62116] text-white w-full mt-3 rounded
-                    hover:bg-[#8A192A] hover:cursor-pointer"
+                </div>
+                <div className="flex flex-col gap-1">
+                    <Label htmlFor="password" className="font-semibold text-gray-700 text-sm">
+                        Contraseña
+                    </Label>
+                    <InputGroup className="h-11 rounded-lg border-gray-200">
+                        <InputGroupInput
+                            id="password"
+                            name="password"
+                            type={showPassword ? "text" : "password"}
+                            placeholder="Contraseña"
+                            value={form.password}
+                            onChange={onChange}
+                            style={{ fontSize: "1rem" }}
+                        />
+                        <InputGroupAddon align="inline-end">
+                            <InputGroupButton type="button" onClick={togglePassword}>
+                                {showPassword
+                                    ? iconEyeSlash({ size: 16, color: "#8A192A" })
+                                    : iconEye({ size: 16, color: "#8A192A" })}
+                            </InputGroupButton>
+                        </InputGroupAddon>
+                    </InputGroup>
+                </div>
+                <Link href="/OlvideMiClave" className="text-xs text-[#C0392B] hover:underline text-right -mt-2">
+                    ¿Olvidaste tu contraseña?
+                </Link>
+                <Button
+                    type="submit"
+                    className="bg-[#C0392B] text-white w-full h-11 rounded-lg hover:bg-[#8A192A] hover:cursor-pointer font-semibold"
                     disabled={loading}
                 >
                     {loading ? <Spinner /> : "Iniciar Sesión"}
                 </Button>
-                <hr className="border-white my-3" />
-                <Link 
-                    href="/Registrarse" 
-                    className="text-gray-200 hover:underline text-center"
-                >
-                    ¿No tienes una cuenta? <br /> Regístrate aquí
-                </Link>
+                <div className="border-t border-gray-100 pt-4 text-center">
+                    <Link href="/Registrarse" className="text-sm text-gray-500 hover:text-[#C0392B] transition">
+                        ¿No tienes una cuenta? <span className="font-semibold text-[#C0392B]">Regístrate aquí</span>
+                    </Link>
+                </div>
             </form>
-        </>
+        </div>
     );
 }

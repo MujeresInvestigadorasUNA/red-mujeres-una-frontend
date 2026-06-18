@@ -85,3 +85,12 @@ export async function getProfilePictureUrl({ user_id, expires_minutes = 60 }) {
     headers: { Accept: 'application/json' },
   });
 }
+
+export async function cleanupIncompleteFirebaseUser({ email }) {
+  return apiFetch('/users/cleanup-firebase', {
+    method: 'POST',
+    skipAuth: true,
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email }),
+  });
+}

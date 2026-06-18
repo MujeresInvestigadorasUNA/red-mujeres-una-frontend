@@ -177,16 +177,18 @@ export function CustomNavigationMenu() {
     }, []);
 
     return (
-        <nav className="sticky top-0 z-10 px-4 py-2 text-white mainSection md:px-5">
+        <nav className="sticky top-0 z-10 px-4 py-2 text-gray-800 bg-white border-b border-gray-200 shadow-sm md:px-5">
             <div className="flex items-center justify-between gap-3">
                 <Link href="/" className="font-bold">
-                    <Image
-                        src="/images/logo.png"
-                        alt="Logo"
-                        width={60}
-                        height={60}
-                        className="border-[#8A192A] border-3 rounded-full shadow"
-                    />
+                    <div className="h-9 overflow-hidden flex items-start">
+                        <Image
+                            src="/images/Logo-Red-De-Mujeres-notext.png"
+                            alt="Logo"
+                            width={200}
+                            height={200}
+                            className="h-14 w-auto object-contain object-top"
+                        />
+                    </div>
                 </Link>
 
                 {user ? (
@@ -199,7 +201,7 @@ export function CustomNavigationMenu() {
                         <NavigationMenuList>
                             <NavigationMenuItem>
                                 <NavigationMenuTrigger
-                                    className="bg-transparent text-white"
+                                    className="bg-transparent text-gray-700 hover:text-[#C0392B]"
                                     onClick={(event) => event.preventDefault()}
                                 >
                                     Foros
@@ -222,7 +224,7 @@ export function CustomNavigationMenu() {
 
                             <NavigationMenuItem>
                                 <NavigationMenuTrigger
-                                    className="bg-transparent hover:bg-transparent focus:bg-transparent active:bg-transparent text-white"
+                                    className="bg-transparent hover:bg-transparent focus:bg-transparent active:bg-transparent text-gray-700 hover:text-[#C0392B]"
                                     onClick={(event) => event.preventDefault()}
                                 >
                                     Investigaciones
@@ -255,7 +257,7 @@ export function CustomNavigationMenu() {
 
                             <NavigationMenuItem>
                                 <NavigationMenuTrigger
-                                    className="bg-transparent hover:bg-transparent focus:bg-transparent active:bg-transparent text-white"
+                                    className="bg-transparent hover:bg-transparent focus:bg-transparent active:bg-transparent text-gray-700 hover:text-[#C0392B]"
                                     onClick={(event) => event.preventDefault()}
                                 >
                                     Cursos
@@ -279,7 +281,7 @@ export function CustomNavigationMenu() {
                             {user?.user_type_id === 3 && (
                                 <NavigationMenuItem>
                                     <NavigationMenuTrigger
-                                        className="bg-transparent hover:bg-transparent focus:bg-transparent active:bg-transparent text-white"
+                                        className="bg-transparent hover:bg-transparent focus:bg-transparent active:bg-transparent text-gray-700 hover:text-[#C0392B]"
                                         onClick={(event) => event.preventDefault()}
                                     >
                                         Administración
@@ -298,14 +300,14 @@ export function CustomNavigationMenu() {
                         </NavigationMenuList>
                     </NavigationMenu>
                 ) : (
-                    <div className="hidden md:flex items-center gap-6 text-white">
-                        <Link href="/Foros" className="hover:text-red-300 transition">
+                    <div className="hidden md:flex items-center gap-6 text-gray-700">
+                        <Link href="/Foros" className="hover:text-[#C0392B] transition">
                             Foros
                         </Link>
-                        <Link href="/Investigaciones" className="hover:text-red-300 transition">
+                        <Link href="/Investigaciones" className="hover:text-[#C0392B] transition">
                             Investigaciones
                         </Link>
-                        <Link href="/Cursos" className="hover:text-red-300 transition">
+                        <Link href="/Cursos" className="hover:text-[#C0392B] transition">
                             Cursos
                         </Link>
                     </div>
@@ -331,7 +333,7 @@ export function CustomNavigationMenu() {
                                     markAllNotificationsRead();
                                 }}
                                 aria-label="Abrir notificaciones"
-                                className="hidden md:inline-flex relative items-center justify-center rounded-full w-10 h-10 p-0 bg-white/10 text-white hover:bg-white/20 transition transform hover:scale-105 mr-3 shadow-sm"
+                                className="hidden md:inline-flex relative items-center justify-center rounded-full w-10 h-10 p-0 bg-gray-100 text-gray-600 hover:bg-gray-200 transition transform hover:scale-105 mr-3 shadow-sm"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="none" className="feather feather-bell">
                                     <path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
@@ -406,7 +408,7 @@ export function CustomNavigationMenu() {
             </div>
 
             {mobileMenuOpen && (
-                <div className="mt-3 grid gap-2 rounded bg-[#b62116] p-3 text-sm shadow md:hidden">
+                <div className="mt-3 grid gap-2 rounded bg-[#C0392B] p-3 text-sm shadow text-white md:hidden">
                     {user ? (
                         <>
                             <Link href="/Foros" onClick={() => setMobileMenuOpen(false)}>Explorar Foros</Link>

@@ -41,7 +41,7 @@ function hashIndex(id, len) {
 }
 
 export default function ForoPage({ params }) {
-    const { user } = useUser();
+    const { user, userLoading } = useUser();
     const { foro: foroId } = use(params);
 
     const [forum, setForum] = useState(null);
@@ -58,7 +58,7 @@ export default function ForoPage({ params }) {
 
     // ── Data fetching ────────────────────────────────────────────
     useEffect(() => {
-        if (!foroId) return;
+        if (!foroId || userLoading) return;
 
         const fetchAll = async () => {
             // Profile
@@ -84,7 +84,7 @@ export default function ForoPage({ params }) {
             // Research
             try {
                 setLoadingResearch(true);
-                const data = await getResearchByUserId(foroId);
+                const data = await getResearchByUserId(foroId, user?.id || null);
                 const arr = Array.isArray(data) ? data : [];
                 const counts = {};
                 const liked = new Set();
@@ -117,7 +117,7 @@ export default function ForoPage({ params }) {
         };
 
         fetchAll();
-    }, [foroId]);
+    }, [foroId, userLoading]);
 
     // ── Like toggle ──────────────────────────────────────────────
     const handleLike = async (researchId) => {

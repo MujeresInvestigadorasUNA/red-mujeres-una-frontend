@@ -52,83 +52,76 @@ export default function ForgotPasswordForm() {
     };
 
     return (
-        <>
-            <Image
-                src="/images/logo.png"
-                alt="Logo"
-                width={3000}
-                height={3000}
-                className="w-40 h-40 object-cover rounded-full border-4 border-white shadow-lg"
-            />
-            <form
-                className="flex flex-col gap-3 bg-[#E7473C] rounded p-4 px-5 w-1/2"
-                onSubmit={handleSubmit}
-            >
-                <h2 className="text-2xl font-bold text-center text-white">
+        <div className="bg-white rounded-2xl shadow-xl px-8 py-10 w-full max-w-md flex flex-col items-center gap-5">
+            <div className="flex flex-col items-center gap-2">
+                <Image
+                    src="/images/Logo-Red-De-Mujeres-notext.png"
+                    alt="Logo"
+                    width={400}
+                    height={400}
+                    className="w-20 h-auto object-contain"
+                />
+                <div className="text-center">
+                    <p className="font-semibold text-gray-800 text-sm">Red de Mujeres Académicas e Investigadoras</p>
+                    <p className="text-xs text-gray-400 uppercase tracking-wide">Universidad Nacional de Costa Rica</p>
+                </div>
+            </div>
+
+            <div className="w-full border-t border-gray-100" />
+
+            <form className="flex flex-col gap-4 w-full" onSubmit={handleSubmit}>
+                <h2 className="text-xl font-bold text-center text-gray-800">
                     Recuperar Contraseña
                 </h2>
 
                 {!submitted ? (
                     <>
-                        <p className="text-white text-sm text-center">
-                            Ingresa tu correo electrónico y te enviaremos un enlace para
-                            recuperar tu contraseña.
+                        <p className="text-gray-500 text-sm text-center">
+                            Ingresa tu correo electrónico y te enviaremos un enlace para recuperar tu contraseña.
                         </p>
-                        <Label
-                            htmlFor="email"
-                            className="font-semibold text-white text-md"
-                        >
-                            Correo Electrónico
-                        </Label>
-                        <Input
-                            id="email"
-                            type="email"
-                            placeholder="Correo Electrónico"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            className="bg-white h-12 rounded"
-                            disabled={loading}
-                        />
+                        <div className="flex flex-col gap-1">
+                            <Label htmlFor="email" className="font-semibold text-gray-700 text-sm">
+                                Correo Electrónico
+                            </Label>
+                            <Input
+                                id="email"
+                                type="email"
+                                placeholder="correo@ejemplo.com"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                className="h-11 rounded-lg border-gray-200"
+                                disabled={loading}
+                            />
+                        </div>
                         <Button
                             type="submit"
-                            className="bg-white text-[#E7473C] font-bold h-12 rounded hover:bg-gray-200"
+                            className="bg-[#C0392B] text-white font-semibold h-11 rounded-lg hover:bg-[#8A192A] hover:cursor-pointer"
                             disabled={loading}
                         >
-                            {loading ? (
-                                <Spinner size="sm" color="text-[#E7473C]" />
-                            ) : (
-                                "Recuperar Contraseña"
-                            )}
+                            {loading ? <Spinner size="sm" /> : "Enviar enlace de recuperación"}
                         </Button>
                     </>
                 ) : (
-                    <div className="text-center">
-                        <p className="text-white text-sm mb-4">
-                            Se ha enviado un enlace de recuperación a tu correo electrónico.
-                            Por favor, revisa tu bandeja de entrada.
+                    <div className="text-center flex flex-col gap-4">
+                        <p className="text-gray-600 text-sm">
+                            Se ha enviado un enlace de recuperación a tu correo electrónico. Por favor, revisa tu bandeja de entrada.
                         </p>
                         <Button
                             type="button"
-                            onClick={() => {
-                                setEmail("");
-                                setSubmitted(false);
-                            }}
-                            className="bg-white text-[#E7473C] font-bold h-12 rounded hover:bg-gray-200 w-full"
+                            onClick={() => { setEmail(""); setSubmitted(false); }}
+                            className="bg-[#C0392B] text-white font-semibold h-11 rounded-lg hover:bg-[#8A192A] hover:cursor-pointer w-full"
                         >
                             Volver
                         </Button>
                     </div>
                 )}
 
-                <div className="text-center mt-2">
-                    <Link
-                        href="/IniciarSesion"
-                        className="text-white text-sm hover:underline"
-                    >
-                        Volver a Iniciar Sesión
+                <div className="border-t border-gray-100 pt-3 text-center">
+                    <Link href="/IniciarSesion" className="text-sm text-gray-500 hover:text-[#C0392B] transition">
+                        ← Volver a <span className="font-semibold text-[#C0392B]">Iniciar Sesión</span>
                     </Link>
                 </div>
             </form>
-        </>
+        </div>
     );
 }

@@ -19,9 +19,11 @@ export async function getResearch(limit = 5, viewerUserId = null) {
   }
 }
 
-export async function getResearchByUserId(user_id) {
+export async function getResearchByUserId(user_id, viewerUserId = null) {
   try {
-    const response = await apiFetch(`/research/user/${user_id}`, {
+    let url = `/research/user/${user_id}`;
+    if (viewerUserId) url += `?viewer_user_id=${viewerUserId}`;
+    const response = await apiFetch(url, {
       method: 'GET',
       headers: { Accept: 'application/json' },
     });

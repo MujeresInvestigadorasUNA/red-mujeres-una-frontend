@@ -17,6 +17,7 @@ const getTokenExpiry = (token) => {
 export const UserProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [accessToken, setAccessToken] = useState(null);
+    const [userLoading, setUserLoading] = useState(true);
     const expiryTimerRef = useRef(null);
 
     const clearExpiryTimer = () => {
@@ -47,6 +48,7 @@ export const UserProvider = ({ children }) => {
             setUser(JSON.parse(storedUser));
             setAccessToken(storedToken);
         }
+        setUserLoading(false);
     }, []);
 
     // Validate token and schedule auto-logout on expiry
@@ -122,7 +124,7 @@ export const UserProvider = ({ children }) => {
     };
 
     return (
-        <UserContext.Provider value={{ user, accessToken, setUserData, setToken, logout }}>
+        <UserContext.Provider value={{ user, accessToken, userLoading, setUserData, setToken, logout }}>
             {children}
         </UserContext.Provider>
     );
