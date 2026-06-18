@@ -290,7 +290,7 @@ export default function SignUpForm() {
           priority
         />
         <h1 className="text-3xl font-bold text-center text-[#E7473C]">
-          Red de Mujeres Academicas UNA
+          Red de Mujeres Academicas e Investigadoras UNA
         </h1>
         <p className="text-center mt-5 px-10 text-gray-600 text-lg">
           Plataforma para la visibilizacion, colaboracion y apoyo entre
