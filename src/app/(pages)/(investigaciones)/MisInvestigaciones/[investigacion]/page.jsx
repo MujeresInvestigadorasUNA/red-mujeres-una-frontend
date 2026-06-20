@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { Pencil } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import { toast } from "sonner";
@@ -9,23 +9,19 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
 import { useUser } from "@/app/contexts/UserContext";
-import { getResearchById, getResearchPdfUrl, registerResearchVisit, updateResearch } from "@/lib/api/research";
-
-const PLACEHOLDER_IMAGES = [
-    "/images/curso1.png",
-    "/images/curso2.png",
-    "/images/curso3.png",
-];
+import { getResearchById, getResearchPdfUrl, registerResearchVisit, updateResearch, getResearchAuthors, addResearchAuthors, removeResearchAuthors } from "@/lib/api/research";
+import CoAuthorSelector from "@/app/components/CoAuthorSelector";
 
 const PLACEHOLDER_DESCRIPTION = "Exploración detallada de esta investigación académica de la Red de Mujeres Académicas.";
-
-const isValidImageUrl = (url) => {
-    if (!url) return false;
-    const imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg"];
-    const urlLower = url.toLowerCase();
-    return imageExtensions.some((ext) => urlLower.includes(ext));
-};
 
 export default function Investigacion() {
     const params = useParams();
@@ -38,6 +34,9 @@ export default function Investigacion() {
     const [description, setDescription] = useState("");
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [coAuthors, setCoAuthors] = useState([]);
+    const [coAuthorsLoading, setCoAuthorsLoading] = useState(false);
     const refreshTimeoutRef = useRef(null);
     const refreshBufferMs = 3 * 60 * 1000;
     const fallbackRefreshMs = 25 * 60 * 1000;
@@ -141,6 +140,48 @@ export default function Investigacion() {
         registerResearchVisit(user.id, researchId);
     }, [researchId, user?.id]);
 
+    useEffect(() => {
+        if (!researchId) return;
+
+        const loadCoAuthors = async () => {
+            setCoAuthorsLoading(true);
+            try {
+                const data = await getResearchAuthors(researchId);
+                setCoAuthors(Array.isArray(data) ? data.filter((a) => a.id !== user?.id) : []);
+            } finally {
+                setCoAuthorsLoading(false);
+            }
+        };
+
+        loadCoAuthors();
+    }, [researchId, user?.id]);
+
+    const handleAddCoAuthor = async (author) => {
+        const res = await addResearchAuthors(researchId, [author.id]);
+        if (res.ok) {
+            setCoAuthors((prev) => [...prev, author]);
+            toast.success(`${author.first_name} ${author.last_name} agregada como co-autora.`);
+        } else {
+            toast.error("No se pudo agregar la co-autora.");
+        }
+    };
+
+    const handleRemoveCoAuthor = async (authorId) => {
+        const res = await removeResearchAuthors(researchId, [authorId]);
+        if (res.ok) {
+            setCoAuthors((prev) => prev.filter((a) => a.id !== authorId));
+            toast.success("Co-autora eliminada.");
+        } else {
+            toast.error("No se pudo eliminar la co-autora.");
+        }
+    };
+
+    const handleCancelEdit = () => {
+        setTitle(currentResearch?.title || "");
+        setDescription(currentResearch?.description || "");
+        setIsEditing(false);
+    };
+
     const handleSubmit = async (event) => {
         event.preventDefault();
 
@@ -181,6 +222,7 @@ export default function Investigacion() {
             setCurrentResearch(updatedResearch);
             setTitle(updatedResearch?.title || "");
             setDescription(updatedResearch?.description || "");
+            setIsEditing(false);
         } catch (error) {
             console.error("Error updating research:", error);
             toast.error("Error de conexión al actualizar la investigación.");
@@ -188,10 +230,6 @@ export default function Investigacion() {
             setSaving(false);
         }
     };
-
-    const imageSrc = isValidImageUrl(currentResearch?.vector_link)
-        ? currentResearch.vector_link
-        : PLACEHOLDER_IMAGES[0];
 
     return (
         <main className="flex-grow px-20 py-10 h-[100%]">
@@ -205,44 +243,107 @@ export default function Investigacion() {
                     <Skeleton className="h-40 w-full rounded-lg" />
                 </div>
             ) : currentResearch ? (
-                <form className="space-y-8" onSubmit={handleSubmit}>
-                    <div className="space-y-3">
-                        <h1 className="text-2xl font-bold">Editar investigación</h1>
-                        <p className="text-gray-700">
-                            Modifica el título y la descripción. El documento PDF y la imagen se muestran como referencia.
-                        </p>
+                <div className="space-y-8">
+                    <div className="flex items-center justify-between gap-3 flex-wrap">
+                        <h1 className="text-2xl font-bold">{currentResearch.title}</h1>
+                        <Button
+                            type="button"
+                            onClick={() => setIsEditing(true)}
+                            className="bg-[#E7473C] hover:bg-[#831d16] text-white gap-2"
+                        >
+                            <Pencil size={16} />
+                            Editar
+                        </Button>
                     </div>
 
-                    <div className="space-y-2">
-                        <Label htmlFor="title">Título</Label>
-                        <Input
-                            id="title"
-                            value={title}
-                            onChange={(event) => setTitle(event.target.value)}
-                            placeholder="Título de la investigación"
-                            className="text-lg font-semibold"
-                        />
-                    </div>
+                    <p className="text-gray-700">
+                        {currentResearch.description || PLACEHOLDER_DESCRIPTION}
+                    </p>
 
-                    <div className="space-y-2">
-                        <Label htmlFor="description">Descripción</Label>
-                        <Textarea
-                            id="description"
-                            value={description}
-                            onChange={(event) => setDescription(event.target.value)}
-                            placeholder="Descripción de la investigación"
-                            className="min-h-40 resize-none"
-                        />
-                    </div>
+                    {coAuthors.length > 0 && (
+                        <div className="space-y-2">
+                            <span className="text-sm font-medium text-gray-700">Co-autoras</span>
+                            <div className="flex flex-wrap gap-2">
+                                {coAuthors.map((author) => (
+                                    <span
+                                        key={author.id}
+                                        className="inline-flex items-center bg-red-50 border border-red-200 text-red-800 rounded-full px-3 py-1 text-sm"
+                                    >
+                                        {author.first_name} {author.last_name}
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    <Dialog
+                        open={isEditing}
+                        onOpenChange={(open) => {
+                            if (!open) handleCancelEdit();
+                        }}
+                    >
+                        <DialogContent className="sm:max-w-xl">
+                            <DialogHeader>
+                                <DialogTitle>Editar investigación</DialogTitle>
+                                <DialogDescription>
+                                    Modifica el título, la descripción y gestiona las co-autoras.
+                                </DialogDescription>
+                            </DialogHeader>
+
+                            <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+                                <div className="flex flex-col gap-2">
+                                    <Label htmlFor="title">Título</Label>
+                                    <Input
+                                        id="title"
+                                        value={title}
+                                        onChange={(event) => setTitle(event.target.value)}
+                                        placeholder="Título de la investigación"
+                                    />
+                                </div>
+
+                                <div className="flex flex-col gap-2">
+                                    <Label htmlFor="description">Descripción</Label>
+                                    <Textarea
+                                        id="description"
+                                        value={description}
+                                        onChange={(event) => setDescription(event.target.value)}
+                                        placeholder="Descripción de la investigación"
+                                        className="min-h-[140px] resize-y"
+                                    />
+                                </div>
+
+                                <CoAuthorSelector
+                                    selectedAuthors={coAuthors}
+                                    onAdd={handleAddCoAuthor}
+                                    onRemove={handleRemoveCoAuthor}
+                                    excludeUserId={user?.id}
+                                />
+                                {coAuthorsLoading && (
+                                    <p className="text-xs text-gray-400">Cargando co-autoras...</p>
+                                )}
+
+                                <DialogFooter>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={handleCancelEdit}
+                                        disabled={saving}
+                                    >
+                                        Cancelar
+                                    </Button>
+                                    <Button
+                                        type="submit"
+                                        disabled={saving}
+                                        className="bg-[#E7473C] text-white hover:bg-[#831d16]"
+                                    >
+                                        {saving ? "Guardando..." : "Guardar Cambios"}
+                                    </Button>
+                                </DialogFooter>
+                            </form>
+                        </DialogContent>
+                    </Dialog>
 
                     <section className="space-y-4">
-                        <h2 className="text-2xl font-bold">Vista previa de la investigación</h2>
-                        <p className="text-gray-700">
-                            {currentResearch.description || PLACEHOLDER_DESCRIPTION}
-                        </p>
-                    </section>
-
-                    <section className="mt-8 space-y-4">
                         <div className="flex items-center justify-between gap-3 flex-wrap">
                             <h2 className="text-2xl font-bold">Documento de investigación</h2>
                             {downloadUrl ? (
@@ -274,17 +375,7 @@ export default function Investigacion() {
                             </div>
                         )}
                     </section>
-
-                    <div className="flex gap-3 pt-2">
-                        <Button
-                            type="submit"
-                            disabled={saving}
-                            className="bg-[#E7473C] text-white hover:bg-[#cf4035] hover:cursor-pointer w-full"
-                        >
-                            {saving ? "Guardando..." : "Guardar Cambios"}
-                        </Button>
-                    </div>
-                </form>
+                </div>
             ) : (
                 <div className="text-center py-10">
                     <p>Investigación no encontrada</p>

@@ -8,7 +8,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { useUser } from "@/app/contexts/UserContext";
-import { listUsers, deleteUser, updateUser } from "@/lib/api/users";
+import { listUsers, deleteUser, updateUser, updateUserType } from "@/lib/api/users";
+import { getProfilePictureUrl } from "@/lib/api/auth";
 import { Trash2, Edit2, Loader2, Search, RefreshCw, Shield, X } from "lucide-react";
 
 const USER_TYPES = {
@@ -43,6 +44,7 @@ export default function Usuarios() {
   const [editForm, setEditForm] = useState({});
   const [isSaving, setIsSaving] = useState(false);
   const [isDeletingUserId, setIsDeletingUserId] = useState(null);
+  const [photoUrls, setPhotoUrls] = useState({});
 
   useEffect(() => {
     if (user?.user_type_id !== 3) {
@@ -61,7 +63,24 @@ export default function Usuarios() {
         return;
       }
       const data = await response.json();
-      setUsers(Array.isArray(data) ? data : []);
+      const usersList = Array.isArray(data) ? data : [];
+      setUsers(usersList);
+
+      const photos = {};
+      await Promise.all(
+        usersList
+          .filter((u) => u.photo)
+          .map(async (u) => {
+            try {
+              const res = await getProfilePictureUrl({ user_id: u.id });
+              if (res.ok) {
+                const result = await res.json();
+                photos[u.id] = result?.url || result?.signed_url || result || null;
+              }
+            } catch {}
+          })
+      );
+      setPhotoUrls(photos);
     } catch (error) {
       toast.error("Error al conectar con el servidor");
       console.error(error);
@@ -134,6 +153,25 @@ export default function Usuarios() {
       console.error(error);
     } finally {
       setIsDeletingUserId(null);
+    }
+  };
+
+  const handleTypeChange = async (userId, newTypeId) => {
+    if (userId === user?.id) {
+      toast.error("No puedes cambiar tu propio tipo de usuario");
+      return;
+    }
+    try {
+      const res = await updateUserType(userId, newTypeId);
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        toast.error(data?.detail || "Error al cambiar el tipo de usuario");
+        return;
+      }
+      setUsers((prev) => prev.map((u) => u.id === userId ? { ...u, user_type_id: newTypeId } : u));
+      toast.success("Tipo de usuario actualizado");
+    } catch {
+      toast.error("Error de conexión");
     }
   };
 
@@ -353,9 +391,17 @@ export default function Usuarios() {
                           className="w-12 h-12 rounded-full shrink-0 overflow-hidden flex items-center justify-center shadow-sm"
                           style={{ background: `linear-gradient(135deg, ${gradFrom}, ${gradTo})` }}
                         >
-                          <span className="text-white font-semibold text-sm">
-                            {getInitials(userData.first_name, userData.last_name)}
-                          </span>
+                          {photoUrls[userData.id] ? (
+                            <img
+                              src={photoUrls[userData.id]}
+                              alt={fullName}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <span className="text-white font-semibold text-sm">
+                              {getInitials(userData.first_name, userData.last_name)}
+                            </span>
+                          )}
                         </div>
                         <div className="flex flex-col min-w-0 flex-1">
                           <span className="text-sm font-semibold text-slate-800 truncate group-hover:text-[#555] transition-colors duration-200">
@@ -368,15 +414,22 @@ export default function Usuarios() {
                           )}
                         </div>
                       </div>
-                      <span className={`text-[10px] font-semibold px-2 py-1 rounded-full shrink-0 whitespace-nowrap ${
-                        userData.user_type_id === 3
-                          ? "bg-purple-100 text-purple-700"
-                          : userData.user_type_id === 2
-                          ? "bg-blue-100 text-blue-700"
-                          : "bg-slate-100 text-slate-600"
-                      }`}>
-                        {USER_TYPES[userData.user_type_id] || "Desconocido"}
-                      </span>
+                      <select
+                        value={userData.user_type_id}
+                        onChange={(e) => handleTypeChange(userData.id, parseInt(e.target.value))}
+                        disabled={userData.id === user?.id}
+                        className={`text-[10px] font-semibold px-2 py-1 rounded-full shrink-0 cursor-pointer border-0 appearance-auto ${
+                          userData.user_type_id === 3
+                            ? "bg-purple-100 text-purple-700"
+                            : userData.user_type_id === 2
+                            ? "bg-blue-100 text-blue-700"
+                            : "bg-slate-100 text-slate-600"
+                        } ${userData.id === user?.id ? "opacity-50 cursor-not-allowed" : ""}`}
+                      >
+                        {Object.entries(USER_TYPES).map(([id, label]) => (
+                          <option key={id} value={id}>{label}</option>
+                        ))}
+                      </select>
                     </div>
 
                     {/* Profesión */}

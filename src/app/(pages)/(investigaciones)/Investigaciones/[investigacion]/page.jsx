@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useUser } from "@/app/contexts/UserContext";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -126,6 +126,7 @@ function RelatedSkeletonCarousel() {
 
 export default function Investigacion() {
     const params = useParams();
+    const router = useRouter();
     const { user } = useUser();
     const researchId = params.investigacion;
     
@@ -149,6 +150,12 @@ export default function Investigacion() {
                 setLoading(true);
                 setLoadingRelated(true);
                 const current = await getResearchById(researchId);
+
+                const ownerId = current?.user_id ?? current?.owner_id;
+                if (ownerId && user?.id && String(ownerId) === String(user.id)) {
+                    router.replace(`/MisInvestigaciones/${researchId}`);
+                    return;
+                }
 
                 setCurrentResearch(current);
 

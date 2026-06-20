@@ -86,17 +86,53 @@ export async function updateResearch({ research_id, title, description }) {
   });
 }
 
-export async function createResearch({ user_id, title, description, document }) {
+export async function createResearch({ user_id, title, description, document, author_ids = [] }) {
   const formData = new FormData();
   formData.append('user_id', String(user_id));
   formData.append('title', title);
   if (description?.trim()) formData.append('description', description.trim());
   formData.append('document', document);
+  if (author_ids?.length > 0) {
+    author_ids.forEach((id) => formData.append('author_ids', String(id)));
+  }
 
   return apiFetch('/research/', {
     method: 'POST',
     headers: { Accept: 'application/json' },
     body: formData,
+  });
+}
+
+export async function getResearchAuthors(research_id) {
+  try {
+    const response = await apiFetch(`/research/${research_id}/authors`, {
+      method: 'GET',
+      headers: { Accept: 'application/json' },
+    });
+    if (!response.ok) {
+      console.error('Error fetching research authors:', response.statusText);
+      return [];
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching research authors:', error);
+    return [];
+  }
+}
+
+export async function addResearchAuthors(research_id, user_ids) {
+  return apiFetch(`/research/${research_id}/authors`, {
+    method: 'POST',
+    headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+    body: JSON.stringify({ user_ids }),
+  });
+}
+
+export async function removeResearchAuthors(research_id, user_ids) {
+  return apiFetch(`/research/${research_id}/authors`, {
+    method: 'DELETE',
+    headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+    body: JSON.stringify({ user_ids }),
   });
 }
 

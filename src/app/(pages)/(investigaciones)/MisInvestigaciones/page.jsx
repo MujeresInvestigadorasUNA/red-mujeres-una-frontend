@@ -35,6 +35,7 @@ import Link from "next/link";
 import { useMemo, useRef, useState, useEffect } from "react";
 import { UploadCloudIcon } from "lucide-react";
 import { createResearch, getResearchByUserId } from "@/lib/api/research";
+import CoAuthorSelector from "@/app/components/CoAuthorSelector";
 import { upsertNotification } from "@/lib/notifications";
 
 const COVER_GRADIENTS = [
@@ -69,6 +70,7 @@ export default function MisInvestigaciones() {
     const [searchQuery, setSearchQuery] = useState("");
     const [isProcessingMessageOpen, setIsProcessingMessageOpen] = useState(false);
     const [processingMessage, setProcessingMessage] = useState("");
+    const [selectedCoAuthors, setSelectedCoAuthors] = useState([]);
     const ITEMS_PER_PAGE = 6;
 
     const userId = useMemo(() => user?.id ?? user?.user_id ?? null, [user]);
@@ -132,6 +134,15 @@ export default function MisInvestigaciones() {
         setDescription("");
         setDocument(null);
         setIsDraggingFile(false);
+        setSelectedCoAuthors([]);
+    };
+
+    const handleAddCoAuthor = (author) => {
+        setSelectedCoAuthors((prev) => [...prev, author]);
+    };
+
+    const handleRemoveCoAuthor = (authorId) => {
+        setSelectedCoAuthors((prev) => prev.filter((a) => a.id !== authorId));
     };
 
     const isPdfFile = (file) => file?.type === "application/pdf" || file?.name?.toLowerCase().endsWith(".pdf");
@@ -220,6 +231,7 @@ export default function MisInvestigaciones() {
                 description: description.trim(),
                 document,
                 access_token: accessToken,
+                author_ids: selectedCoAuthors.map((a) => a.id),
             });
 
             let responseData = null;
@@ -541,6 +553,13 @@ export default function MisInvestigaciones() {
                                 onChange={handleFileInputChange}
                             />
                         </div>
+
+                        <CoAuthorSelector
+                            selectedAuthors={selectedCoAuthors}
+                            onAdd={handleAddCoAuthor}
+                            onRemove={handleRemoveCoAuthor}
+                            excludeUserId={userId}
+                        />
 
                         <DialogFooter>
                             <Button

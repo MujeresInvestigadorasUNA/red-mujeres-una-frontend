@@ -1,8 +1,12 @@
 import { apiFetch } from './client';
 
-export async function getResearchers(limit = 5) {
+export async function getResearchers(limit = 5, search = '') {
   try {
-    const url = limit ? `/users/researchers?limit=${limit}` : '/users/researchers';
+    const params = new URLSearchParams();
+    if (limit) params.set('limit', String(limit));
+    if (search?.trim()) params.set('search', search.trim());
+    const query = params.toString();
+    const url = `/users/researchers${query ? `?${query}` : ''}`;
     const response = await apiFetch(url, { method: 'GET', headers: { Accept: 'application/json' } });
     if (!response.ok) {
       console.error('Error fetching researchers:', response.statusText);
