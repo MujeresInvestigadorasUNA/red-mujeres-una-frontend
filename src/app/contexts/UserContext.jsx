@@ -27,12 +27,13 @@ export const UserProvider = ({ children }) => {
         }
     };
 
-    const logout = (redirectTo = '/') => {
+    const logout = (redirectTo = '/', { sessionExpired = false } = {}) => {
         clearExpiryTimer();
         setUser(null);
         setAccessToken(null);
         localStorage.clear();
-        window.location.href = redirectTo;
+        const url = sessionExpired ? `${redirectTo}?session_expired=true` : redirectTo;
+        window.location.href = url;
     };
 
     // Restore session from localStorage on mount
@@ -42,7 +43,7 @@ export const UserProvider = ({ children }) => {
 
         if (storedUser && storedUser.length > 0) {
             if (!storedToken) {
-                logout("/IniciarSesion");
+                logout("/IniciarSesion", { sessionExpired: true });
                 return;
             }
             setUser(JSON.parse(storedUser));
@@ -56,7 +57,7 @@ export const UserProvider = ({ children }) => {
         if (!user) return;
 
         if (!accessToken) {
-            logout("/IniciarSesion");
+            logout("/IniciarSesion", { sessionExpired: true });
             return;
         }
 
@@ -69,10 +70,10 @@ export const UserProvider = ({ children }) => {
         if (expiryMs) {
             const msUntilExpiry = expiryMs - Date.now();
             if (msUntilExpiry <= 0) {
-                logout("/IniciarSesion");
+                logout("/IniciarSesion", { sessionExpired: true });
                 return;
             }
-            expiryTimerRef.current = setTimeout(() => logout("/IniciarSesion"), msUntilExpiry);
+            expiryTimerRef.current = setTimeout(() => logout("/IniciarSesion", { sessionExpired: true }), msUntilExpiry);
         }
 
         // Also validate with the server immediately
@@ -82,7 +83,7 @@ export const UserProvider = ({ children }) => {
                 const response = await getUserInfo({ user_id: userId, access_token: accessToken });
                 if (!isMounted) return;
                 if (response.status === 401 || response.status === 403) {
-                    logout("/IniciarSesion");
+                    logout("/IniciarSesion", { sessionExpired: true });
                 }
             } catch (error) {
                 console.error("Error validating access token:", error);

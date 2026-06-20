@@ -11,7 +11,8 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getResearch, getRecommendedResearch, likeResearch, unlikeResearch } from "@/lib/api/research";
+import { getResearch, getRecommendedResearch, likeResearch, unlikeResearch, getAuthorDisplay, getAuthorsData } from "@/lib/api/research";
+import AuthorLinks from "@/app/components/AuthorLinks";
 import { getResearchers } from "@/lib/api/forums";
 import { getProfilePictureUrl } from "@/lib/api/auth";
 import { Card } from "@/components/ui/card";
@@ -23,7 +24,7 @@ import {
   ArrowRight,
   Sparkles,
   Users,
-  BookOpen,
+  CalendarDays,
   ScrollText,
   Network,
   Map,
@@ -104,9 +105,7 @@ function ResearchCard({ research, gradients, index, isRecommended = false, isLik
             >
               {initials}
             </span>
-            <span className="text-xs text-slate-500 truncate">
-              {research.author}
-            </span>
+            <AuthorLinks authors={research.authorsData} fallback={research.author} />
           </div>
           <h3
             className={`text-sm font-semibold text-slate-800 line-clamp-2 mb-1.5 leading-snug transition-colors duration-200 ${
@@ -263,7 +262,8 @@ export default function Home() {
           data.map((r) => ({
             id: r.id,
             title: r.title,
-            author: r.author || r.user_name || "Investigadora",
+            author: getAuthorDisplay(r),
+            authorsData: getAuthorsData(r),
             description: r.description || "Sin descripción disponible",
             url: `/Investigaciones/${r.id}`,
             visits_count: r.visits_count || 0,
@@ -305,7 +305,8 @@ export default function Home() {
           data.map((r) => ({
             id: r.id,
             title: r.title,
-            author: r.author || r.user_name || "Investigadora",
+            author: getAuthorDisplay(r),
+            authorsData: getAuthorsData(r),
             description: r.description || "Sin descripción disponible",
             url: `/Investigaciones/${r.id}`,
             similarity_score: r.similarity_score,
@@ -571,7 +572,7 @@ export default function Home() {
       </section>
 
       {/* ── Herramientas de la Red ────────────────────────────────── */}
-      <section className="px-6 md:px-16 xl:px-20 py-8 toolsSection bg-slate-50 border-y border-slate-100">
+      <section className="px-6 md:px-16 xl:px-20 py-8 bg-linear-to-br from-blue-50 to-indigo-50/60">
         <h2 className="text-[#E7473C] text-base font-bold mb-4">
           Herramientas de la Red
         </h2>
@@ -586,10 +587,10 @@ export default function Home() {
               to: "#E7473C",
             },
             {
-              icon: BookOpen,
-              title: "Cursos",
-              desc: "Cursos para mujeres académicas.",
-              url: "/Cursos",
+              icon: CalendarDays,
+              title: "Eventos",
+              desc: "Eventos para mujeres académicas.",
+              url: "/Eventos",
               from: "#92400e",
               to: "#f59e0b",
             },

@@ -15,7 +15,8 @@ import { Card } from "@/components/ui/card";
 import { iconEye } from "@/app/assets/icons";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { getResearch, likeResearch, unlikeResearch } from "@/lib/api/research";
+import { getResearch, likeResearch, unlikeResearch, getAuthorDisplay, getAuthorsData } from "@/lib/api/research";
+import AuthorLinks from "@/app/components/AuthorLinks";
 
 const COVER_GRADIENTS = [
     ["#831d16", "#c2372d"],
@@ -123,7 +124,7 @@ export default function Investigaciones() {
     };
 
     const handleShare = (researchId) => {
-        const url = `${process.env.NEXT_PUBLIC_FRONTEND_URL}/Investigaciones/${researchId}`;
+        const url = `${window.location.origin}/Investigaciones/${researchId}`;
         navigator.clipboard.writeText(url).then(
             () => toast.success("URL copiada al portapapeles"),
             () => toast.error("Error al copiar la URL"),
@@ -228,7 +229,8 @@ export default function Investigaciones() {
                 ) : displayed.length > 0 ? (
                     displayed.map((item) => {
                         const [from, to] = COVER_GRADIENTS[(String(item.id || "").charCodeAt(0) || 0) % COVER_GRADIENTS.length];
-                        const authorName = item.author || item.user_name || "Investigadora";
+                        const authorsData = getAuthorsData(item);
+                        const authorName = getAuthorDisplay(item);
                         const initials = getInitials(authorName);
                         const isLiked = likedResearch.has(item.id);
 
@@ -296,7 +298,7 @@ export default function Investigaciones() {
                                             >
                                                 {initials}
                                             </span>
-                                            <span className="text-xs text-slate-500 truncate">{authorName}</span>
+                                            <AuthorLinks authors={authorsData} fallback={authorName} />
                                         </div>
 
                                         {/* Title */}

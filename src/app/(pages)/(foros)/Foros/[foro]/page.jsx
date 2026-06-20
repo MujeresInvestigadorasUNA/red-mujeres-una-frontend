@@ -2,15 +2,16 @@
 import { capitalizeWords } from "@/app/assets/utils";
 import { getProfilePictureUrl } from "@/lib/api/auth";
 import { getUser } from "@/lib/api/forums";
-import { getResearchByUserId, getResearchPdfUrl, likeResearch, unlikeResearch } from "@/lib/api/research";
-import { getCoursesByUserId } from "@/lib/api/courses";
+import { getResearchByUserId, getResearchPdfUrl, likeResearch, unlikeResearch, getAuthorsData, getAuthorDisplay } from "@/lib/api/research";
+import AuthorLinks from "@/app/components/AuthorLinks";
+import { getEventsByUserId } from "@/lib/api/events";
 import { useUser } from "@/app/contexts/UserContext";
 import Link from "next/link";
 import { use, useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
-    Search, RefreshCw, FileText, BookOpen,
-    Heart, Eye, Calendar, Layers, User,
+    Search, RefreshCw, FileText, CalendarDays,
+    Heart, Eye, Layers,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,12 +25,20 @@ const RESEARCH_GRADIENTS = [
     ["#831d16", "#E7473C"],
 ];
 
-const COURSE_GRADIENTS = [
-    ["#065f46", "#10b981"],
-    ["#1e3a8a", "#3b82f6"],
-    ["#4c1d95", "#8b5cf6"],
-    ["#92400e", "#f59e0b"],
+const EVENT_COLORS = [
+    "bg-[#831d16]",
+    "bg-[#c2372d]",
+    "bg-[#E7473C]",
+    "bg-[#b91c1c]",
 ];
+
+const MONTHS_SHORT = ["ENE", "FEB", "MAR", "ABR", "MAY", "JUN", "JUL", "AGO", "SEP", "OCT", "NOV", "DIC"];
+
+function parseDateLocal(dateStr) {
+    if (!dateStr) return null;
+    const d = new Date(dateStr + "T00:00:00");
+    return isNaN(d.getTime()) ? null : d;
+}
 
 function getInitials(name) {
     if (!name) return "?";
@@ -47,10 +56,10 @@ export default function ForoPage({ params }) {
     const [forum, setForum] = useState(null);
     const [photoSignedUrl, setPhotoSignedUrl] = useState(null);
     const [research, setResearch] = useState([]);
-    const [courses, setCourses] = useState([]);
+    const [events, setEvents] = useState([]);
     const [loadingForum, setLoadingForum] = useState(true);
     const [loadingResearch, setLoadingResearch] = useState(true);
-    const [loadingCourses, setLoadingCourses] = useState(true);
+    const [loadingEvents, setLoadingEvents] = useState(true);
     const [activeTab, setActiveTab] = useState("investigaciones");
     const [searchQuery, setSearchQuery] = useState("");
     const [likedResearch, setLikedResearch] = useState(new Set());
@@ -101,18 +110,18 @@ export default function ForoPage({ params }) {
                 setLoadingResearch(false);
             }
 
-            // Courses
+            // Events
             try {
-                setLoadingCourses(true);
-                const res = await getCoursesByUserId({ user_id: foroId });
+                setLoadingEvents(true);
+                const res = await getEventsByUserId(foroId);
                 if (res.ok) {
                     const data = await res.json();
-                    setCourses(Array.isArray(data) ? data : []);
+                    setEvents(Array.isArray(data) ? data : []);
                 }
             } catch (e) {
                 console.error(e);
             } finally {
-                setLoadingCourses(false);
+                setLoadingEvents(false);
             }
         };
 
@@ -156,7 +165,7 @@ export default function ForoPage({ params }) {
     const filteredResearch = research.filter((r) =>
         !q || r.title?.toLowerCase().includes(q) || r.description?.toLowerCase().includes(q)
     );
-    const filteredCourses = courses.filter((c) =>
+    const filteredEvents = events.filter((c) =>
         !q || c.title?.toLowerCase().includes(q) || c.description?.toLowerCase().includes(q)
     );
 
@@ -215,8 +224,8 @@ export default function ForoPage({ params }) {
                                     {research.length} investigación{research.length !== 1 ? "es" : ""}
                                 </span>
                                 <span className="flex items-center gap-1.5 text-white/70 text-xs">
-                                    <BookOpen className="w-3.5 h-3.5" />
-                                    {courses.length} curso{courses.length !== 1 ? "s" : ""}
+                                    <CalendarDays className="w-3.5 h-3.5" />
+                                    {events.length} evento{events.length !== 1 ? "s" : ""}
                                 </span>
                             </div>
                         </div>
@@ -246,18 +255,18 @@ export default function ForoPage({ params }) {
                             </span>
                         </button>
                         <button
-                            onClick={() => handleTabChange("cursos")}
+                            onClick={() => handleTabChange("eventos")}
                             className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${
-                                activeTab === "cursos"
+                                activeTab === "eventos"
                                     ? "bg-[#E7473C] text-white shadow-sm"
                                     : "text-slate-500 hover:text-slate-700 hover:bg-slate-50"
                             }`}
                         >
-                            Cursos
+                            Eventos
                             <span className={`ml-1.5 text-xs px-1.5 py-0.5 rounded-full ${
-                                activeTab === "cursos" ? "bg-white/20" : "bg-slate-100"
+                                activeTab === "eventos" ? "bg-white/20" : "bg-slate-100"
                             }`}>
-                                {courses.length}
+                                {events.length}
                             </span>
                         </button>
                     </div>
@@ -321,6 +330,9 @@ export default function ForoPage({ params }) {
 
                                                 {/* Body */}
                                                 <div className="flex flex-col flex-1 p-3.5">
+                                                    <div className="flex items-center gap-2 mb-2">
+                                                        <AuthorLinks authors={getAuthorsData(item)} fallback={getAuthorDisplay(item)} />
+                                                    </div>
                                                     <h3 className="text-sm font-semibold text-slate-800 line-clamp-2 mb-1.5 leading-snug group-hover:text-[#831d16] transition-colors duration-200">
                                                         {item.title}
                                                     </h3>
@@ -374,72 +386,59 @@ export default function ForoPage({ params }) {
                     </div>
                 )}
 
-                {/* ── Cursos tab ───────────────────────────────── */}
-                {activeTab === "cursos" && (
+                {/* ── Eventos tab ──────────────────────────────── */}
+                {activeTab === "eventos" && (
                     <div>
-                        {loadingCourses ? (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                                {[...Array(4)].map((_, i) => (
-                                    <Card key={i} className="p-0 overflow-hidden border border-slate-100 flex flex-col gap-0">
-                                        <Skeleton className="h-28 w-full rounded-none" />
-                                        <div className="p-3.5 flex flex-col gap-2">
-                                            <Skeleton className="h-4 w-full" />
-                                            <Skeleton className="h-3 w-4/5" />
-                                            <Skeleton className="h-3 w-24 mt-1" />
+                        {loadingEvents ? (
+                            <div className="flex flex-col gap-3">
+                                {[...Array(3)].map((_, i) => (
+                                    <Card key={i} className="p-0 overflow-hidden border border-slate-100 flex flex-row gap-0">
+                                        <Skeleton className="w-20 shrink-0 rounded-none" />
+                                        <div className="p-3.5 flex flex-col gap-2 flex-1">
+                                            <Skeleton className="h-4 w-3/4" />
+                                            <Skeleton className="h-3 w-full" />
+                                            <Skeleton className="h-3 w-2/3" />
                                         </div>
                                     </Card>
                                 ))}
                             </div>
-                        ) : filteredCourses.length > 0 ? (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                                {filteredCourses.map((course) => {
-                                    const [from, to] = COURSE_GRADIENTS[hashIndex(course.id, COURSE_GRADIENTS.length)];
+                        ) : filteredEvents.length > 0 ? (
+                            <div className="flex flex-col gap-3">
+                                {filteredEvents.map((evt) => {
+                                    const colorClass = EVENT_COLORS[hashIndex(evt.id, EVENT_COLORS.length)];
+                                    const date = parseDateLocal(evt.initial_date);
+                                    const day = date ? date.getDate() : null;
+                                    const month = date ? MONTHS_SHORT[date.getMonth()] : null;
+
                                     return (
-                                        <Link key={course.id} href={`/Cursos/${course.id}`}>
-                                            <Card className="p-0 overflow-hidden border border-slate-100 hover:border-emerald-300/60 hover:shadow-md transition-all duration-300 flex flex-col gap-0 group h-full">
-                                                {/* Header: photo or gradient */}
-                                                <div
-                                                    className="relative h-24 shrink-0 flex items-center justify-center overflow-hidden"
-                                                    style={{ background: course.photo ? undefined : `linear-gradient(135deg, ${from}, ${to})` }}
-                                                >
-                                                    {course.photo ? (
-                                                        <img src={course.photo} alt={course.title} className="w-full h-full object-cover" />
+                                        <Link key={evt.id} href={`/Eventos/${evt.id}`} className="group">
+                                            <Card className="p-0 overflow-hidden border border-slate-200 hover:border-[#E7473C]/40 hover:shadow-md transition-all duration-300 flex flex-row gap-0 h-full">
+                                                <div className={`${colorClass} w-20 shrink-0 flex flex-col items-center justify-center text-white relative overflow-hidden`}>
+                                                    <div className="absolute -right-4 -top-4 w-14 h-14 rounded-full bg-white/10" />
+                                                    {day ? (
+                                                        <div className="relative z-10 flex flex-col items-center py-3">
+                                                            <span className="text-[9px] font-semibold uppercase tracking-widest text-white/70">{month}</span>
+                                                            <span className="text-3xl font-extrabold leading-none mt-0.5">{day}</span>
+                                                        </div>
                                                     ) : (
-                                                        <>
-                                                            <div className="absolute -right-4 -top-4 w-20 h-20 rounded-full bg-white/10" />
-                                                            <div className="absolute -left-2 -bottom-3 w-14 h-14 rounded-full bg-white/10" />
-                                                            <BookOpen className="w-9 h-9 text-white/25 group-hover:text-white/40 transition-all duration-300" strokeWidth={1} />
-                                                        </>
+                                                        <CalendarDays className="w-7 h-7 text-white/40" strokeWidth={1} />
                                                     )}
                                                 </div>
 
-                                                {/* Body */}
-                                                <div className="flex flex-col flex-1 p-3.5">
-                                                    <h3 className="text-sm font-semibold text-slate-800 line-clamp-2 mb-1.5 leading-snug group-hover:text-emerald-700 transition-colors duration-200">
-                                                        {course.title || "Sin título"}
+                                                <div className="flex flex-col flex-1 p-3.5 min-w-0">
+                                                    <h3 className="text-sm font-semibold text-slate-800 line-clamp-1 group-hover:text-[#831d16] transition-colors duration-200">
+                                                        {evt.title || "Sin título"}
                                                     </h3>
-                                                    {course.description && (
-                                                        <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed flex-1 mb-2">
-                                                            {course.description}
+                                                    {evt.description && (
+                                                        <p className="text-xs text-slate-500 line-clamp-1 leading-relaxed mt-0.5">
+                                                            {evt.description}
                                                         </p>
                                                     )}
-                                                    <div className="flex flex-wrap items-center gap-1.5 pt-2.5 mt-auto border-t border-slate-100">
-                                                        {course.modality && (
+                                                    <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                                                        {evt.modality && (
                                                             <span className="inline-flex items-center gap-1 text-[10px] font-medium text-slate-500 bg-slate-100 rounded-full px-2 py-0.5">
                                                                 <Layers className="w-3 h-3" />
-                                                                {course.modality}
-                                                            </span>
-                                                        )}
-                                                        {course.initial_date && (
-                                                            <span className="inline-flex items-center gap-1 text-[10px] text-slate-400 bg-slate-50 rounded-full px-2 py-0.5">
-                                                                <Calendar className="w-3 h-3" />
-                                                                {new Date(course.initial_date).toLocaleDateString("es-CR", { day: "2-digit", month: "short", year: "numeric" })}
-                                                            </span>
-                                                        )}
-                                                        {course.max_quotas && (
-                                                            <span className="inline-flex items-center gap-1 text-[10px] text-slate-400 bg-slate-50 rounded-full px-2 py-0.5">
-                                                                <User className="w-3 h-3" />
-                                                                {course.max_quotas} cupos
+                                                                {evt.modality}
                                                             </span>
                                                         )}
                                                     </div>
@@ -451,12 +450,12 @@ export default function ForoPage({ params }) {
                             </div>
                         ) : (
                             <EmptyState
-                                icon={<BookOpen className="w-10 h-10 text-slate-300" strokeWidth={1.5} />}
-                                title={searchQuery ? "Sin resultados" : "Sin cursos"}
+                                icon={<CalendarDays className="w-10 h-10 text-slate-300" strokeWidth={1.5} />}
+                                title={searchQuery ? "Sin resultados" : "Sin eventos"}
                                 description={
                                     searchQuery
-                                        ? `No se encontraron cursos para "${searchQuery}"`
-                                        : "Esta investigadora aún no ha creado cursos."
+                                        ? `No se encontraron eventos para "${searchQuery}"`
+                                        : "Esta investigadora aún no ha creado eventos."
                                 }
                             />
                         )}

@@ -216,7 +216,7 @@ export function CustomNavigationMenu() {
                                         <DesktopMenuItem
                                             href="/MiForo"
                                             title="Mi Foro"
-                                            description="Accede a tu foro personal con tus investigaciones y cursos."
+                                            description="Accede a tu foro personal con tus investigaciones y eventos."
                                         />
                                     </ul>
                                 </NavigationMenuContent>
@@ -260,19 +260,19 @@ export function CustomNavigationMenu() {
                                     className="bg-transparent hover:bg-transparent focus:bg-transparent active:bg-transparent text-gray-700 hover:text-[#C0392B]"
                                     onClick={(event) => event.preventDefault()}
                                 >
-                                    Cursos
+                                    Eventos
                                 </NavigationMenuTrigger>
                                 <NavigationMenuContent>
                                     <ul className="grid w-96 gap-2">
                                         <DesktopMenuItem
-                                            href="/Cursos"
-                                            title="Explorar Cursos"
-                                            description="Explora todos los cursos disponibles en la plataforma."
+                                            href="/Eventos"
+                                            title="Explorar Eventos"
+                                            description="Explora todos los eventos organizados por la comunidad."
                                         />
                                         <DesktopMenuItem
-                                            href="/MisCursos"
-                                            title="Mis Cursos"
-                                            description="Accede a tus cursos personales y gestiona tus inscripciones."
+                                            href="/MisEventos"
+                                            title="Mis Eventos"
+                                            description="Crea y gestiona tus eventos."
                                         />
                                     </ul>
                                 </NavigationMenuContent>
@@ -307,8 +307,8 @@ export function CustomNavigationMenu() {
                         <Link href="/Investigaciones" className="hover:text-[#C0392B] transition">
                             Investigaciones
                         </Link>
-                        <Link href="/Cursos" className="hover:text-[#C0392B] transition">
-                            Cursos
+                        <Link href="/Eventos" className="hover:text-[#C0392B] transition">
+                            Eventos
                         </Link>
                     </div>
                 )}
@@ -417,8 +417,8 @@ export function CustomNavigationMenu() {
                             <Link href="/MisInvestigaciones" onClick={() => setMobileMenuOpen(false)}>Mis Investigaciones</Link>
                             <Link href="/MapaDispersion" onClick={() => setMobileMenuOpen(false)}>Mapa Dispersión 2D</Link>
                             <Link href="/MapaDispersion3D" onClick={() => setMobileMenuOpen(false)}>Mapa Dispersión 3D</Link>
-                            <Link href="/Cursos" onClick={() => setMobileMenuOpen(false)}>Explorar Cursos</Link>
-                            <Link href="/MisCursos" onClick={() => setMobileMenuOpen(false)}>Mis Cursos</Link>
+                            <Link href="/Eventos" onClick={() => setMobileMenuOpen(false)}>Explorar Eventos</Link>
+                            <Link href="/MisEventos" onClick={() => setMobileMenuOpen(false)}>Mis Eventos</Link>
                             {user?.user_type_id === 3 && (
                                 <Link href="/Usuarios" onClick={() => setMobileMenuOpen(false)}>Usuarios</Link>
                             )}
@@ -427,7 +427,7 @@ export function CustomNavigationMenu() {
                         <>
                             <Link href="/Foros" onClick={() => setMobileMenuOpen(false)}>Foros</Link>
                             <Link href="/Investigaciones" onClick={() => setMobileMenuOpen(false)}>Investigaciones</Link>
-                            <Link href="/Cursos" onClick={() => setMobileMenuOpen(false)}>Cursos</Link>
+                            <Link href="/Eventos" onClick={() => setMobileMenuOpen(false)}>Eventos</Link>
                         </>
                     )}
 

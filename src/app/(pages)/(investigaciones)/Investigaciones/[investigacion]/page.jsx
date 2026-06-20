@@ -20,10 +20,14 @@ import {
     getResearchById,
     getRelatedResearch,
     getResearchPdfUrl,
+    getResearchAuthors,
     registerResearchVisit,
     likeResearch,
     unlikeResearch,
+    getAuthorDisplay,
+    getAuthorsData,
 } from "@/lib/api/research";
+import AuthorLinks from "@/app/components/AuthorLinks";
 
 const PLACEHOLDER_DESCRIPTION = "Exploración detallada de esta investigación académica de la Red de Mujeres Académicas.";
 
@@ -43,7 +47,7 @@ function getInitials(name) {
 
 function RelatedResearchCard({ research, isLiked, likesCount, onLike }) {
     const [from, to] = RECOMMENDED_GRADIENTS[(String(research.id || "").charCodeAt(0) || 0) % RECOMMENDED_GRADIENTS.length];
-    const initials = getInitials(research.author || research.user_name);
+    const initials = getInitials(getAuthorDisplay(research));
 
     return (
         <Link href={`/Investigaciones/${research.id}`} className="flex flex-col flex-1 group min-w-0">
@@ -68,9 +72,7 @@ function RelatedResearchCard({ research, isLiked, likesCount, onLike }) {
                         >
                             {initials}
                         </span>
-                        <span className="text-xs text-slate-500 truncate">
-                            {research.author || research.user_name || "Investigadora"}
-                        </span>
+                        <AuthorLinks authors={getAuthorsData(research)} fallback={getAuthorDisplay(research)} />
                     </div>
                     <h3 className="text-sm font-semibold text-slate-800 line-clamp-2 mb-1.5 leading-snug group-hover:text-blue-700 transition-colors duration-200">
                         {research.title || "Sin título"}
@@ -131,6 +133,7 @@ export default function Investigacion() {
     const researchId = params.investigacion;
     
     const [currentResearch, setCurrentResearch] = useState(null);
+    const [authors, setAuthors] = useState([]);
     const [pdfLinks, setPdfLinks] = useState({ inlineUrl: null, downloadUrl: null });
     const [relatedResearch, setRelatedResearch] = useState([]);
     const [likedResearch, setLikedResearch] = useState(new Set());
@@ -160,6 +163,7 @@ export default function Investigacion() {
                 setCurrentResearch(current);
 
                 if (current?.id) {
+                    getResearchAuthors(current.id).then(setAuthors);
                     const related = await getRelatedResearch(current.id, 6, user?.id);
                     setRelatedResearch(related);
                     const counts = {};
@@ -323,7 +327,23 @@ export default function Investigacion() {
                     <p className="mt-3 text-gray-700">
                         {currentResearch.description || PLACEHOLDER_DESCRIPTION}
                     </p>
-                    
+
+                    {authors.length > 0 && (
+                        <div className="mt-4 space-y-2">
+                            <span className="text-sm font-medium text-gray-700">Autoras</span>
+                            <div className="flex flex-wrap gap-2">
+                                {authors.map((author) => (
+                                    <span
+                                        key={author.id}
+                                        className="inline-flex items-center bg-red-50 border border-red-200 text-red-800 rounded-full px-3 py-1 text-sm"
+                                    >
+                                        {author.first_name} {author.last_name}
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
                     <section className="mt-4 space-y-4">
                         {viewerUrl ? (
                             <div ref={pdfContainerRef} className="w-full">

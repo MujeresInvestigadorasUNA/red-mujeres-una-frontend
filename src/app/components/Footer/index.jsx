@@ -19,7 +19,7 @@ export default function Footer() {
             <div className="flex gap-8 justify-center flex-wrap">
                 <Link href="/Foros" className="font-bold hover:text-gray-900">Foros</Link>
                 <Link href="/Investigaciones" className="font-bold hover:text-gray-900">Investigaciones</Link>
-                <Link href="/Cursos" className="font-bold hover:text-gray-900">Cursos</Link>
+                <Link href="/Eventos" className="font-bold hover:text-gray-900">Eventos</Link>
             </div>
         </footer>
     )

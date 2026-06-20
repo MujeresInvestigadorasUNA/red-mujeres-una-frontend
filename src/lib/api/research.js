@@ -1,5 +1,24 @@
 import { apiFetch } from './client';
 
+export function getAuthorsData(item) {
+  if (Array.isArray(item?.authors) && item.authors.length > 0) {
+    return item.authors.map((a) => ({
+      id: a.id ?? a.user_id,
+      name: `${a.first_name || a.name || ''} ${a.last_name || ''}`.trim(),
+    })).filter((a) => a.name);
+  }
+  return [];
+}
+
+export function getAuthorDisplay(item) {
+  const authors = getAuthorsData(item);
+  if (authors.length > 0) return authors.map((a) => a.name).join(', ');
+  if (item?.user_first_name || item?.user_last_name) {
+    return `${item.user_first_name || ''} ${item.user_last_name || ''}`.trim();
+  }
+  return item?.author || item?.user_name || 'Investigadora';
+}
+
 export async function getResearch(limit = 5, viewerUserId = null) {
   try {
     let url = limit ? `/research/?limit=${limit}` : '/research/';
@@ -113,7 +132,9 @@ export async function getResearchAuthors(research_id) {
       console.error('Error fetching research authors:', response.statusText);
       return [];
     }
-    return await response.json();
+    const data = await response.json();
+    const list = Array.isArray(data) ? data : Array.isArray(data?.authors) ? data.authors : [];
+    return list.map((a) => ({ ...a, id: a.id ?? a.user_id }));
   } catch (error) {
     console.error('Error fetching research authors:', error);
     return [];

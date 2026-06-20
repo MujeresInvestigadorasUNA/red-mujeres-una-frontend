@@ -1,13 +1,14 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { iconEye, iconEyeSlash } from "@/app/assets/icons";
-import { 
-    InputGroup, 
-    InputGroupAddon, 
-    InputGroupButton, 
-    InputGroupInput 
+import {
+    InputGroup,
+    InputGroupAddon,
+    InputGroupButton,
+    InputGroupInput
 } from "@/components/ui/input-group";
 import { toast } from "sonner";
 import { loginUser } from "@/lib/api/auth";
@@ -16,12 +17,21 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { useUser } from "@/app/contexts/UserContext";
+import { AlertCircle } from "lucide-react";
 
 export default function LoginForm() {
     const { setUserData, setToken } = useUser();
+    const searchParams = useSearchParams();
     const [showPassword, setShowPassword] = useState(false);
     const [form, setForm] = useState({ email: "", password: "" });
     const [loading, setLoading] = useState(false);
+    const [sessionExpired, setSessionExpired] = useState(false);
+
+    useEffect(() => {
+        if (searchParams.get("session_expired") === "true") {
+            setSessionExpired(true);
+        }
+    }, [searchParams]);
 
     const togglePassword = () => setShowPassword(!showPassword);
     const onChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
@@ -77,6 +87,15 @@ export default function LoginForm() {
             </div>
 
             <div className="w-full border-t border-gray-100" />
+
+            {sessionExpired && (
+                <div className="flex items-center gap-2.5 w-full bg-amber-50 border border-amber-200 rounded-lg px-4 py-3">
+                    <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+                    <p className="text-sm text-amber-800">
+                        Tu sesión ha expirado. Por favor, inicia sesión de nuevo.
+                    </p>
+                </div>
+            )}
 
             <form className="flex flex-col gap-4 w-full" onSubmit={handleSubmit}>
                 <h2 className="text-xl font-bold text-center text-gray-800">

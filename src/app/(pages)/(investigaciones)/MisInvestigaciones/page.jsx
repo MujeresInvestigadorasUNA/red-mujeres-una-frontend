@@ -34,7 +34,8 @@ import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { useMemo, useRef, useState, useEffect } from "react";
 import { UploadCloudIcon } from "lucide-react";
-import { createResearch, getResearchByUserId } from "@/lib/api/research";
+import { createResearch, getResearchByUserId, getAuthorDisplay, getAuthorsData } from "@/lib/api/research";
+import AuthorLinks from "@/app/components/AuthorLinks";
 import CoAuthorSelector from "@/app/components/CoAuthorSelector";
 import { upsertNotification } from "@/lib/notifications";
 
@@ -368,7 +369,8 @@ export default function MisInvestigaciones() {
                 ) : displayed.length > 0 ? (
                     displayed.map((item) => {
                         const [from, to] = COVER_GRADIENTS[(String(item.id || "").charCodeAt(0) || 0) % COVER_GRADIENTS.length];
-                        const authorName = item.author || item.user_name || "Investigadora";
+                        const authorsData = getAuthorsData(item);
+                        const authorName = getAuthorDisplay(item);
                         const initials = getInitials(authorName);
 
                         return (
@@ -402,7 +404,7 @@ export default function MisInvestigaciones() {
                                             >
                                                 {initials}
                                             </span>
-                                            <span className="text-xs text-slate-500 truncate">{authorName}</span>
+                                            <AuthorLinks authors={authorsData} fallback={authorName} />
                                         </div>
 
                                         {/* Title */}
