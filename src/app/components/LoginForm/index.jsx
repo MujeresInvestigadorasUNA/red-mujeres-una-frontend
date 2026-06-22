@@ -36,35 +36,63 @@ export default function LoginForm() {
     const togglePassword = () => setShowPassword(!showPassword);
     const onChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
+    const isValidEmail = (email) => {
+        return /^[^\s@\s]+@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}$/.test(email);
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!form.email || !form.password) {
-            return toast.error("Por favor, complete todos los campos");
+        if (!form.email.trim()) {
+            return toast.error("Ingresa tu correo electrónico.");
         }
+
+        if (!isValidEmail(form.email)) {
+            return toast.error("Ingresa un correo electrónico válido.");
+        }
+
+        if (!form.password.trim()) {
+            return toast.error("La contraseña no puede estar vacía.");
+        }
+
         setLoading(true);
 
         try {
-            const response = await loginUser({ email: form.email, password: form.password });
-            if (!response.ok) {
-                const data = await response.json();
-                const detail = data?.detail;
+            const response = await loginUser({ email: form.email.trim(), password: form.password });
 
-                if (response.status === 400 && detail === "Invalid credentials") {
-                    return toast.warning("Correo o contraseña incorrectos. Verifica tus datos e inténtalo de nuevo.");
+            if (!response.ok) {
+                let message = "No fue posible iniciar sesión. Inténtalo nuevamente.";
+
+                try {
+                    const data = await response.json();
+                    const detail = data?.detail;
+
+                    if (response.status === 400 && detail === "Invalid credentials") {
+                        message = "Correo o contraseña incorrectos. Verifica tus datos e inténtalo de nuevo.";
+                    } else {
+                        const parsedDetail = Array.isArray(detail)
+                            ? detail[0]?.msg
+                            : typeof detail === "string"
+                                ? detail
+                                : null;
+
+                        if (parsedDetail) {
+                            message = parsedDetail;
+                        }
+                    }
+                } catch {
+                    message = "Error en la respuesta del servidor. Inténtalo más tarde.";
                 }
 
-                const parsedDetail =
-                    Array.isArray(detail) ? detail[0]?.msg : typeof detail === "string" ? detail : null;
-
-                return toast.warning(parsedDetail || "No fue posible iniciar sesión. Inténtalo nuevamente.");
+                return toast.error(message);
             }
+
             const data = await response.json();
             setUserData(data);
             setToken(data.access_token);
             window.location.href = "/";
         } catch (err) {
-            toast.warning("Error de conexión");
+            toast.error("No se pudo conectar con el servidor. Inténtalo de nuevo más tarde.");
         } finally {
             setLoading(false);
         }

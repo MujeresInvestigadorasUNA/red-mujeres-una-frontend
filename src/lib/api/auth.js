@@ -9,6 +9,15 @@ export async function loginUser({ email, password }) {
   });
 }
 
+export async function checkUserExists({ email }) {
+  const params = new URLSearchParams({ email }).toString();
+  return apiFetch(`/users/exists?${params}`, {
+    method: 'GET',
+    skipAuth: true,
+    headers: { Accept: 'application/json' },
+  });
+}
+
 export async function getUserInfo({ user_id }) {
   return apiFetch(`/users/${user_id}/`, {
     method: 'GET',
