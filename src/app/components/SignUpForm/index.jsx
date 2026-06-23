@@ -30,7 +30,6 @@ export default function SignUpForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
-  const [verificationLinkSent, setVerificationLinkSent] = useState(false);
   const [signupSessionId, setSignupSessionId] = useState("");
 
   const persistSignupSession = ({ sessionId, emailValue, temporaryPassword }) => {
@@ -61,7 +60,7 @@ export default function SignUpForm() {
       if (existingSession?.email) {
         setSignupSessionId(existingSessionId);
         setEmail(existingSession.email);
-        setVerificationLinkSent(true);
+
       }
     } catch (err) {
       console.error(err);
@@ -134,7 +133,7 @@ export default function SignUpForm() {
                 handleCodeInApp: true,
               });
               setSignupSessionId(existingActiveId);
-              setVerificationLinkSent(true);
+      
               setSuccess("Ya iniciaste el proceso con este correo. Te reenviamos el link de verificacion.");
               return;
             }
@@ -142,6 +141,19 @@ export default function SignUpForm() {
             // La sesión guardada expiró o es inválida, continuar con flujo normal
           }
         }
+      }
+
+      // Pre-check: verificar si el email ya existe en la BD y limpiar huérfanos de Firebase
+      try {
+        const cleanupRes = await cleanupIncompleteFirebaseUser({ email });
+        const cleanupData = await cleanupRes.json();
+
+        if (cleanupData.status === "conflict") {
+          setError("Este correo ya tiene una cuenta registrada. Inicia sesión en lugar de registrarte.");
+          return;
+        }
+      } catch {
+        // Si el endpoint falla, continuar con el flujo normal
       }
 
       const sessionId = createSignupSessionId();
@@ -165,49 +177,13 @@ export default function SignUpForm() {
         handleCodeInApp: true,
       });
 
-      setVerificationLinkSent(true);
       setSuccess(
         "Te enviamos un link de verificacion. Abre el correo y te redirigira a la pantalla para completar tu registro."
       );
     } catch (err) {
       console.error(err);
       if (err?.code === "auth/email-already-in-use") {
-        // Consultar al backend: ¿existe este correo en la BD?
-        try {
-          const cleanupRes = await cleanupIncompleteFirebaseUser({ email });
-          const cleanupData = await cleanupRes.json();
-
-          if (cleanupData.status === "conflict") {
-            // Correo ya registrado en la BD → no continuar
-            setError("Este correo ya tiene una cuenta registrada. Inicia sesion en lugar de registrarte.");
-            setVerificationLinkSent(true);
-
-            return;
-          }
-
-          if (cleanupData.status === "cleaned") {
-            // Backend eliminó el usuario incompleto de Firebase → reintentar registro
-            setLoading(true);
-            const sessionId = createSignupSessionId();
-            const temporaryPassword = `Tmp#${Math.random().toString(36).slice(-10)}A1`;
-            const firebaseCredentials = await createUserWithEmailAndPassword(auth, email, temporaryPassword);
-            persistSignupSession({ sessionId, emailValue: email, temporaryPassword });
-            setSignupSessionId(sessionId);
-            await sendEmailVerification(firebaseCredentials.user, {
-              url: buildVerificationRedirectUrl(sessionId),
-              handleCodeInApp: true,
-            });
-            setVerificationLinkSent(true);
-            setSuccess("Te enviamos el link de verificacion. Abre el correo para completar tu registro.");
-            return;
-          }
-        } catch {
-          // Si el backend falla, mostrar botón de reenvío como fallback
-        }
-
-        // Fallback: sin sesión local y backend no pudo limpiar
-        //setVerificationLinkSent(true);
-        //setError("Este correo tiene un registro pendiente. Revisa tu bandeja de entrada o usa 'Reenviar link de verificacion'.");
+        setError("Este correo ya está en uso. Si ya tienes una cuenta, inicia sesión.");
         return;
       }
       localStorage.removeItem("signup_active_session_id");
@@ -218,61 +194,61 @@ export default function SignUpForm() {
   };
 
   const handleResendVerification = async () => {
+    const targetEmail = email?.trim();
+    if (!targetEmail) {
+      setError("Ingresa tu correo electrónico para reenviar el link.");
+      return;
+    }
+
     setLoading(true);
     setError(null);
     setSuccess(null);
 
     try {
-      const activeSessionId = signupSessionId || localStorage.getItem("signup_active_session_id") || "";
-      if (!activeSessionId) {
-        setError("No se encontro una sesion valida. Ingresa el correo y envia el link nuevamente.");
+      // 1. Verificar que no esté ya registrado en la BD
+      const cleanupRes = await cleanupIncompleteFirebaseUser({ email: targetEmail });
+      const cleanupData = await cleanupRes.json();
+
+      if (cleanupData.status === "conflict") {
+        setError("Este correo ya tiene una cuenta registrada. Inicia sesión en lugar de registrarte.");
         return;
       }
 
-      const activeSessionRaw = localStorage.getItem(`signup_session_${activeSessionId}`);
-      if (!activeSessionRaw) {
-        setError("No se encontro la sesion de verificacion. Vuelve a enviar el link.");
-        return;
+      // 2. El cleanup limpió cualquier huérfano de Firebase → recrear usuario y reenviar
+      const sessionId = createSignupSessionId();
+      const temporaryPassword = `Tmp#${Math.random().toString(36).slice(-10)}A1`;
+
+      const firebaseCredentials = await createUserWithEmailAndPassword(
+        auth,
+        targetEmail,
+        temporaryPassword
+      );
+
+      // Limpiar sesión anterior
+      if (signupSessionId) {
+        localStorage.removeItem(`signup_session_${signupSessionId}`);
       }
 
-      const activeSession = JSON.parse(activeSessionRaw);
-      if (!activeSession?.email || !activeSession?.temporaryPassword) {
-        setError("La sesion de verificacion esta incompleta. Vuelve a enviar el link.");
-        return;
-      }
+      persistSignupSession({
+        sessionId,
+        emailValue: targetEmail,
+        temporaryPassword,
+      });
+      setSignupSessionId(sessionId);
 
-      let firebaseUser = auth?.currentUser;
-      if (!firebaseUser || firebaseUser.email !== activeSession.email) {
-        const signInResult = await signInWithEmailAndPassword(
-          auth,
-          activeSession.email,
-          activeSession.temporaryPassword
-        );
-        firebaseUser = signInResult.user;
-      }
-
-      await sendEmailVerification(firebaseUser, {
-        url: buildVerificationRedirectUrl(activeSessionId),
+      await sendEmailVerification(firebaseCredentials.user, {
+        url: buildVerificationRedirectUrl(sessionId),
         handleCodeInApp: true,
       });
 
-      setEmail(activeSession.email);
-      setSignupSessionId(activeSessionId);
-      setVerificationLinkSent(true);
-      setSuccess("Link de verificacion reenviado. Revisa tu bandeja de entrada y spam.");
+      setSuccess("Link de verificación reenviado. Revisa tu bandeja de entrada y spam.");
     } catch (err) {
       console.error(err);
-      if (err?.code === "auth/invalid-credential") {
-        if (signupSessionId) {
-          localStorage.removeItem(`signup_session_${signupSessionId}`);
-        }
-        localStorage.removeItem("signup_active_session_id");
-        setVerificationLinkSent(false);
-        setSignupSessionId("");
-        setError("La sesion temporal vencio o es invalida. Vuelve a enviar el link desde el paso 1.");
+      if (err?.code === "auth/email-already-in-use") {
+        setError("No se pudo limpiar el registro anterior. Intenta de nuevo en unos minutos.");
         return;
       }
-      setError("No se pudo reenviar el correo de verificacion.");
+      setError("No se pudo reenviar el correo de verificación. Intenta de nuevo.");
     } finally {
       setLoading(false);
     }
@@ -357,7 +333,7 @@ export default function SignUpForm() {
             type="button"
             className="bg-white text-[#8A192A] w-full rounded hover:bg-gray-100 hover:cursor-pointer"
             onClick={handleResendVerification}
-            disabled={loading || !verificationLinkSent}
+            disabled={loading || !email?.trim()}
           >
             Reenviar link de verificacion
           </Button>
