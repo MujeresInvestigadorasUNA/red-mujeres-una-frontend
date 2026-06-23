@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useUser } from "@/app/contexts/UserContext";
 import {
@@ -59,26 +60,38 @@ function getInitials(name) {
     .toUpperCase();
 }
 
-
 function ResearchCard({ research, gradients, index, isRecommended = false, isLiked = false, likesCount = 0, onLike }) {
+  const router = useRouter();
   const [from, to] =
     gradients[
       (String(research.id || "").charCodeAt(0) || 0) % gradients.length
     ];
   const initials = getInitials(research.author);
 
+  const handleCardClick = (event) => {
+    if (event.target.closest("a,button")) return;
+    router.push(research.url);
+  };
+
+  const handleCardKeyDown = (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    if (event.target.closest("a,button")) return;
+    event.preventDefault();
+    router.push(research.url);
+  };
+
   return (
-    <Link
-      href={research.url}
-      className="flex flex-col flex-1 group animate-fadeInUp min-w-0"
-      style={{ animationDelay: `${index * 70}ms`, animationFillMode: "both" }}
-    >
       <Card
-        className={`p-0 overflow-hidden border shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col flex-1 gap-0 ${
+        role="link"
+        tabIndex={0}
+        onClick={handleCardClick}
+        onKeyDown={handleCardKeyDown}
+        className={`p-0 overflow-hidden border shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col flex-1 gap-0 cursor-pointer ${
           isRecommended
             ? "border-blue-100 hover:border-blue-300"
             : "border-slate-100 hover:border-[#E7473C]/30"
         }`}
+        style={{ animationDelay: `${index * 70}ms`, animationFillMode: "both" }}
       >
         <div
           className="relative h-28 shrink-0 flex items-center justify-center overflow-hidden"
@@ -143,7 +156,6 @@ function ResearchCard({ research, gradients, index, isRecommended = false, isLik
           </div>
         </div>
       </Card>
-    </Link>
   );
 }
 
