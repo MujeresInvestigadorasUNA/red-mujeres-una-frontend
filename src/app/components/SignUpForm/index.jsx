@@ -7,16 +7,14 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
-import { AlertCircle } from "lucide-react";
-import { toast } from "sonner";
+import { AlertCircle, ArrowLeft } from "lucide-react";
+
 import {
   createUserWithEmailAndPassword,
   sendEmailVerification,
-  signInWithEmailAndPassword,
-  fetchSignInMethodsForEmail,
 } from "firebase/auth";
 import { auth, hasFirebaseConfig } from "@/lib/firebase/client";
-import { cleanupIncompleteFirebaseUser, checkUserExists } from "@/lib/api/auth";
+import { cleanupIncompleteFirebaseUser } from "@/lib/api/auth";
 
 export default function SignUpForm() {
   const baseCompleteUrl =
@@ -102,96 +100,30 @@ export default function SignUpForm() {
     e.preventDefault();
 
     if (!email?.trim()) {
-      toast.error("Completa el email para continuar.");
+      setError("Completa el email para continuar.");
       return;
     }
 
     if (!isValidEmail(email)) {
-      toast.error("Ingresa un correo electrónico válido.");
+      setError("Ingresa un correo electrónico válido.");
       return;
     }
 
     setLoading(true);
+    setError(null);
+    setSuccess(null);
 
     try {
       if (!hasFirebaseConfig || !auth) {
-        toast.error("Falta configurar Firebase para la verificacion de correo.");
+        setError("Falta configurar Firebase para la verificación de correo.");
         return;
       }
 
       const normalizedEmail = email.trim().toLowerCase();
-      const existsResponse = await checkUserExists({ email: normalizedEmail });
-      if (!existsResponse.ok) {
-        toast.error("No se pudo verificar si el correo ya existe. Intenta de nuevo más tarde.");
-        return;
-      }
 
-      const existsData = await existsResponse.json();
-      const emailExists = existsData?.exists ?? existsData?.status === "exists";
-      if (emailExists) {
-        toast.error("Este correo ya está registrado. Inicia sesión o utiliza otro correo.");
-        return;
-      }
-
-      let signInMethods = [];
+      // Pre-check: cleanup verifica si existe en BD (conflict) o limpia huérfanos de Firebase (cleaned)
       try {
-        signInMethods = await fetchSignInMethodsForEmail(auth, normalizedEmail);
-      } catch (firebaseLookupError) {
-        if (firebaseLookupError?.code !== "auth/user-not-found") {
-          console.debug(firebaseLookupError);
-        }
-      }
-
-      if (Array.isArray(signInMethods) && signInMethods.length > 0) {
         const cleanupRes = await cleanupIncompleteFirebaseUser({ email: normalizedEmail });
-        if (!cleanupRes.ok) {
-          toast.error("No se pudo verificar el estado previo de Firebase. Intenta de nuevo más tarde.");
-          return;
-        }
-
-        const cleanupData = await cleanupRes.json();
-        if (cleanupData.status === "cleaned") {
-          toast.success("Se detectó un registro previo incompleto y se limpió. Puedes intentar el registro nuevamente.");
-        } else if (cleanupData.status === "conflict") {
-          toast.error("Este correo ya tiene una cuenta registrada. Inicia sesión en lugar de registrarte.");
-          return;
-        } else {
-          toast.error("No se pudo limpiar el registro previo de Firebase. Intenta de nuevo con otro correo.");
-          return;
-        }
-      }
-
-      // Si hay una sesión guardada para este correo, reenviar verificación directamente
-      const existingActiveId = localStorage.getItem("signup_active_session_id");
-      if (existingActiveId) {
-        const existingSessionRaw = localStorage.getItem(`signup_session_${existingActiveId}`);
-        if (existingSessionRaw) {
-          try {
-            const existingSession = JSON.parse(existingSessionRaw);
-            if (existingSession?.email === email && existingSession?.temporaryPassword) {
-              const signInResult = await signInWithEmailAndPassword(
-                auth,
-                email,
-                existingSession.temporaryPassword
-              );
-              await sendEmailVerification(signInResult.user, {
-                url: buildVerificationRedirectUrl(existingActiveId),
-                handleCodeInApp: true,
-              });
-              setSignupSessionId(existingActiveId);
-      
-              setSuccess("Ya iniciaste el proceso con este correo. Te reenviamos el link de verificacion.");
-              return;
-            }
-          } catch {
-            // La sesión guardada expiró o es inválida, continuar con flujo normal
-          }
-        }
-      }
-
-      // Pre-check: verificar si el email ya existe en la BD y limpiar huérfanos de Firebase
-      try {
-        const cleanupRes = await cleanupIncompleteFirebaseUser({ email });
         const cleanupData = await cleanupRes.json();
 
         if (cleanupData.status === "conflict") {
@@ -233,7 +165,7 @@ export default function SignUpForm() {
         return;
       }
       localStorage.removeItem("signup_active_session_id");
-      toast.error(getFirebaseErrorMessage(err?.code));
+      setError(getFirebaseErrorMessage(err?.code));
     } finally {
       setLoading(false);
     }
@@ -301,7 +233,14 @@ export default function SignUpForm() {
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-xl px-8 py-10 w-full max-w-md flex flex-col items-center gap-5">
+    <div className="bg-white rounded-2xl shadow-xl px-8 py-10 w-full max-w-md flex flex-col items-center gap-5 relative">
+      <Link
+        href="/IniciarSesion"
+        className="absolute top-4 left-4 p-2 rounded-full text-gray-400 hover:text-[#C0392B] hover:bg-gray-100 transition-colors"
+        title="Volver al inicio de sesión"
+      >
+        <ArrowLeft className="w-5 h-5" />
+      </Link>
       <div className="flex flex-col items-center gap-2">
         <Image
           src="/images/Logo-Red-De-Mujeres-notext.png"
@@ -339,26 +278,48 @@ export default function SignUpForm() {
           />
         </div>
 
-          <Button
-            type="submit"
-            className="bg-[#B62116] text-white w-full rounded hover:bg-[#8A192A] hover:cursor-pointer"
-            disabled={loading}
-          >
-            {loading ? <Spinner /> : "Enviar link de verificacion"}
-          </Button>
+        <Button
+          type="submit"
+          className="bg-[#B62116] text-white w-full rounded hover:bg-[#8A192A] hover:cursor-pointer"
+          disabled={loading}
+        >
+          {loading ? <Spinner /> : "Enviar link de verificacion"}
+        </Button>
 
-          <Button
-            type="button"
-            className="bg-white text-[#8A192A] w-full rounded hover:bg-gray-100 hover:cursor-pointer"
-            onClick={handleResendVerification}
-            disabled={loading || !email?.trim()}
-          >
-            Reenviar link de verificacion
-          </Button>
+        <Button
+          type="button"
+          className="bg-white text-[#8A192A] w-full rounded hover:bg-gray-100 hover:cursor-pointer border border-gray-200"
+          onClick={handleResendVerification}
+          disabled={loading || !email?.trim()}
+        >
+          Reenviar link de verificacion
+        </Button>
 
-          <hr className="border-white" />
-          <Link href="/IniciarSesion" className="text-gray-200 hover:underline text-center">
-            ¿Ya tienes una cuenta? <br /> Inicia sesion aqui
+        {error && (
+          <div className="flex items-start gap-2.5 w-full bg-red-50 border border-red-200 rounded-lg px-4 py-3">
+            <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+            <p className="text-sm text-red-800">{error}</p>
+          </div>
+        )}
+
+        {success && (
+          <div className="flex flex-col gap-3 w-full">
+            <div className="flex items-start gap-2.5 bg-green-50 border border-green-200 rounded-lg px-4 py-3">
+              <AlertCircle className="w-4 h-4 text-green-600 shrink-0 mt-0.5" />
+              <p className="text-sm text-green-800">{success}</p>
+            </div>
+            <div className="flex items-start gap-2.5 bg-amber-50 border border-amber-200 rounded-lg px-4 py-3">
+              <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+              <p className="text-sm text-amber-800">
+                Si no ves el correo en los próximos minutos, revisa tu bandeja de spam o correo no deseado.
+              </p>
+            </div>
+          </div>
+        )}
+
+        <div className="border-t border-gray-100 pt-4 text-center">
+          <Link href="/IniciarSesion" className="text-sm text-gray-500 hover:text-[#C0392B] transition">
+            ¿Ya tienes una cuenta? <span className="font-semibold text-[#C0392B]">Inicia sesión aquí</span>
           </Link>
         </div>
       </form>
