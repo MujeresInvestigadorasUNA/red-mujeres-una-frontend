@@ -3,6 +3,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
+import { sendPasswordResetEmail } from "firebase/auth";
+import { auth } from "@/lib/firebase/client";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -12,6 +14,19 @@ export default function ForgotPasswordForm() {
     const [email, setEmail] = useState("");
     const [loading, setLoading] = useState(false);
     const [submitted, setSubmitted] = useState(false);
+
+    const getFirebaseErrorMessage = (code) => {
+        switch (code) {
+            case "auth/user-not-found":
+                return "No existe una cuenta con este correo electrónico.";
+            case "auth/invalid-email":
+                return "El correo electrónico no es válido.";
+            case "auth/too-many-requests":
+                return "Demasiados intentos. Intenta de nuevo más tarde.";
+            default:
+                return "No fue posible procesar tu solicitud. Inténtalo nuevamente.";
+        }
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -23,29 +38,11 @@ export default function ForgotPasswordForm() {
         setLoading(true);
 
         try {
-            const response = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/users/forgot-password`,
-                {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ email }),
-                }
-            );
-
-            if (!response.ok) {
-                const data = await response.json();
-                const detail = data?.detail;
-                const message =
-                    typeof detail === "string"
-                        ? detail
-                        : "No fue posible procesar tu solicitud. Inténtalo nuevamente.";
-                return toast.error(message);
-            }
-
+            await sendPasswordResetEmail(auth, email.trim());
             setSubmitted(true);
             toast.success("Verifica tu correo electrónico para recuperar tu contraseña");
         } catch (err) {
-            toast.error("Error de conexión");
+            toast.error(getFirebaseErrorMessage(err?.code));
         } finally {
             setLoading(false);
         }
@@ -104,22 +101,36 @@ export default function ForgotPasswordForm() {
                 ) : (
                     <div className="text-center flex flex-col gap-4">
                         <p className="text-gray-600 text-sm">
-                            Se ha enviado un enlace de recuperación a tu correo electrónico. Por favor, revisa tu bandeja de entrada.
+                            Se ha enviado un enlace de recuperación a tu correo electrónico.
                         </p>
-                        <Button
-                            type="button"
-                            onClick={() => { setEmail(""); setSubmitted(false); }}
-                            className="bg-[#C0392B] text-white font-semibold h-11 rounded-lg hover:bg-[#8A192A] hover:cursor-pointer w-full"
+                        <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3">
+                            <p className="text-sm text-amber-800">
+                                Revisa tu <span className="font-bold">bandeja de entrada</span> o tu carpeta de <span className="font-bold">spam / correo no deseado</span>.
+                            </p>
+                        </div>
+                        <Link
+                            href="/IniciarSesion"
+                            className="bg-[#C0392B] text-white font-semibold h-11 rounded-lg hover:bg-[#8A192A] hover:cursor-pointer w-full flex items-center justify-center"
                         >
-                            Volver
-                        </Button>
+                            Volver al Inicio de Sesión
+                        </Link>
                     </div>
                 )}
 
                 <div className="border-t border-gray-100 pt-3 text-center">
-                    <Link href="/IniciarSesion" className="text-sm text-gray-500 hover:text-[#C0392B] transition">
-                        ← Volver a <span className="font-semibold text-[#C0392B]">Iniciar Sesión</span>
-                    </Link>
+                    {!submitted ? (
+                        <Link href="/IniciarSesion" className="text-sm text-gray-500 hover:text-[#C0392B] transition">
+                            ← Volver a <span className="font-semibold text-[#C0392B]">Iniciar Sesión</span>
+                        </Link>
+                    ) : (
+                        <button
+                            type="button"
+                            onClick={() => setSubmitted(false)}
+                            className="text-sm text-gray-500 hover:text-[#C0392B] transition"
+                        >
+                            Reenviar enlace de recuperación
+                        </button>
+                    )}
                 </div>
             </form>
         </div>

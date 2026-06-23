@@ -1,114 +1,71 @@
 "use client";
 import React, { createContext, useState, useContext, useEffect, useRef } from 'react';
-import { getUserInfo } from "@/lib/api/auth";
+import { onIdTokenChanged, signOut } from 'firebase/auth';
+import { auth } from '@/lib/firebase/client';
+import { fetchUserByEmail } from '@/lib/api/auth';
 
 const UserContext = createContext();
-
-const getTokenExpiry = (token) => {
-    try {
-        const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
-        const payload = JSON.parse(atob(base64));
-        return payload.exp ? payload.exp * 1000 : null;
-    } catch {
-        return null;
-    }
-};
 
 export const UserProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [accessToken, setAccessToken] = useState(null);
     const [userLoading, setUserLoading] = useState(true);
-    const expiryTimerRef = useRef(null);
+    const initializedRef = useRef(false);
 
-    const clearExpiryTimer = () => {
-        if (expiryTimerRef.current) {
-            clearTimeout(expiryTimerRef.current);
-            expiryTimerRef.current = null;
-        }
-    };
-
-    const logout = (redirectTo = '/', { sessionExpired = false } = {}) => {
-        clearExpiryTimer();
+    const logout = async (redirectTo = '/', { sessionExpired = false } = {}) => {
+        try {
+            if (auth) await signOut(auth);
+        } catch {}
         setUser(null);
         setAccessToken(null);
-        localStorage.clear();
+        localStorage.removeItem('user');
         const url = sessionExpired ? `${redirectTo}?session_expired=true` : redirectTo;
         window.location.href = url;
     };
 
-    // Restore session from localStorage on mount
     useEffect(() => {
-        const storedUser = localStorage.getItem('user');
-        const storedToken = localStorage.getItem('access_token');
-
-        if (storedUser && storedUser.length > 0) {
-            if (!storedToken) {
-                logout("/IniciarSesion", { sessionExpired: true });
-                return;
-            }
-            setUser(JSON.parse(storedUser));
-            setAccessToken(storedToken);
-        }
-        setUserLoading(false);
-    }, []);
-
-    // Validate token and schedule auto-logout on expiry
-    useEffect(() => {
-        if (!user) return;
-
-        if (!accessToken) {
-            logout("/IniciarSesion", { sessionExpired: true });
+        if (!auth) {
+            setUserLoading(false);
             return;
         }
 
-        const userId = user?.id ?? user?.user_id;
-        if (!userId) return;
+        const unsubscribe = onIdTokenChanged(auth, async (firebaseUser) => {
+            if (firebaseUser) {
+                const token = await firebaseUser.getIdToken();
+                setAccessToken(token);
 
-        // Decode JWT and check expiry
-        clearExpiryTimer();
-        const expiryMs = getTokenExpiry(accessToken);
-        if (expiryMs) {
-            const msUntilExpiry = expiryMs - Date.now();
-            if (msUntilExpiry <= 0) {
-                logout("/IniciarSesion", { sessionExpired: true });
-                return;
-            }
-            expiryTimerRef.current = setTimeout(() => logout("/IniciarSesion", { sessionExpired: true }), msUntilExpiry);
-        }
-
-        // Also validate with the server immediately
-        let isMounted = true;
-        const validateToken = async () => {
-            try {
-                const response = await getUserInfo({ user_id: userId, access_token: accessToken });
-                if (!isMounted) return;
-                if (response.status === 401 || response.status === 403) {
-                    logout("/IniciarSesion", { sessionExpired: true });
+                const storedUser = localStorage.getItem('user');
+                if (storedUser) {
+                    setUser(JSON.parse(storedUser));
+                } else {
+                    try {
+                        const userData = await fetchUserByEmail(firebaseUser.email);
+                        if (userData) {
+                            setUser(userData);
+                            localStorage.setItem('user', JSON.stringify(userData));
+                        }
+                    } catch {}
                 }
-            } catch (error) {
-                console.error("Error validating access token:", error);
+            } else {
+                setAccessToken(null);
+                if (initializedRef.current && user) {
+                    localStorage.removeItem('user');
+                    setUser(null);
+                }
             }
-        };
-        validateToken();
 
-        // Re-validate when el usuario vuelve a la pestaña después de estar inactivo
-        const handleVisibilityChange = () => {
-            if (document.visibilityState === 'visible') validateToken();
-        };
-        document.addEventListener('visibilitychange', handleVisibilityChange);
+            if (!initializedRef.current) {
+                initializedRef.current = true;
+                setUserLoading(false);
+            }
+        });
 
-        return () => {
-            isMounted = false;
-            clearExpiryTimer();
-            document.removeEventListener('visibilitychange', handleVisibilityChange);
-        };
-    }, [user, accessToken]);
+        return () => unsubscribe();
+    }, []);
 
-    // Escucha el evento global que dispara apiFetch cuando cualquier llamada recibe 401/403
     useEffect(() => {
         const handleAuthExpired = () => {
-            localStorage.clear();
-            window.location.href = '/IniciarSesion';
+            logout("/IniciarSesion", { sessionExpired: true });
         };
         window.addEventListener('auth:expired', handleAuthExpired);
         return () => window.removeEventListener('auth:expired', handleAuthExpired);
@@ -121,7 +78,6 @@ export const UserProvider = ({ children }) => {
 
     const setToken = (token) => {
         setAccessToken(token);
-        localStorage.setItem('access_token', token);
     };
 
     return (

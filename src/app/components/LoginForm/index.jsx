@@ -11,7 +11,9 @@ import {
     InputGroupInput
 } from "@/components/ui/input-group";
 import { toast } from "sonner";
-import { loginUser } from "@/lib/api/auth";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "@/lib/firebase/client";
+import { fetchUserByEmail } from "@/lib/api/auth";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -37,7 +39,22 @@ export default function LoginForm() {
     const onChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
     const isValidEmail = (email) => {
-        return /^[^\s@\s]+@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}$/.test(email);
+        return /^[^\s@]+@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}$/.test(email);
+    };
+
+    const getFirebaseErrorMessage = (code) => {
+        switch (code) {
+            case "auth/invalid-credential":
+            case "auth/wrong-password":
+            case "auth/user-not-found":
+                return "Correo o contraseña incorrectos. Verifica tus datos e inténtalo de nuevo.";
+            case "auth/too-many-requests":
+                return "Demasiados intentos fallidos. Intenta de nuevo más tarde.";
+            case "auth/user-disabled":
+                return "Esta cuenta ha sido deshabilitada.";
+            default:
+                return "No fue posible iniciar sesión. Inténtalo nuevamente.";
+        }
     };
 
     const handleSubmit = async (e) => {
@@ -58,41 +75,21 @@ export default function LoginForm() {
         setLoading(true);
 
         try {
-            const response = await loginUser({ email: form.email.trim(), password: form.password });
+            const userCredential = await signInWithEmailAndPassword(auth, form.email.trim(), form.password);
+            const token = await userCredential.user.getIdToken();
 
-            if (!response.ok) {
-                let message = "No fue posible iniciar sesión. Inténtalo nuevamente.";
+            setToken(token);
 
-                try {
-                    const data = await response.json();
-                    const detail = data?.detail;
-
-                    if (response.status === 400 && detail === "Invalid credentials") {
-                        message = "Correo o contraseña incorrectos. Verifica tus datos e inténtalo de nuevo.";
-                    } else {
-                        const parsedDetail = Array.isArray(detail)
-                            ? detail[0]?.msg
-                            : typeof detail === "string"
-                                ? detail
-                                : null;
-
-                        if (parsedDetail) {
-                            message = parsedDetail;
-                        }
-                    }
-                } catch {
-                    message = "Error en la respuesta del servidor. Inténtalo más tarde.";
+            try {
+                const userData = await fetchUserByEmail(form.email.trim());
+                if (userData) {
+                    setUserData(userData);
                 }
+            } catch {}
 
-                return toast.error(message);
-            }
-
-            const data = await response.json();
-            setUserData(data);
-            setToken(data.access_token);
             window.location.href = "/";
         } catch (err) {
-            toast.error("No se pudo conectar con el servidor. Inténtalo de nuevo más tarde.");
+            toast.error(getFirebaseErrorMessage(err?.code));
         } finally {
             setLoading(false);
         }

@@ -245,17 +245,13 @@ export default function CompleteRegistrationForm() {
         return;
       }
 
-      const firebaseIdToken = await firebaseUser.getIdToken();
-
       await updatePassword(firebaseUser, formData.password);
 
       const response = await registerUser({
         first_name: formData.firstName,
         last_name: formData.lastName,
         email: verifiedEmail,
-        password: formData.password,
         user_type_id: 1,
-        firebase_id_token: firebaseIdToken,
       });
 
       if (!response.ok) {
