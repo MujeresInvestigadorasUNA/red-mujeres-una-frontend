@@ -460,7 +460,7 @@ export default function Home() {
             <CarouselNext className="hover:cursor-pointer -right-4 border-white/30 bg-white/15 text-white shadow-sm hover:bg-white/25 h-7 w-7" />
           </Carousel>
         ) : (
-          <p className="text-white/60 text-xs py-3">
+          <p className="text-white/80 text-xs py-3">
             No hay foros disponibles en este momento.
           </p>
         )}

@@ -66,6 +66,7 @@ export default function Investigaciones() {
     const [loadingMore, setLoadingMore] = useState(false);
     const [displayCount, setDisplayCount] = useState(9);
     const [searchQuery, setSearchQuery] = useState("");
+    const [searchFilter, setSearchFilter] = useState("titulo");
     const [likedResearch, setLikedResearch] = useState(new Set());
     const [likesCounts, setLikesCounts] = useState({});
     const ITEMS_PER_PAGE = 9;
@@ -132,14 +133,18 @@ export default function Investigaciones() {
     };
 
     const q = searchQuery.toLowerCase().trim();
-    const filtered = allResearch.filter(
-        (item) =>
-            !q ||
-            item.author?.toLowerCase().includes(q) ||
+    const filtered = allResearch.filter((item) => {
+        if (!q) return true;
+        if (searchFilter === "titulo") {
+            return item.title?.toLowerCase().includes(q) ||
+                item.description?.toLowerCase().includes(q);
+        }
+        return item.author?.toLowerCase().includes(q) ||
             item.user_name?.toLowerCase().includes(q) ||
-            item.title?.toLowerCase().includes(q) ||
-            item.description?.toLowerCase().includes(q)
-    );
+            (Array.isArray(item.authors) && item.authors.some((a) =>
+                `${a.first_name || a.name || ""} ${a.last_name || ""}`.toLowerCase().includes(q)
+            ));
+    });
     const displayed = filtered.slice(0, displayCount);
     const hasMore = filtered.length > displayCount;
 
@@ -179,39 +184,57 @@ export default function Investigaciones() {
                 style={{ background: "linear-gradient(135deg, #831d16, #E7473C)" }}
             >
                 <div className="flex items-center gap-2 mb-1">
-                    <FileText className="w-4 h-4 text-white/60" />
-                    <span className="text-white/60 text-xs font-medium uppercase tracking-wide">
+                    <FileText className="w-4 h-4 text-white/80" />
+                    <span className="text-white/80 text-xs font-medium uppercase tracking-wide">
                         Investigación
                     </span>
                 </div>
                 <h1 className="text-2xl font-bold text-white">Investigaciones</h1>
-                <p className="text-white/70 text-sm mt-1 max-w-xl leading-relaxed">
+                <p className="text-white/80 text-sm mt-1 max-w-xl leading-relaxed">
                     Encuentra aquí todas las investigaciones realizadas por las integrantes de la Red de Mujeres Académicas.
                 </p>
             </section>
 
             {/* Search & Filter bar */}
             <div className="px-6 md:px-16 xl:px-20 pt-8">
-                <div className="flex gap-2 mb-5 max-w-sm">
-                    <div className="relative flex-1">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
-                        <Input
-                            placeholder="Buscar investigaciones..."
-                            value={searchQuery}
-                            onChange={handleSearchChange}
-                            className="pl-9 h-9 text-sm bg-white border-slate-200"
-                        />
-                    </div>
-                    {searchQuery && (
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={handleClear}
-                            className="h-9 w-9 text-slate-400 hover:text-slate-600"
+                <div className="flex flex-col gap-3 mb-5 max-w-md">
+                    <div className="flex items-center gap-1 bg-slate-100 rounded-lg p-0.5 w-fit">
+                        <button
+                            type="button"
+                            onClick={() => { setSearchFilter("titulo"); setDisplayCount(ITEMS_PER_PAGE); }}
+                            className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${searchFilter === "titulo" ? "bg-white text-slate-800 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
                         >
-                            <RefreshCw className="w-3.5 h-3.5" />
-                        </Button>
-                    )}
+                            Por título
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => { setSearchFilter("autora"); setDisplayCount(ITEMS_PER_PAGE); }}
+                            className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${searchFilter === "autora" ? "bg-white text-slate-800 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+                        >
+                            Por autora
+                        </button>
+                    </div>
+                    <div className="flex gap-2">
+                        <div className="relative flex-1">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+                            <Input
+                                placeholder={searchFilter === "titulo" ? "Buscar por título..." : "Buscar por nombre de autora..."}
+                                value={searchQuery}
+                                onChange={handleSearchChange}
+                                className="pl-9 h-9 text-sm bg-white border-slate-200"
+                            />
+                        </div>
+                        {searchQuery && (
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={handleClear}
+                                className="h-9 w-9 text-slate-400 hover:text-slate-600"
+                            >
+                                <RefreshCw className="w-3.5 h-3.5" />
+                            </Button>
+                        )}
+                    </div>
                 </div>
 
                 {!loading && (

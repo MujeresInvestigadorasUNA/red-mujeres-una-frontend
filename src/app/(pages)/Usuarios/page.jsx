@@ -97,7 +97,6 @@ export default function Usuarios() {
       email: userData.email || "",
       user_profession: userData.user_profession || "",
       user_description: userData.user_description || "",
-      is_public: userData.is_public || false,
       user_type_id: userData.user_type_id || 1
     });
   };
@@ -213,13 +212,13 @@ export default function Usuarios() {
         style={{ background: "linear-gradient(135deg, #831d16, #E7473C)" }}
       >
         <div className="flex items-center gap-2 mb-1">
-          <Shield className="w-4 h-4 text-white/60" />
-          <span className="text-white/60 text-xs font-medium uppercase tracking-wide">
+          <Shield className="w-4 h-4 text-white/80" />
+          <span className="text-white/80 text-xs font-medium uppercase tracking-wide">
             Panel de Administración
           </span>
         </div>
         <h1 className="text-2xl font-bold text-white">Gestión de Usuarios</h1>
-        <p className="text-white/70 text-sm mt-1 max-w-xl leading-relaxed">
+        <p className="text-white/80 text-sm mt-1 max-w-xl leading-relaxed">
           Administra los usuarios de la plataforma, edita información y gestiona permisos.
         </p>
       </section>
@@ -259,8 +258,8 @@ export default function Usuarios() {
 
         {/* Grid */}
         {isLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {[...Array(8)].map((_, i) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[...Array(6)].map((_, i) => (
               <Card key={i} className="p-4 border border-slate-100 flex items-start gap-3">
                 <Skeleton className="w-12 h-12 rounded-full shrink-0" />
                 <div className="flex flex-col gap-2 flex-1 pt-1">
@@ -274,13 +273,13 @@ export default function Usuarios() {
           </div>
         ) : displayed.length > 0 ? (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {displayed.map((userData, i) => {
                 const fullName = `${userData.first_name} ${userData.last_name}`;
                 const [gradFrom, gradTo] = AVATAR_GRADIENTS[i % AVATAR_GRADIENTS.length];
 
                 return editingUserId === userData.id ? (
-                  <Card key={userData.id} className="p-4 border border-slate-100 flex flex-col gap-3 col-span-1 sm:col-span-2 lg:col-span-3 xl:col-span-4">
+                  <Card key={userData.id} className="p-4 border border-slate-100 flex flex-col gap-3 col-span-1 sm:col-span-2 lg:col-span-3">
                     <div className="flex items-center justify-between mb-2">
                       <span className="font-semibold text-slate-800">Editando usuario</span>
                       <button
@@ -311,13 +310,12 @@ export default function Usuarios() {
                         />
                       </div>
                       <div className="md:col-span-2">
-                        <Label className="text-xs font-semibold text-slate-600 mb-1 block">Correo *</Label>
+                        <Label className="text-xs font-semibold text-slate-600 mb-1 block">Correo</Label>
                         <Input
                           value={editForm.email}
-                          onChange={(e) => handleInputChange("email", e.target.value)}
-                          placeholder="correo@ejemplo.com"
                           type="email"
-                          className="border-slate-200 rounded text-sm"
+                          disabled
+                          className="border-slate-200 rounded text-sm bg-slate-50 text-slate-500 cursor-not-allowed"
                         />
                       </div>
                       <div>
@@ -385,40 +383,42 @@ export default function Usuarios() {
                     className="p-4 border border-slate-100 hover:border-slate-300 hover:shadow-sm transition-all duration-200 group h-full flex flex-col gap-3"
                   >
                     {/* Avatar + nombre */}
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex items-center gap-3 flex-1 min-w-0">
-                        <div
-                          className="w-12 h-12 rounded-full shrink-0 overflow-hidden flex items-center justify-center shadow-sm"
-                          style={{ background: `linear-gradient(135deg, ${gradFrom}, ${gradTo})` }}
-                        >
-                          {photoUrls[userData.id] ? (
-                            <img
-                              src={photoUrls[userData.id]}
-                              alt={fullName}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <span className="text-white font-semibold text-sm">
-                              {getInitials(userData.first_name, userData.last_name)}
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex flex-col min-w-0 flex-1">
-                          <span className="text-sm font-semibold text-slate-800 truncate group-hover:text-[#555] transition-colors duration-200">
-                            {fullName}
+                    <div className="flex items-start gap-3">
+                      <div
+                        className="w-11 h-11 rounded-full shrink-0 overflow-hidden flex items-center justify-center shadow-sm"
+                        style={{ background: `linear-gradient(135deg, ${gradFrom}, ${gradTo})` }}
+                      >
+                        {photoUrls[userData.id] ? (
+                          <img
+                            src={photoUrls[userData.id]}
+                            alt={fullName}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <span className="text-white font-semibold text-sm">
+                            {getInitials(userData.first_name, userData.last_name)}
                           </span>
-                          {userData.email && (
-                            <span className="text-xs text-slate-400 truncate">
-                              {userData.email}
-                            </span>
-                          )}
-                        </div>
+                        )}
                       </div>
+                      <div className="flex flex-col min-w-0 flex-1">
+                        <span className="text-sm font-semibold text-slate-800 leading-snug group-hover:text-[#555] transition-colors duration-200">
+                          {fullName}
+                        </span>
+                        {userData.email && (
+                          <span className="text-xs text-slate-400 truncate">
+                            {userData.email}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Tipo + Profesión */}
+                    <div className="flex items-center gap-2 flex-wrap">
                       <select
                         value={userData.user_type_id}
                         onChange={(e) => handleTypeChange(userData.id, parseInt(e.target.value))}
                         disabled={userData.id === user?.id}
-                        className={`text-[10px] font-semibold px-2 py-1 rounded-full shrink-0 cursor-pointer border-0 appearance-auto ${
+                        className={`text-[10px] font-semibold px-2 py-1 rounded-full cursor-pointer border-0 appearance-auto ${
                           userData.user_type_id === 3
                             ? "bg-purple-100 text-purple-700"
                             : userData.user_type_id === 2
@@ -430,14 +430,11 @@ export default function Usuarios() {
                           <option key={id} value={id}>{label}</option>
                         ))}
                       </select>
-                    </div>
-
-                    {/* Profesión */}
-                    <div>
-                      <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wide">Profesión</span>
-                      <p className={`text-xs mt-0.5 ${userData.user_profession ? "text-slate-600" : "text-slate-400 italic"}`}>
-                        {userData.user_profession || "Sin profesión registrada"}
-                      </p>
+                      {userData.user_profession && (
+                        <span className="text-[10px] text-slate-500 bg-slate-50 px-2 py-1 rounded-full">
+                          {userData.user_profession}
+                        </span>
+                      )}
                     </div>
 
                     {/* Descripción */}

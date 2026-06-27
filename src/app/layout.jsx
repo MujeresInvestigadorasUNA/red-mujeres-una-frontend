@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import Footer from "./components/Footer";
 import "./globals.css";
 import { CustomNavigationMenu } from "./components/NavigationMenu";
+import AIChat from "./components/AIChat";
 
 export default function RootLayout({ children }) {
   const pathname = usePathname();
@@ -18,6 +19,7 @@ export default function RootLayout({ children }) {
           {!hideLayout && <CustomNavigationMenu />}
           {children}
           {!hideFooter && <Footer />}
+          {!hideLayout && <AIChat />}
         </UserProvider>
         <Toaster position="bottom-center" richColors  />
       </body>

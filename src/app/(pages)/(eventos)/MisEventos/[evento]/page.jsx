@@ -149,7 +149,7 @@ export default function MiEvento({ params }) {
                                                 placeholder="Título del Evento"
                                                 value={event.title}
                                                 onChange={onChange}
-                                                className="bg-white/20 text-white placeholder:text-white/70 border-0 shadow-none focus:outline-none focus:ring-2 focus:ring-white/30 text-3xl md:text-4xl font-bold p-0 mb-0"
+                                                className="bg-white/20 text-white placeholder:text-white/90 border-0 shadow-none focus:outline-none focus:ring-2 focus:ring-white/30 text-3xl md:text-4xl font-bold p-0 mb-0"
                                             />
                                         </h1>
                                         {event.organizer && (
@@ -163,42 +163,42 @@ export default function MiEvento({ params }) {
                                     <div className="flex items-center gap-2">
                                         {iconCalendar({ size: 16 })}
                                         <div>
-                                            <p className="opacity-75 text-xs">Inicio</p>
+                                            <p className="opacity-90 text-xs">Inicio</p>
                                             <Input
                                                 id="startDate"
                                                 name="startDate"
                                                 type="date"
                                                 value={event.startDate}
                                                 onChange={onChange}
-                                                className="bg-white/20 text-white border-0 shadow-none p-0 text-sm font-semibold placeholder:text-white/70"
+                                                className="bg-white/20 text-white border-0 shadow-none p-0 text-sm font-semibold placeholder:text-white/90"
                                             />
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-2">
                                         {iconCalendar({ size: 16 })}
                                         <div>
-                                            <p className="opacity-75 text-xs">Finalización</p>
+                                            <p className="opacity-90 text-xs">Finalización</p>
                                             <Input
                                                 id="endDate"
                                                 name="endDate"
                                                 type="date"
                                                 value={event.endDate}
                                                 onChange={onChange}
-                                                className="bg-white/20 text-white border-0 shadow-none p-0 text-sm font-semibold placeholder:text-white/70"
+                                                className="bg-white/20 text-white border-0 shadow-none p-0 text-sm font-semibold placeholder:text-white/90"
                                             />
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-2">
                                         {iconCalendar({ size: 16 })}
                                         <div>
-                                            <p className="opacity-75 text-xs">Registro Máximo</p>
+                                            <p className="opacity-90 text-xs">Registro Máximo</p>
                                             <Input
                                                 id="maxRegistrationDate"
                                                 name="maxRegistrationDate"
                                                 type="date"
                                                 value={event.maxRegistrationDate}
                                                 onChange={onChange}
-                                                className="bg-white/20 text-white border-0 shadow-none p-0 text-sm font-semibold placeholder:text-white/70"
+                                                className="bg-white/20 text-white border-0 shadow-none p-0 text-sm font-semibold placeholder:text-white/90"
                                             />
                                         </div>
                                     </div>

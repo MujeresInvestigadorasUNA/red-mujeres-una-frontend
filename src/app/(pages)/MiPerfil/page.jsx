@@ -4,14 +4,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
+
 import { Separator } from "@/components/ui/separator";
 import { useEffect, useRef, useState } from "react";
 import { getUserInfo, updateUser, uploadProfilePicture, getProfilePictureUrl } from "@/lib/api/auth";
 import { useUser } from "@/app/contexts/UserContext";
 import { toast } from "sonner";
 import Image from "next/image";
-import { Camera, Eye, EyeOff, Loader2, User } from "lucide-react";
+import { Camera, Loader2, User } from "lucide-react";
 
 export default function MiPerfil() {
     const { user, setUserData } = useUser();
@@ -23,7 +23,6 @@ export default function MiPerfil() {
         userProfession: "",
         email: "",
         photo: null,       // URL base del servidor (sin SAS)
-        isPublic: false,
         userDescription: "",
     });
     const [photoFile, setPhotoFile] = useState(null);       // archivo local seleccionado
@@ -56,10 +55,6 @@ export default function MiPerfil() {
         setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
     };
 
-    const handleOnPublicChange = (checked) => {
-        setForm((prev) => ({ ...prev, isPublic: checked }));
-    };
-
     const normalizeTextField = (value) => {
         const trimmed = value.trim();
         if (!trimmed) return "";
@@ -77,7 +72,7 @@ export default function MiPerfil() {
         };
         setForm(normalizedForm);
 
-        if (!normalizedForm.firstName || !normalizedForm.lastName || !normalizedForm.email || !normalizedForm.userProfession) {
+        if (!normalizedForm.firstName || !normalizedForm.lastName || !normalizedForm.userProfession) {
             toast.error("Por favor, complete todos los campos requeridos");
             return;
         }
@@ -90,8 +85,6 @@ export default function MiPerfil() {
                 last_name: normalizedForm.lastName,
                 user_profession: normalizedForm.userProfession,
                 user_description: normalizedForm.userDescription,
-                is_public: normalizedForm.isPublic,
-                email: normalizedForm.email,
             });
 
             if (!response.ok) {
@@ -121,7 +114,6 @@ export default function MiPerfil() {
                 last_name: latestData?.last_name || normalizedForm.lastName,
                 user_profession: latestData?.user_profession || normalizedForm.userProfession,
                 user_description: latestData?.user_description || normalizedForm.userDescription,
-                is_public: latestData?.is_public ?? normalizedForm.isPublic,
                 photo: latestData?.photo || form.photo,
                 email: latestData?.email || normalizedForm.email,
                 user_type_id: latestData?.user_type_id || user.user_type_id,
@@ -152,7 +144,6 @@ export default function MiPerfil() {
                 userProfession: data.user_profession || "",
                 email: data.email || "",
                 photo: data.photo || null,
-                isPublic: data.is_public || false,
                 userDescription: data.user_description || "",
             });
 
@@ -234,7 +225,7 @@ export default function MiPerfil() {
                             />
                         ) : (
                             <div className="w-full h-full bg-white/10 flex items-center justify-center">
-                                <User className="w-14 h-14 text-white/40" />
+                                <User className="w-14 h-14 text-white/80" />
                             </div>
                         )}
                         <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
@@ -246,7 +237,7 @@ export default function MiPerfil() {
                         <p className="text-white text-xl font-semibold">{fullName}</p>
                     )}
                     {form.userProfession && (
-                        <p className="text-white/60 text-sm">{form.userProfession}</p>
+                        <p className="text-white/80 text-sm">{form.userProfession}</p>
                     )}
 
                     <input
@@ -277,7 +268,7 @@ export default function MiPerfil() {
                                 value={form.firstName}
                                 onChange={onChange}
                                 required
-                                className="bg-white/10 border-white/20 text-white placeholder:text-white/30 h-11 rounded-lg focus:border-white/40 focus:bg-white/15"
+                                className="bg-white/10 border-white/20 text-white placeholder:text-white/50 h-11 rounded-lg focus:border-white/40 focus:bg-white/15"
                             />
                         </div>
                         <div className="grid w-full gap-2">
@@ -292,7 +283,7 @@ export default function MiPerfil() {
                                 value={form.lastName}
                                 onChange={onChange}
                                 required
-                                className="bg-white/10 border-white/20 text-white placeholder:text-white/30 h-11 rounded-lg focus:border-white/40 focus:bg-white/15"
+                                className="bg-white/10 border-white/20 text-white placeholder:text-white/50 h-11 rounded-lg focus:border-white/40 focus:bg-white/15"
                             />
                         </div>
                     </div>
@@ -309,23 +300,21 @@ export default function MiPerfil() {
                             value={form.userProfession}
                             onChange={onChange}
                             required
-                            className="bg-white/10 border-white/20 text-white placeholder:text-white/30 h-11 rounded-lg focus:border-white/40 focus:bg-white/15"
+                            className="bg-white/10 border-white/20 text-white placeholder:text-white/50 h-11 rounded-lg focus:border-white/40 focus:bg-white/15"
                         />
                     </div>
 
                     <div className="grid gap-2">
                         <Label htmlFor="email" className="text-white/80 text-sm font-medium">
-                            Correo Electrónico <span className="text-red-400">*</span>
+                            Correo Electrónico
                         </Label>
                         <Input
                             id="email"
                             name="email"
-                            placeholder="tu@email.com"
                             type="email"
                             value={form.email}
-                            onChange={onChange}
-                            required
-                            className="bg-white/10 border-white/20 text-white placeholder:text-white/30 h-11 rounded-lg focus:border-white/40 focus:bg-white/15"
+                            disabled
+                            className="bg-white/5 border-white/10 text-white/70 h-11 rounded-lg cursor-not-allowed"
                         />
                     </div>
 
@@ -340,36 +329,11 @@ export default function MiPerfil() {
                             value={form.userDescription}
                             onChange={onChange}
                             rows={4}
-                            className="bg-white/10 border-white/20 text-white placeholder:text-white/30 rounded-lg focus:border-white/40 focus:bg-white/15 resize-none"
+                            className="bg-white/10 border-white/20 text-white placeholder:text-white/50 rounded-lg focus:border-white/40 focus:bg-white/15 resize-none"
                         />
                     </div>
 
                     <Separator className="bg-white/10" />
-
-                    {/* Toggle visibilidad del foro */}
-                    <div className="flex items-center justify-between bg-white/5 border border-white/10 rounded-lg px-4 py-3">
-                        <div className="flex flex-col gap-0.5">
-                            <span className="text-white text-sm font-medium">
-                                {form.isPublic ? "Foro Público" : "Foro Privado"}
-                            </span>
-                            <span className="text-white/50 text-xs">
-                                {form.isPublic
-                                    ? "Tu perfil es visible para todos en el foro"
-                                    : "Tu perfil no aparece en el foro"}
-                            </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            {form.isPublic
-                                ? <Eye className="w-4 h-4 text-[#E7473C]" />
-                                : <EyeOff className="w-4 h-4 text-white/40" />
-                            }
-                            <Switch
-                                id="isPublic"
-                                checked={form.isPublic}
-                                onCheckedChange={handleOnPublicChange}
-                            />
-                        </div>
-                    </div>
                 </div>
 
                 <Button

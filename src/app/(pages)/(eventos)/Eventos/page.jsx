@@ -83,13 +83,13 @@ export default function Eventos() {
                 style={{ background: "linear-gradient(135deg, #831d16, #E7473C)" }}
             >
                 <div className="flex items-center gap-2 mb-1">
-                    <CalendarDays className="w-4 h-4 text-white/60" />
-                    <span className="text-white/60 text-xs font-medium uppercase tracking-wide">
+                    <CalendarDays className="w-4 h-4 text-white/80" />
+                    <span className="text-white/80 text-xs font-medium uppercase tracking-wide">
                         Comunidad
                     </span>
                 </div>
                 <h1 className="text-2xl font-bold text-white">Eventos</h1>
-                <p className="text-white/70 text-sm mt-1 max-w-xl leading-relaxed">
+                <p className="text-white/80 text-sm mt-1 max-w-xl leading-relaxed">
                     Encuentra aquí los eventos organizados por las integrantes de la Red de Mujeres Académicas.
                 </p>
             </section>
@@ -155,13 +155,13 @@ export default function Eventos() {
                                             <div className="absolute -left-4 -bottom-4 w-16 h-16 rounded-full bg-white/10" />
                                             {day ? (
                                                 <div className="relative z-10 flex flex-col items-center py-4">
-                                                    <span className="text-[10px] font-semibold uppercase tracking-widest text-white/70">
+                                                    <span className="text-[10px] font-semibold uppercase tracking-widest text-white/80">
                                                         {month}
                                                     </span>
                                                     <span className="text-4xl md:text-5xl font-extrabold leading-none mt-0.5">
                                                         {day}
                                                     </span>
-                                                    <span className="text-[10px] text-white/60 mt-1">{year}</span>
+                                                    <span className="text-[10px] text-white/80 mt-1">{year}</span>
                                                 </div>
                                             ) : (
                                                 <CalendarDays className="w-10 h-10 text-white/40" strokeWidth={1} />

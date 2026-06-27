@@ -91,13 +91,13 @@ export default function Foros() {
                 style={{ background: "linear-gradient(135deg, #831d16, #E7473C)" }}
             >
                 <div className="flex items-center gap-2 mb-1">
-                    <Users className="w-4 h-4 text-white/60" />
-                    <span className="text-white/60 text-xs font-medium uppercase tracking-wide">
+                    <Users className="w-4 h-4 text-white/80" />
+                    <span className="text-white/80 text-xs font-medium uppercase tracking-wide">
                         Directorio
                     </span>
                 </div>
                 <h1 className="text-2xl font-bold text-white">Foros de Investigadoras</h1>
-                <p className="text-white/70 text-sm mt-1 max-w-xl leading-relaxed">
+                <p className="text-white/80 text-sm mt-1 max-w-xl leading-relaxed">
                     Conoce a las integrantes de la Red de Mujeres Académicas UNA, sus investigaciones y logros académicos.
                 </p>
             </section>

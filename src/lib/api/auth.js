@@ -39,11 +39,11 @@ export async function registerUser({ email, first_name, last_name, user_type_id 
   });
 }
 
-export async function updateUser({ id, first_name, last_name, user_profession, user_description, is_public, email }) {
+export async function updateUser({ id, first_name, last_name, user_profession, user_description, email }) {
   return apiFetch(`/users/${id}/`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ first_name, last_name, user_profession, user_description, is_public, email }),
+    body: JSON.stringify({ first_name, last_name, user_profession, user_description, email }),
   });
 }
 
