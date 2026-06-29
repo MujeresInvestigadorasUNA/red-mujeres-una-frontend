@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Search, X, UserPlus } from "lucide-react";
 import { getResearchers } from "@/lib/api/forums";
 
+
 export default function CoAuthorSelector({ selectedAuthors = [], onAdd, onRemove, excludeUserId = null }) {
     const [searchQuery, setSearchQuery] = useState("");
     const [allResearchers, setAllResearchers] = useState([]);
