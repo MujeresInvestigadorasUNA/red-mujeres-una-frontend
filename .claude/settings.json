@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(forums\")"
+      "Bash(forums\")",
+      "Bash(git -C \"d:/dylan/Documents/Mujeres Investigadoras/red-mujeres-una-frontend\" log --all --full-history -- \"*firebase*adminsdk*\" \"*service_account*\")"
     ]
   }
 }
