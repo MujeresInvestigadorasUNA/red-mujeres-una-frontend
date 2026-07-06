@@ -387,11 +387,19 @@ export function CustomNavigationMenu() {
                                         </div>
                                     </DropdownMenuLabel>
                                     <DropdownMenuSeparator />
-                                    <DropdownMenuItem>
-                                        <Link href="/MiPerfil">Mi Perfil</Link>
+                                    <DropdownMenuItem asChild>
+                                        <Link href="/MiPerfil" className="flex w-full cursor-pointer">
+                                            Mi Perfil
+                                        </Link>
                                     </DropdownMenuItem>
-                                    <DropdownMenuItem>
-                                        <button onClick={logoutButtonHandler}>Cerrar sesión</button>
+                                    <DropdownMenuItem asChild>
+                                        <button
+                                            type="button"
+                                            onClick={logoutButtonHandler}
+                                            className="flex w-full cursor-pointer text-left"
+                                        >
+                                            Cerrar sesión
+                                        </button>
                                     </DropdownMenuItem>
                                 </DropdownMenuContent>
                             </DropdownMenu>
