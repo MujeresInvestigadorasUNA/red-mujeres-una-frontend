@@ -1,8 +1,9 @@
 "use client";
 import React, { createContext, useState, useContext, useEffect, useRef } from 'react';
-import { onIdTokenChanged, signOut } from 'firebase/auth';
+import { onIdTokenChanged } from 'firebase/auth';
 import { auth } from '@/lib/firebase/client';
 import { fetchUserByEmail } from '@/lib/api/auth';
+import { getFirebaseSessionStatus, signOutFirebaseSession } from '@/lib/firebase/session';
 
 const UserContext = createContext();
 
@@ -14,7 +15,7 @@ export const UserProvider = ({ children }) => {
 
     const logout = async (redirectTo = '/', { sessionExpired = false } = {}) => {
         try {
-            if (auth) await signOut(auth);
+            await signOutFirebaseSession();
         } catch {}
         setUser(null);
         setAccessToken(null);
@@ -31,6 +32,14 @@ export const UserProvider = ({ children }) => {
 
         const unsubscribe = onIdTokenChanged(auth, async (firebaseUser) => {
             if (firebaseUser) {
+                try {
+                    const session = await getFirebaseSessionStatus();
+                    if (!session.valid) {
+                        await logout('/IniciarSesion', { sessionExpired: true });
+                        return;
+                    }
+                } catch {}
+
                 const token = await firebaseUser.getIdToken();
                 setAccessToken(token);
 

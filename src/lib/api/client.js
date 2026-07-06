@@ -1,4 +1,5 @@
 import { auth } from '@/lib/firebase/client';
+import { getFirebaseSessionStatus, signOutFirebaseSession } from '@/lib/firebase/session';
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -29,10 +30,12 @@ export async function apiFetch(path, { skipAuth = false, ...options } = {}) {
   const response = await fetch(url, { ...options, headers });
 
   if (!skipAuth && (response.status === 401 || response.status === 403)) {
-    // Only signal session expiry if Firebase also has no active session.
-    // A 401 with a valid Firebase token is a permission error, not session expiry.
-    if (typeof window !== 'undefined' && !auth?.currentUser) {
-      window.dispatchEvent(new Event('auth:expired'));
+    if (typeof window !== 'undefined') {
+      const session = await getFirebaseSessionStatus();
+      if (!session.valid) {
+        await signOutFirebaseSession();
+        window.dispatchEvent(new Event('auth:expired'));
+      }
     }
   }
 
