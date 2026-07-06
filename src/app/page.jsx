@@ -183,6 +183,17 @@ function ResearchSkeletonGrid({ count = 6 }) {
   );
 }
 
+async function fetchSignedPhotoUrl(userId) {
+  try {
+    const response = await getProfilePictureUrl({ user_id: userId });
+    if (!response.ok) return null;
+    const data = await response.json();
+    return data?.url || data?.signed_url || data || null;
+  } catch {
+    return null;
+  }
+}
+
 function RecommendedLoadingState() {
   return (
     <div className="space-y-4">
@@ -220,7 +231,7 @@ function RecommendedLoadingState() {
 }
 
 export default function Home() {
-  const { user } = useUser();
+  const { user, userLoading } = useUser();
   const [allResearchCards, setAllResearchCards] = useState([]);
   const [recommendedCards, setRecommendedCards] = useState([]);
   const [forumCards, setForumCards] = useState([]);
@@ -229,6 +240,7 @@ export default function Home() {
   const [loadingForums, setLoadingForums] = useState(true);
   const [likedResearch, setLikedResearch] = useState(new Set());
   const [likesCounts, setLikesCounts] = useState({});
+  const [forumImageErrors, setForumImageErrors] = useState({});
 
   const handleLike = async (researchId) => {
     if (!user) { toast.error("Debes iniciar sesión para dar like"); return; }
@@ -335,6 +347,8 @@ export default function Home() {
   }, [user?.id]);
 
   useEffect(() => {
+    if (userLoading) return;
+
     const fetchForumsData = async () => {
       try {
         const data = await getResearchers();
@@ -343,14 +357,7 @@ export default function Home() {
         const signedPhotos = await Promise.all(
           data.map(async (r) => {
             if (!r.photo) return null;
-            try {
-              const res = await getProfilePictureUrl({ user_id: r.id });
-              if (!res.ok) return null;
-              const d = await res.json();
-              return d?.url || d?.signed_url || d || null;
-            } catch {
-              return null;
-            }
+            return await fetchSignedPhotoUrl(r.id);
           })
         );
 
@@ -369,7 +376,7 @@ export default function Home() {
       }
     };
     fetchForumsData();
-  }, []);
+  }, [userLoading]);
 
   return (
     <main className="grow h-full">
@@ -442,6 +449,16 @@ export default function Home() {
                           src={forum.photo}
                           alt={forum.title}
                           className="w-full h-full object-cover"
+                          onError={async (event) => {
+                            const target = event.currentTarget;
+                            target.onerror = null;
+                            const nextPhotoUrl = await fetchSignedPhotoUrl(forum.id);
+                            setForumCards((cards) =>
+                              cards.map((card) =>
+                                card.id === forum.id ? { ...card, photo: nextPhotoUrl || null } : card
+                              )
+                            );
+                          }}
                         />
                       ) : (
                         <span className="font-bold text-base text-white">

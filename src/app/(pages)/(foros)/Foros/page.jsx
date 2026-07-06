@@ -22,6 +22,17 @@ function getInitials(firstName, lastName) {
     return `${firstName?.[0] || ""}${lastName?.[0] || ""}`.toUpperCase() || "?";
 }
 
+async function fetchSignedPhotoUrl(userId) {
+    try {
+        const response = await getProfilePictureUrl({ user_id: userId });
+        if (!response.ok) return null;
+        const data = await response.json();
+        return data?.url || data?.signed_url || data || null;
+    } catch {
+        return null;
+    }
+}
+
 const ITEMS_PER_PAGE = 12;
 
 export default function Foros() {
@@ -170,6 +181,18 @@ export default function Foros() {
                                                         src={forum.signedPhoto}
                                                         alt={fullName}
                                                         className="w-full h-full object-cover"
+                                                        onError={async (event) => {
+                                                            const target = event.currentTarget;
+                                                            target.onerror = null;
+                                                            const nextUrl = await fetchSignedPhotoUrl(forum.id);
+                                                            setForums((list) =>
+                                                                list.map((item) =>
+                                                                    item.id === forum.id
+                                                                        ? { ...item, signedPhoto: nextUrl || null }
+                                                                        : item
+                                                                )
+                                                            );
+                                                        }}
                                                     />
                                                 ) : (
                                                     <span className="text-white font-semibold text-sm">
