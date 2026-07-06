@@ -16,6 +16,7 @@ import { getResearch, getRecommendedResearch, likeResearch, unlikeResearch, getA
 import AuthorLinks from "@/app/components/AuthorLinks";
 import { getResearchers } from "@/lib/api/forums";
 import { getProfilePictureUrl } from "@/lib/api/auth";
+import { normalizeMediaUrl } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
 import { iconEye } from "@/app/assets/icons";
 import { Heart } from "lucide-react";
@@ -188,7 +189,7 @@ async function fetchSignedPhotoUrl(userId) {
     const response = await getProfilePictureUrl({ user_id: userId });
     if (!response.ok) return null;
     const data = await response.json();
-    return data?.url || data?.signed_url || data || null;
+    return normalizeMediaUrl(data);
   } catch {
     return null;
   }

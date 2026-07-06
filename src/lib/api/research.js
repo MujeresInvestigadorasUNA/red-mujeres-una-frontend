@@ -31,7 +31,8 @@ export async function getResearch(limit = 5, viewerUserId = null) {
     }
 
     const data = await response.json();
-    return data.map((item) => ({ ...item, description: item.description || '' }));
+    const list = Array.isArray(data) ? data : Array.isArray(data?.items) ? data.items : [];
+    return list.map((item) => ({ ...item, description: item.description || '' }));
   } catch (error) {
     console.error('Error fetching research:', error);
     return [];
@@ -52,7 +53,8 @@ export async function getResearchByUserId(user_id, viewerUserId = null) {
     }
 
     const data = await response.json();
-    return data.map((item) => ({ ...item, description: item.description || '' }));
+    const list = Array.isArray(data) ? data : Array.isArray(data?.items) ? data.items : [];
+    return list.map((item) => ({ ...item, description: item.description || '' }));
   } catch (error) {
     console.error('Error fetching research by user:', error);
     return [];
@@ -274,7 +276,8 @@ export async function getRelatedResearch(research_id, limit = 4, viewer_user_id 
     }
 
     const data = await response.json();
-    return data.map((item) => ({ ...item, description: item.description || '' }));
+    const list = Array.isArray(data) ? data : Array.isArray(data?.items) ? data.items : [];
+    return list.map((item) => ({ ...item, description: item.description || '' }));
   } catch (error) {
     console.error('Error fetching related research:', error);
     return [];
@@ -293,7 +296,8 @@ export async function getRecommendedResearch(user_id, limit = 4) {
     }
 
     const data = await response.json();
-    return data.map((item) => ({ ...item, description: item.description || '' }));
+    const list = Array.isArray(data) ? data : Array.isArray(data?.items) ? data.items : [];
+    return list.map((item) => ({ ...item, description: item.description || '' }));
   } catch (error) {
     console.error('Error fetching recommended research:', error);
     return [];

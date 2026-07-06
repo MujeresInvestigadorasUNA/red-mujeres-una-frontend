@@ -3,6 +3,7 @@ import { getResearchers } from "@/lib/api/forums";
 import { getProfilePictureUrl } from "@/lib/api/auth";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card } from "@/components/ui/card";
+import { normalizeMediaUrl } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -27,7 +28,7 @@ async function fetchSignedPhotoUrl(userId) {
         const response = await getProfilePictureUrl({ user_id: userId });
         if (!response.ok) return null;
         const data = await response.json();
-        return data?.url || data?.signed_url || data || null;
+        return normalizeMediaUrl(data);
     } catch {
         return null;
     }
@@ -55,7 +56,7 @@ export default function Foros() {
                             const res = await getProfilePictureUrl({ user_id: r.id });
                             if (!res.ok) return null;
                             const d = await res.json();
-                            return d?.url || d?.signed_url || d || null;
+                            return normalizeMediaUrl(d);
                         } catch {
                             return null;
                         }

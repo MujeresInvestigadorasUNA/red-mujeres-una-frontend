@@ -12,6 +12,7 @@ import { useUser } from "@/app/contexts/UserContext";
 import { toast } from "sonner";
 import Image from "next/image";
 import { Camera, Loader2, User } from "lucide-react";
+import { normalizeMediaUrl } from "@/lib/utils";
 
 export default function MiPerfil() {
     const { user, setUserData } = useUser();
@@ -36,7 +37,7 @@ export default function MiPerfil() {
             const response = await getProfilePictureUrl({ user_id: userId });
             if (!response.ok) return;
             const data = await response.json();
-            setPhotoSignedUrl(data?.url || data?.signed_url || data || null);
+            setPhotoSignedUrl(normalizeMediaUrl(data));
         } catch {
             // Si falla, simplemente no mostramos foto
         }

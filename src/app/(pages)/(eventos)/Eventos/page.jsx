@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { getEvents } from "@/lib/api/events";
 
 const ACCENT_COLORS = [
@@ -27,6 +28,7 @@ function parseDateLocal(dateStr) {
 
 export default function Eventos() {
     const { user } = useUser();
+    const router = useRouter();
     const [allEvents, setAllEvents] = useState([]);
     const [loadingEvents, setLoadingEvents] = useState(true);
     const [displayCount, setDisplayCount] = useState(10);
@@ -146,8 +148,11 @@ export default function Eventos() {
                             const year = date ? date.getFullYear() : null;
 
                             return (
-                                <Link key={event.id} href={`/Eventos/${event.id}`} className="block group">
-                                    <Card className="p-0 overflow-hidden border border-slate-200 shadow-sm hover:shadow-lg hover:border-[#E7473C]/40 transition-all duration-300 flex flex-row h-full gap-0">
+                                <Card
+                                    key={event.id}
+                                    className="p-0 overflow-hidden border border-slate-200 shadow-sm hover:shadow-lg hover:border-[#E7473C]/40 transition-all duration-300 flex flex-row h-full gap-0 cursor-pointer group"
+                                    onClick={() => router.push(`/Eventos/${event.id}`)}
+                                >
 
                                         {/* Date block */}
                                         <div className={`${accent.bg} w-24 md:w-28 shrink-0 flex flex-col items-center justify-center text-white relative overflow-hidden`}>
@@ -222,7 +227,6 @@ export default function Eventos() {
                                         </div>
 
                                     </Card>
-                                </Link>
                             );
                         })
                     ) : (

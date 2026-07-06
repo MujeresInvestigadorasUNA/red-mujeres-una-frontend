@@ -32,6 +32,7 @@ import {
     notificationsUpdateEventName,
     updateNotificationStatus
 } from "@/lib/notifications"
+import { normalizeMediaUrl } from "@/lib/utils"
 
 export function CustomNavigationMenu() {
     const { user, logout } = useUser();
@@ -50,7 +51,7 @@ export function CustomNavigationMenu() {
         }
         getProfilePictureUrl({ user_id: user.id })
             .then((res) => res.ok ? res.json() : null)
-            .then((data) => setUserPhotoUrl(data?.url || data?.signed_url || data || null))
+            .then((data) => setUserPhotoUrl(normalizeMediaUrl(data)))
             .catch(() => setUserPhotoUrl(null));
     }, [user?.id]);
 

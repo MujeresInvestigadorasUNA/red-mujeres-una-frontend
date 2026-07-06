@@ -19,10 +19,16 @@ async function getFirebaseToken() {
  *   - skipAuth {boolean} - Si true, no inyecta el token ni dispara auth:expired
  */
 export async function apiFetch(path, { skipAuth = false, ...options } = {}) {
-  const url = path.startsWith('http') ? path : `${BASE_URL}${path}`;
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  const isBrowser = typeof window !== 'undefined';
+  const url = path.startsWith('http')
+    ? path
+    : isBrowser
+      ? `/api/proxy${normalizedPath}`
+      : `${BASE_URL}${normalizedPath}`;
   const headers = { ...options.headers };
 
-  if (!skipAuth && !headers.Authorization && typeof window !== 'undefined') {
+  if (!skipAuth && !headers.Authorization && isBrowser) {
     const token = await getFirebaseToken();
     if (token) headers.Authorization = `Bearer ${token}`;
   }

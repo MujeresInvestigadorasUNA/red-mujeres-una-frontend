@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card } from "@/components/ui/card";
+import { normalizeMediaUrl } from "@/lib/utils";
 
 const RESEARCH_GRADIENTS = [
     ["#831d16", "#c2372d"],
@@ -79,7 +80,7 @@ export default function ForoPage({ params }) {
                     if (userData.photo) {
                         getProfilePictureUrl({ user_id: foroId })
                             .then((r) => r.ok ? r.json() : null)
-                            .then((d) => setPhotoSignedUrl(d?.url || d?.signed_url || d || null))
+                            .then((d) => setPhotoSignedUrl(normalizeMediaUrl(d)))
                             .catch(() => {});
                     }
                 }

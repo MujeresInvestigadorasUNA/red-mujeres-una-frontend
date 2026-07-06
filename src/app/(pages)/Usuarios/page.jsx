@@ -11,6 +11,7 @@ import { useUser } from "@/app/contexts/UserContext";
 import { listUsers, deleteUser, updateUser, updateUserType } from "@/lib/api/users";
 import { getProfilePictureUrl } from "@/lib/api/auth";
 import { Trash2, Edit2, Loader2, Search, RefreshCw, Shield, X } from "lucide-react";
+import { normalizeMediaUrl } from "@/lib/utils";
 
 const USER_TYPES = {
   1: "Usuario Regular",
@@ -75,7 +76,7 @@ export default function Usuarios() {
               const res = await getProfilePictureUrl({ user_id: u.id });
               if (res.ok) {
                 const result = await res.json();
-                photos[u.id] = result?.url || result?.signed_url || result || null;
+                photos[u.id] = normalizeMediaUrl(result);
               }
             } catch {}
           })
