@@ -1,6 +1,6 @@
 "use client";
 import { useUser } from "@/app/contexts/UserContext";
-import { Heart, Share2, FileText, Search, RefreshCw, MoreVertical, BookOpen, EyeOff } from "lucide-react";
+import { Heart, Share2, FileText, Search, RefreshCw, MoreVertical, BookOpen, EyeOff, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -75,6 +75,10 @@ export default function MisInvestigaciones() {
     const ITEMS_PER_PAGE = 6;
 
     const userId = useMemo(() => user?.id ?? user?.user_id ?? null, [user]);
+    const canCreateResearch = useMemo(() => {
+        const roleId = Number(user?.user_type_id ?? user?.user_type ?? user?.role_id ?? 0);
+        return Boolean(user?.is_admin || roleId === 2 || roleId === 3);
+    }, [user]);
 
     useEffect(() => {
         const fetchUserResearch = async () => {
@@ -193,6 +197,12 @@ export default function MisInvestigaciones() {
             toast.warning("Debes iniciar sesión para agregar una investigación.");
             return;
         }
+
+        if (!canCreateResearch) {
+            toast.warning("Solo los investigadores y administradores pueden agregar investigaciones.");
+            return;
+        }
+
         setIsModalOpen(true);
     };
 
@@ -303,10 +313,24 @@ export default function MisInvestigaciones() {
                         Panel Personal
                     </span>
                 </div>
-                <h1 className="text-2xl font-bold text-white">Mis Investigaciones</h1>
-                <p className="text-white/80 text-sm mt-1 max-w-xl leading-relaxed">
-                    Gestiona y comparte tus investigaciones con la comunidad de la Red de Mujeres Académicas UNA.
-                </p>
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                        <h1 className="text-2xl font-bold text-white">Mis Investigaciones</h1>
+                        <p className="text-white/80 text-sm mt-1 max-w-xl leading-relaxed">
+                            Gestiona y comparte tus investigaciones con la comunidad de la Red de Mujeres Académicas UNA.
+                        </p>
+                    </div>
+
+                    {canCreateResearch && (
+                        <Button
+                            onClick={handleOpenModal}
+                            className="bg-white/15 text-white border border-white/25 hover:bg-white/20 backdrop-blur-sm"
+                        >
+                            <Plus className="w-4 h-4 mr-2" />
+                            Añadir investigación
+                        </Button>
+                    )}
+                </div>
             </section>
 
             {/* ── Content ───────────────────────────────────────── */}
