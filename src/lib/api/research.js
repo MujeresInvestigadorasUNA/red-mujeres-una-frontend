@@ -162,7 +162,7 @@ export async function removeResearchAuthors(research_id, user_ids) {
 export async function likeResearch(user_id, research_id) {
   try {
     const response = await apiFetch(
-      `/research/user/${user_id}/likes/${research_id}`,
+      `/research/user/${user_id}/likes/${research_id}/`,
       { method: 'POST', headers: { Accept: 'application/json' } }
     );
     if (!response.ok) {
@@ -179,7 +179,7 @@ export async function likeResearch(user_id, research_id) {
 export async function unlikeResearch(user_id, research_id) {
   try {
     const response = await apiFetch(
-      `/research/user/${user_id}/likes/${research_id}`,
+      `/research/user/${user_id}/likes/${research_id}/`,
       { method: 'DELETE', headers: { Accept: 'application/json' } }
     );
     if (!response.ok) {
@@ -196,7 +196,7 @@ export async function unlikeResearch(user_id, research_id) {
 export async function registerResearchVisit(user_id, research_id) {
   try {
     const response = await apiFetch(
-      `/research/user/${user_id}/visits/${research_id}`,
+      `/research/user/${user_id}/visits/${research_id}/`,
       { method: 'POST', headers: { Accept: 'application/json' } }
     );
     if (!response.ok) {

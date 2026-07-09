@@ -29,19 +29,52 @@ export async function DELETE(request, { params }) {
 
 async function proxyRequest(request, pathSegments) {
   const path = Array.isArray(pathSegments) ? pathSegments.join('/') : '';
-  const targetUrl = new URL(`${path}${request.nextUrl.search}` || '/', BASE_URL);
-
   const headers = new Headers(request.headers);
   headers.delete('host');
   headers.delete('connection');
 
-  const init = {
-    method: request.method,
-    headers,
-    body: ['GET', 'HEAD'].includes(request.method) ? undefined : request.body,
-  };
+  let currentUrl = new URL(`${path}${request.nextUrl.search}` || '/', BASE_URL);
+  let currentMethod = request.method;
+  let currentBody = undefined;
 
-  const response = await fetch(targetUrl, init);
+  if (!['GET', 'HEAD'].includes(currentMethod)) {
+    currentBody = await request.arrayBuffer();
+    headers.set('content-length', String(currentBody.byteLength));
+  }
+
+  let response;
+
+  for (let redirectCount = 0; redirectCount < 5; redirectCount += 1) {
+    const init = {
+      method: currentMethod,
+      headers,
+      ...(currentBody && !['GET', 'HEAD'].includes(currentMethod) ? { body: currentBody, duplex: 'half' } : {}),
+    };
+
+    response = await fetch(currentUrl, init);
+
+    if (![301, 302, 303, 307, 308].includes(response.status)) {
+      break;
+    }
+
+    const location = response.headers.get('location');
+    if (!location) {
+      break;
+    }
+
+    currentUrl = new URL(location, currentUrl);
+
+    if ([301, 302, 303].includes(response.status) && !['GET', 'HEAD'].includes(currentMethod)) {
+      currentMethod = 'GET';
+      currentBody = undefined;
+      headers.delete('content-length');
+      headers.delete('content-type');
+    } else if (['GET', 'HEAD'].includes(currentMethod)) {
+      currentBody = undefined;
+      headers.delete('content-length');
+    }
+  }
+
   const responseBody = await response.arrayBuffer();
   const responseHeaders = new Headers(response.headers);
   responseHeaders.delete('content-length');
