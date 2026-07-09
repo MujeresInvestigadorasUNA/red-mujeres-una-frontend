@@ -33,7 +33,9 @@ async function proxyRequest(request, pathSegments) {
   headers.delete('host');
   headers.delete('connection');
 
-  let currentUrl = new URL(`${path}${request.nextUrl.search}` || '/', BASE_URL);
+  const rawPath = request.nextUrl.pathname.replace(/^\/api\/proxy\/?/, '') || '/';
+  const targetPath = (path ? `/${path}` : rawPath).replace(/\/+/g, '/');
+  let currentUrl = new URL(`${targetPath}${request.nextUrl.search}`, BASE_URL);
   let currentMethod = request.method;
   let currentBody = undefined;
 
