@@ -148,12 +148,13 @@ function extractResponseMessages(payload) {
   return candidates.flatMap((value) => extractResponseMessages(value));
 }
 
-export async function createResearch({ user_id, title, description, document, author_ids = [] }) {
+export async function createResearch({ user_id, title, description, document, access_token = null, author_ids = [] }) {
   const formData = new FormData();
   formData.append('user_id', String(user_id));
   formData.append('title', title);
   if (description?.trim()) formData.append('description', description.trim());
   formData.append('document', document);
+  if (access_token) formData.append('access_token', access_token);
   if (author_ids?.length > 0) {
     author_ids.forEach((id) => formData.append('author_ids', String(id)));
   }
@@ -165,6 +166,9 @@ export async function createResearch({ user_id, title, description, document, au
   });
 
   const { data, rawText } = await readResponseBody(response);
+  if (response.ok && Array.isArray(data)) {
+    console.warn('Unexpected createResearch response: backend returned a list instead of the created research object.', data);
+  }
 
   return {
     response,
