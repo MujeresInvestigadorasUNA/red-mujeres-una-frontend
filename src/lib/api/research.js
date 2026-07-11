@@ -117,7 +117,7 @@ export async function createResearch({ user_id, title, description, document, au
     author_ids.forEach((id) => formData.append('author_ids', String(id)));
   }
 
-  return apiFetch('/research/', {
+  return apiFetch('/research', {
     method: 'POST',
     headers: { Accept: 'application/json' },
     body: formData,
