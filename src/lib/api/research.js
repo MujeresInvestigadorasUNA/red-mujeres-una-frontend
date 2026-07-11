@@ -107,6 +107,47 @@ export async function updateResearch({ research_id, title, description }) {
   });
 }
 
+async function readResponseBody(response) {
+  const contentType = response.headers.get('content-type') || '';
+
+  try {
+    if (contentType.includes('application/json')) {
+      return { data: await response.clone().json(), rawText: null };
+    }
+
+    const rawText = await response.clone().text();
+    if (!rawText) return { data: null, rawText: null };
+
+    try {
+      return { data: JSON.parse(rawText), rawText };
+    } catch {
+      return { data: rawText, rawText };
+    }
+  } catch (error) {
+    console.error('Error reading research response body:', error);
+    return { data: null, rawText: null };
+  }
+}
+
+function extractResponseMessages(payload) {
+  if (!payload) return [];
+  if (typeof payload === 'string') return [payload.trim()].filter(Boolean);
+  if (Array.isArray(payload)) {
+    return payload.flatMap((item) => extractResponseMessages(item));
+  }
+
+  const candidates = [
+    payload.message,
+    payload.detail,
+    payload.error,
+    payload.errors,
+    payload.messages,
+    payload.info,
+  ];
+
+  return candidates.flatMap((value) => extractResponseMessages(value));
+}
+
 export async function createResearch({ user_id, title, description, document, author_ids = [] }) {
   const formData = new FormData();
   formData.append('user_id', String(user_id));
@@ -117,11 +158,20 @@ export async function createResearch({ user_id, title, description, document, au
     author_ids.forEach((id) => formData.append('author_ids', String(id)));
   }
 
-  return apiFetch('/research', {
+  const response = await apiFetch('/research', {
     method: 'POST',
     headers: { Accept: 'application/json' },
     body: formData,
   });
+
+  const { data, rawText } = await readResponseBody(response);
+
+  return {
+    response,
+    data,
+    rawText,
+    messages: extractResponseMessages(data),
+  };
 }
 
 export async function getResearchAuthors(research_id) {

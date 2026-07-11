@@ -236,7 +236,7 @@ export default function MisInvestigaciones() {
 
         try {
             setIsSubmitting(true);
-            const response = await createResearch({
+            const result = await createResearch({
                 user_id: userId,
                 title: title.trim(),
                 description: description.trim(),
@@ -245,17 +245,29 @@ export default function MisInvestigaciones() {
                 author_ids: selectedCoAuthors.map((a) => a.id),
             });
 
-            let responseData = null;
-            try {
-                responseData = await response.json();
-            } catch {
-                responseData = null;
-            }
+            const response = result?.response;
+            const responseData = result?.data;
+            const responseMessages = Array.isArray(result?.messages) ? result.messages.filter(Boolean) : [];
+            const backendMessage = responseMessages.length > 0 ? responseMessages.join(" | ") : null;
+            const debugDetails = responseData ?? result?.rawText ?? null;
+
+            console.info('createResearch response', {
+                status: response?.status,
+                ok: response?.ok,
+                messages: responseMessages,
+                body: debugDetails,
+            });
 
             if (!response.ok) {
                 let errorMessage = "No se pudo crear la investigación.";
 
-                errorMessage = responseData?.detail?.[0]?.msg || responseData?.detail || errorMessage;
+                if (responseMessages.length > 0) {
+                    errorMessage = responseMessages.join(" | ");
+                } else if (typeof responseData === "string" && responseData.trim()) {
+                    errorMessage = responseData.trim();
+                } else {
+                    errorMessage = responseData?.detail?.[0]?.msg || responseData?.detail || errorMessage;
+                }
 
                 toast.warning(errorMessage);
                 return;
@@ -279,9 +291,9 @@ export default function MisInvestigaciones() {
                     "Tu investigación se está subiendo y procesando en segundo plano. Puedes revisar su estado desde el ícono de notificaciones."
                 );
                 setIsProcessingMessageOpen(true);
-                toast.success("Investigación enviada para procesamiento.");
+                toast.success(backendMessage || "Investigación enviada para procesamiento.");
             } else {
-                toast.success("Investigación creada correctamente.");
+                toast.success(backendMessage || "Investigación creada correctamente.");
             }
 
             setIsModalOpen(false);
