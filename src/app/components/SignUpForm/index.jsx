@@ -69,6 +69,8 @@ export default function SignUpForm() {
 
   const getFirebaseErrorMessage = (code) => {
     switch (code) {
+      case "auth/unauthorized-continue-uri":
+        return "El dominio de la URL de redirección no está autorizado en Firebase. Añade tu dominio en Firebase Console → Authentication → Authorized domains.";
       case "auth/configuration-not-found":
         return "Firebase Auth no esta configurado para este proyecto. Activa Authentication y Email/Password en Firebase Console.";
       case "auth/operation-not-allowed":
@@ -150,10 +152,27 @@ export default function SignUpForm() {
       });
       setSignupSessionId(sessionId);
 
-      await sendEmailVerification(firebaseCredentials.user, {
-        url: buildVerificationRedirectUrl(sessionId),
-        handleCodeInApp: true,
-      });
+      try {
+        await sendEmailVerification(firebaseCredentials.user, {
+          url: buildVerificationRedirectUrl(sessionId),
+          handleCodeInApp: true,
+        });
+      } catch (err) {
+        // If the continue URL domain is not allowlisted, try a fallback without a custom URL
+        if (err?.code === "auth/unauthorized-continue-uri") {
+          console.warn('[SignUpForm] unauthorized continue URL, retrying without custom url');
+          try {
+            await sendEmailVerification(firebaseCredentials.user);
+            setSuccess(
+              "Te enviamos un link de verificacion (sin redirección personalizada). Abre el correo y completa el registro."
+            );
+          } catch (err2) {
+            throw err; // rethrow original to be handled below
+          }
+        } else {
+          throw err;
+        }
+      }
 
       setSuccess(
         "Te enviamos un link de verificacion. Abre el correo y te redirigira a la pantalla para completar tu registro."
@@ -224,6 +243,22 @@ export default function SignUpForm() {
       console.error(err);
       if (err?.code === "auth/email-already-in-use") {
         setError("No se pudo limpiar el registro anterior. Intenta de nuevo en unos minutos.");
+        return;
+      }
+      if (err?.code === "auth/unauthorized-continue-uri") {
+        console.warn('[SignUpForm] resend: unauthorized continue URL');
+        // try fallback without custom url
+        try {
+          const firebaseCredentials = await createUserWithEmailAndPassword(
+            auth,
+            targetEmail,
+            temporaryPassword
+          );
+          await sendEmailVerification(firebaseCredentials.user);
+          setSuccess("Link de verificación reenviado (sin redirección personalizada). Revisa tu bandeja de entrada y spam.");
+        } catch {
+          setError(getFirebaseErrorMessage(err?.code));
+        }
         return;
       }
       setError("No se pudo reenviar el correo de verificación. Intenta de nuevo.");
