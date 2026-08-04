@@ -13,7 +13,7 @@ export const UserProvider = ({ children }) => {
     const [userLoading, setUserLoading] = useState(true);
     const initializedRef = useRef(false);
 
-    const logout = async (redirectTo = '/', { sessionExpired = false } = {}) => {
+    const logout = async (redirectTo = '/', { sessionExpired = false, reason = null } = {}) => {
         try {
             await signOutFirebaseSession();
         } catch {}
@@ -21,6 +21,11 @@ export const UserProvider = ({ children }) => {
         setAccessToken(null);
         localStorage.removeItem('user');
         const url = sessionExpired ? `${redirectTo}?session_expired=true` : redirectTo;
+        if (sessionExpired) {
+            console.info('[logout] sessionExpired=true', { reason });
+        } else {
+            console.info('[logout] redirecting', { sessionExpired });
+        }
         window.location.href = url;
     };
 
@@ -35,10 +40,12 @@ export const UserProvider = ({ children }) => {
                 try {
                     const session = await getFirebaseSessionStatus();
                     if (!session.valid) {
-                        await logout('/IniciarSesion', { sessionExpired: true });
+                        await logout('/IniciarSesion', { sessionExpired: true, reason: session?.reason });
                         return;
                     }
-                } catch {}
+                } catch (e) {
+                    console.error('[UserContext] getFirebaseSessionStatus error', e);
+                }
 
                 const token = await firebaseUser.getIdToken();
                 setAccessToken(token);
